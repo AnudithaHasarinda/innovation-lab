@@ -4,6 +4,7 @@ import { DigitalIdentityDemo } from "./demos/DigitalIdentityDemo";
 import { BrandStudioDemo } from "./demos/BrandStudioDemo";
 import { FinanceDashboardDemo } from "./demos/FinanceDashboardDemo";
 import { TapcardDemo } from "./demos/TapcardDemo";
+import { ShadowRunDemo } from "./demos/ShadowRunDemo";
 import { EmptyState } from "./ui";
 
 /** Maps a project slug to its built-in interactive demo. Add new demos here. */
@@ -14,6 +15,7 @@ export function DemoSlot({ slug }: { slug: string }) {
     case "brand-studio": return <BrandStudioDemo />;
     case "finance-dashboard": return <FinanceDashboardDemo />;
     case "tapcard": return <TapcardDemo />;
+    case "shadow-run": return <ShadowRunDemo />;
     default:
       return <EmptyState title="No built-in demo for this project yet">Create a component in components/demos and register it here.</EmptyState>;
   }

@@ -287,6 +287,75 @@ export const projects: Project[] = [
       },
     ],
   },
+  {
+    slug: "shadow-run",
+    name: "SHADOW RUN",
+    tagline: "A dark, atmospheric 3D survival runner. Swipe, jump, slide and escape the shadow.",
+    description:
+      "A small 3D runner game with a 10-level story, an endless mode and a daily challenge. Dodge walls and pits, collect crystals, find secret routes and unlock characters. It runs offline in the browser.",
+    categories: ["Experiments", "Web Apps"],
+    stack: ["HTML", "CSS", "JavaScript", "WebGL", "Web Audio API"],
+    status: "Prototype",
+    statusNote:
+      "Offline edition: there are no accounts, leaderboards or ads, and the game makes no network requests. Progress is saved only in your own browser. Code for an optional online server and for a mobile wrapper exists in the file but is switched off, and neither has been built or tested. It has been tested only in a desktop browser, not on real phones.",
+    demo: { kind: "built-in", label: "Play the game" },
+    screenshots: [
+      { src: "/projects/shadow-run/menu.jpg", alt: "SHADOW RUN main menu over a dark city scene, with Play, Story Mode, Endless Survival, Daily Challenge, Characters, Missions, Achievements and Settings." },
+      { src: "/projects/shadow-run/gameplay-1.jpg", alt: "SHADOW RUN gameplay in The Forgotten Forest: a runner on a glowing path between pine trees, with a score, a progress bar and a swipe hint." },
+      { src: "/projects/shadow-run/gameplay-2.jpg", alt: "SHADOW RUN gameplay with two obstacles ahead on the path in the forest level." },
+      { src: "/projects/shadow-run/levels.png", alt: "SHADOW RUN story mode level list with ten levels; only the first is unlocked at the start." },
+      { src: "/projects/shadow-run/characters.png", alt: "SHADOW RUN outfits screen. Outfits are cosmetic only and give no gameplay advantage." },
+    ],
+    features: [
+      "Story mode with 10 levels, from The Forgotten Forest to The Final Escape",
+      "Endless Survival and a Daily Challenge with its own seed each day",
+      "Swipe or keyboard controls: change lane, jump and slide",
+      "Crystals, secret routes, missions, achievements and unlockable characters",
+      "3D graphics in WebGL, generated sound, and vibration feedback on phones",
+      "Works fully offline; progress is saved only on your device and can be erased in Settings",
+    ],
+    problem:
+      "A small game is a good way to practise real-time graphics, input, sound and game design in one place. The goal was a runner that feels good with a single swipe and needs nothing but a browser.",
+    architecture: [
+      "One self-contained HTML file with plain JavaScript and no game engine or framework.",
+      "A deterministic simulation: level layouts come from a seeded random generator, so the daily challenge is the same for everyone on the same day.",
+      "WebGL draws the 3D scene; the Web Audio API generates sound effects and music.",
+      "Progress is stored in the browser's local storage under one key, with a version number so saves can be upgraded.",
+      "A configuration object switches the game between the offline edition (used here) and a future online one.",
+    ],
+    process: [
+      "Built the core run first: lanes, jump, slide, obstacles and collisions.",
+      "Added level generation from a seed, then the story levels, endless mode and the daily challenge.",
+      "Added crystals, missions, achievements and characters to give runs a reason to repeat.",
+      "Chose an offline edition for this site so visitors need no account and nothing leaves their device.",
+      "Cleaned up before publishing: any stored sign-in data is removed when the game starts, and a style clash that hid the Reset progress button and blocked the Privacy link was fixed.",
+    ],
+    challenges: [
+      {
+        challenge: "Controls have to feel instant on a phone, where a swipe is not a button press.",
+        solution: "A swipe fires its action as soon as it crosses a threshold, without waiting for the finger to lift, and chained swipes work in one gesture.",
+      },
+      {
+        challenge: "A daily challenge should be fair without needing a server.",
+        solution: "The level is generated from a seed built from the date, so the same day gives the same layout on every device.",
+      },
+      {
+        challenge: "Players should not lose progress, but the game should not collect personal data.",
+        solution: "Everything is kept in local storage on the player's own device, and Settings has a Reset progress button that erases it.",
+      },
+    ],
+    future: [
+      "Test on real Android and iPhone devices",
+      "Optional online leaderboards and accounts, only if a secure server is built",
+      "Wrap it as a mobile app",
+      "More levels, characters and sounds",
+    ],
+    docs: [
+      { title: "Controls", body: "Keyboard: arrow keys or A, D, W, S and Space. Touch: swipe left or right to change lane, up to jump and down to slide. Played in landscape." },
+      { title: "Your data", body: "The game stores your progress in your browser under one key. It has no login. Reset progress in Settings, or clearing this site's data in your browser, removes it." },
+      { title: "Screenshots", body: "Captured from the real game in a desktop browser at phone size, from the first level." },
+    ],
+  },
 ];
 
 export const getProject = (slug: string) => projects.find((p) => p.slug === slug);
