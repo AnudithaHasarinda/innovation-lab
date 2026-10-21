@@ -1,0 +1,23 @@
+<!--
+  HOW TO LINK THE LAB FROM YOUR EXISTING WEBSITE
+  This file is NOT applied automatically, so your current site stays exactly as it is.
+  Paste the pieces you want where indicated. Change "/lab/" to wherever you deploy the lab
+  (for example https://lab.yourdomain.com or /lab/).
+-->
+
+<!-- 1) A pill in your top navigation (next to the other .pill links) -->
+<a class="pill" href="/lab/">Coding Lab</a>
+
+<!-- 2) Optional: a small teaser block you can place above the footer / contact section -->
+<section class="lab-teaser" aria-label="Coding Lab">
+  <p class="lab-eyebrow">New · Coding Lab</p>
+  <h2>The Innovation Lab</h2>
+  <p>Experiments, applications and prototypes. Try them live.</p>
+  <a class="pill" href="/lab/">Enter the lab →</a>
+</section>
+<style>
+  .lab-teaser{max-width:1200px;margin:0 auto;padding:70px 24px;text-align:center;border-top:1px solid #232623}
+  .lab-teaser .lab-eyebrow{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#abb8a8;margin-bottom:12px}
+  .lab-teaser h2{font-size:clamp(30px,5vw,56px);text-transform:uppercase;margin-bottom:12px}
+  .lab-teaser p{color:#8d9889;margin-bottom:24px}
+</style>

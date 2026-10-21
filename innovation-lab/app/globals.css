@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; }
+body { @apply bg-ink font-display text-cream antialiased; }
+::selection { background: #abb8a8; color: #000; }
+:focus-visible { outline: 2px solid #abb8a8; outline-offset: 3px; border-radius: 6px; }
+
+@layer components {
+  .card { @apply relative rounded-2xl border border-line bg-panel/80 backdrop-blur; }
+  .card-glow { transition: box-shadow .3s ease, border-color .3s ease, transform .3s ease; }
+  .card-glow:hover { border-color: rgba(171,184,168,.55); box-shadow: 0 24px 60px -24px rgba(171,184,168,.4); transform: translateY(-3px); }
+  .grid-bg {
+    background-image: radial-gradient(rgba(171,184,168,.18) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 25%, #000 25%, transparent 72%);
+    mask-image: radial-gradient(ellipse at 50% 25%, #000 25%, transparent 72%);
+  }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition; }
+  .btn-primary { @apply bg-sage text-black hover:brightness-110; }
+  .btn-ghost { @apply border border-line bg-white/5 text-cream hover:border-sage hover:text-sage; }
+  .chip { @apply inline-flex items-center rounded-full border border-line bg-white/5 px-3 py-1 text-xs text-mute; }
+  .input { @apply w-full rounded-xl border border-line bg-black/40 px-3 py-2.5 text-sm text-cream placeholder:text-mute/70 focus:border-sage focus:outline-none; }
+  .label { @apply mb-1.5 block text-xs font-medium uppercase tracking-widest text-mute; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
