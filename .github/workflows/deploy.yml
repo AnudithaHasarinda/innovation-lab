@@ -1,0 +1,60 @@
+name: Deploy Innovation Lab
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build the Innovation Lab (served at /<repo>/lab/)
+        working-directory: innovation-lab
+        env:
+          LAB_EXPORT: "1"
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/lab
+          # Optional: add a repository variable MAIN_SITE_URL (Settings > Secrets and variables > Actions > Variables)
+          NEXT_PUBLIC_MAIN_SITE_URL: ${{ vars.MAIN_SITE_URL || '/' }}
+          NEXT_PUBLIC_GITHUB_USERNAME: ${{ github.repository_owner }}
+          GITHUB_USERNAME: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Assemble the site (lab only)
+        run: |
+          mkdir -p _site
+          cp -r innovation-lab/out _site/lab
+          printf '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=lab/"><a href="lab/">Open the Innovation Lab</a>' > _site/index.html
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
