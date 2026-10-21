@@ -209,6 +209,84 @@ export const projects: Project[] = [
     future: ["Import a CSV", "Budget targets", "Month-over-month annotations"],
     docs: [{ title: "Data", body: "Sample figures only. Replace lib/finance.ts data to connect real numbers." }],
   },
+  {
+    slug: "tapcard",
+    name: "Tapcard",
+    tagline: "A digital business card you share by QR code, nearby radar or your phone's own sharing.",
+    description:
+      "Build a card with a privacy level for every detail, then share it by QR code, a Nearby radar, or the phone's own share sheet. Includes templates, a print kit, a contacts list with lead scores and meeting notes.",
+    categories: ["Web Apps"],
+    stack: ["HTML", "CSS", "JavaScript", "Canvas", "Web Crypto API", "BroadcastChannel", "Web Share API", "qrcode.js"],
+    status: "Prototype",
+    statusNote:
+      "Works today in the browser: card editing with privacy levels, templates, QR sharing, a print kit, contacts with lead scores, meeting notes and a Nearby radar tab. Not built yet: a server or accounts (data stays in your own browser) and real profile links (they are placeholders). The Nearby radar and its consent and encrypted-transfer steps only work between windows of the same browser; Bluetooth between real phones needs a mobile app that does not exist yet. It has not been tested on real Android or iPhone devices, and sharing with non-users through AirDrop or Quick Share is untried on real phones too.",
+    demo: { kind: "built-in", label: "Try the prototype" },
+    screenshots: [
+      { src: "/projects/tapcard/card.png", alt: "Tapcard card editor with a phone preview showing a sample card. Sample data only." },
+      { src: "/projects/tapcard/qr.png", alt: "Tapcard QR code tab showing a scannable code for the sample card." },
+      { src: "/projects/tapcard/nearby.png", alt: "Tapcard Nearby radar with one other window found, using the test radar between two browser windows." },
+      { src: "/projects/tapcard/print.png", alt: "Tapcard print kit preview of a business card with a QR code. Sample data only." },
+      { src: "/projects/tapcard/contacts.png", alt: "Tapcard contacts list with lead scores, using three fictional sample contacts." },
+    ],
+    features: [
+      "Privacy level for each detail: public, or hidden until the other person shares theirs back",
+      "Templates, a Free and a Premium view, and separate identities",
+      "QR code that carries only the public details",
+      "Print kit: business card, round sticker, table sign and review sign, exported as a PNG",
+      "Contacts list with a rule-based lead score and follow-up dates, plus meeting notes",
+      "Nearby tab: radar, invitation, consent and encrypted transfer (test radar between browser windows)",
+      "Share with anyone nearby through the phone's own share sheet, using a standard contact file",
+    ],
+    problem:
+      "Paper cards get lost and most digital cards ask the person receiving them to install an app. Tapcard explores a card that works for anyone with a phone camera, while the owner decides which details each person may see.",
+    architecture: [
+      "A single self-contained HTML file with plain JavaScript and no framework.",
+      "All data is kept in the browser's local storage. There is no server and no account.",
+      "Canvas draws the print kit. qrcode.js draws QR codes. The contact card is a standard vCard (.vcf) file.",
+      "Nearby messages are encrypted in the page with the Web Crypto API (ECDH P-256, HKDF and AES-GCM). In the browser a BroadcastChannel carries them between windows.",
+      "A transport boundary lets a native plugin named TapcardNearby replace the test radar later without changing the page. The adapter code has never run on real hardware.",
+    ],
+    process: [
+      "Started with the card, the privacy levels and the QR code, since they work on any phone camera.",
+      "Added the print kit, contacts and meeting notes around that core.",
+      "Built the whole Nearby flow (radar, invite, accept, encrypted transfer, save, QR fallback) against a test transport, then wrote down the contract a native plugin must meet.",
+      "Kept every limit in plain words in the interface and in the spec, so nothing claims more than it does.",
+    ],
+    challenges: [
+      {
+        challenge: "Browsers cannot advertise over Bluetooth, and Safari on iPhone has no Web Bluetooth at all.",
+        solution: "The page talks to a small transport interface. In the browser it uses a test radar between windows. A planned Capacitor plugin would use real Bluetooth Low Energy, and the page switches to it automatically when it is present.",
+      },
+      {
+        challenge: "iPhones do not accept unsolicited Bluetooth files from third-party apps, so a card cannot be pushed to someone without Tapcard.",
+        solution: "Sharing with non-users goes through the phone's own share sheet (AirDrop on iPhone, Quick Share on Android) with a standard .vcf file. Details marked 'after connect' start unticked, because a non-user can never connect back.",
+      },
+      {
+        challenge: "A nearby radar must only show real users and must not guess distance.",
+        solution: "Two phones only see each other if both run Tapcard in the foreground. Signal strength is never turned into metres; without proximity data every device sits on one ring labelled 'Signal detected'.",
+      },
+    ],
+    future: [
+      "Build and test the TapcardNearby plugin on real Android and iPhone devices",
+      "Try the share-sheet route (AirDrop and Quick Share) on real phones",
+      "Add a Supabase backend with accounts so profile links become real",
+      "Wrap the app with Capacitor for the Android and iOS stores",
+    ],
+    docs: [
+      {
+        title: "Native Nearby plugin contract",
+        body: "The page expects a plugin called TapcardNearby with requestPermissions, checkAvailability, start, send and stop, and the events peerFound, peerLost and message. Messages are already encrypted by the page, so the plugin only moves bytes. This plugin does not exist yet.",
+      },
+      {
+        title: "Test on two real phones before shipping",
+        body: "Android to Android, Android to iPhone and iPhone to iPhone; Bluetooth off and permission denied; matching pairing codes; decline, cancel, out-of-range and timeout; nothing saved until the receiver taps Save; and invitations that only reach the chosen device.",
+      },
+      {
+        title: "Screenshots",
+        body: "Captured from the real prototype using fictional sample data (Sample Person, Example Studio and three sample leads). The Nearby screenshot uses the test radar between two browser windows, not real phones.",
+      },
+    ],
+  },
 ];
 
 export const getProject = (slug: string) => projects.find((p) => p.slug === slug);

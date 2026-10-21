@@ -1,0 +1,1730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tapcard prototype v6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root { --mist:#edf0f5; --ink:#0f1729; --cobalt:#2d45f5; --chalk:#fff; --slate:#5b6578; --line:#d9dee8; --gold:#b07a00; --goldbg:#fbf3df; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Schibsted Grotesk',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--mist); color:var(--ink); line-height:1.45; }
+  :focus-visible { outline:2px solid var(--cobalt); outline-offset:2px; }
+  .page { max-width:1080px; margin:0 auto; padding:20px; display:grid; gap:28px; grid-template-columns:1fr; }
+  @media (min-width:940px){ .page{ grid-template-columns:minmax(0,1fr) 380px; align-items:start; } }
+  .sheet { background:var(--chalk); border-radius:20px; padding:8px 28px 12px; }
+  .top { display:flex; justify-content:space-between; align-items:center; padding:20px 0 16px; gap:12px; flex-wrap:wrap; }
+  .logo { font-size:20px; font-weight:700; letter-spacing:-.3px; }
+  .logo span { color:var(--slate); font-weight:500; font-size:14px; margin-left:6px; }
+  .plan { display:flex; border:1px solid var(--line); border-radius:999px; padding:3px; }
+  .plan button { border:none; background:none; color:var(--slate); padding:6px 16px; border-radius:999px; cursor:pointer; font:600 13px inherit; font-family:inherit; }
+  .plan button.on { background:var(--ink); color:#fff; }
+  .plan button.on.prem { background:var(--gold); }
+  section { border-top:1px solid var(--line); padding:22px 0; }
+  h2 { font-size:17px; margin:0 0 14px; font-weight:650; letter-spacing:-.2px; }
+  .sub { color:var(--slate); font-size:13px; margin:-8px 0 14px; max-width:60ch; }
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+  .tab { padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:none; color:var(--slate); cursor:pointer; font:500 13px inherit; font-family:inherit; }
+  .tab.active { background:var(--cobalt); border-color:var(--cobalt); color:#fff; }
+  .tab.locked::after, .tpl.locked::after { content:" Pro"; font-size:10px; color:var(--gold); font-weight:700; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  label.f { display:block; font-size:12px; color:var(--slate); margin:0 0 5px; font-weight:500; }
+  input[type=text], select { width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); font:400 14px inherit; font-family:inherit; }
+  input[type=color] { width:44px; height:38px; border:1px solid var(--line); border-radius:10px; background:none; padding:2px; }
+  input:disabled, select:disabled { opacity:.5; background:var(--mist); }
+  .photo { display:flex; align-items:center; gap:14px; margin-top:18px; }
+  .thumb { width:58px; height:58px; border-radius:50%; background:var(--mist); overflow:hidden; display:flex; align-items:center; justify-content:center; color:var(--slate); font-weight:700; flex:none; }
+  .thumb img { width:100%; height:100%; object-fit:cover; }
+  button.btn { padding:9px 14px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); font:600 13px inherit; font-family:inherit; cursor:pointer; }
+  button.btn.solid { background:var(--ink); border-color:var(--ink); color:#fff; }
+  button.btn.pro { border-color:var(--gold); color:var(--gold); background:var(--goldbg); }
+  .note { font-size:12px; color:var(--slate); margin-top:6px; }
+  .meter { height:6px; background:var(--mist); border-radius:99px; overflow:hidden; margin-top:6px; }
+  .meter i { display:block; height:100%; background:var(--cobalt); border-radius:99px; transition:width .25s; }
+  .strength { margin-top:18px; font-size:13px; }
+  .frow { display:grid; grid-template-columns:1fr 130px; gap:10px; align-items:end; margin-bottom:12px; }
+  .slugrow { display:flex; align-items:center; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .slugrow span { padding:0 0 0 12px; font-size:13px; color:var(--slate); white-space:nowrap; }
+  .slugrow input { border:none; border-radius:0; padding-left:2px; }
+  .tpls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .tpl { padding:10px 16px; border-radius:12px; border:1px solid var(--line); background:#fff; cursor:pointer; font:600 13px inherit; font-family:inherit; color:var(--ink); }
+  .tpl.on { border-color:var(--cobalt); box-shadow:0 0 0 2px rgba(45,69,245,.18); }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+  .tile { background:var(--mist); border-radius:14px; padding:12px 14px; }
+  .tile b { display:block; font-size:24px; letter-spacing:-.5px; }
+  .tile small { color:var(--slate); font-size:12px; }
+  .lockedbox { background:var(--goldbg); color:var(--gold); border-radius:14px; padding:12px 14px; font-size:13px; margin-bottom:16px; font-weight:500; }
+  .conns { display:flex; flex-direction:column; gap:8px; }
+  .conn { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .conn small { color:var(--slate); }
+  .empty { color:var(--slate); font-size:13px; padding:6px 0; }
+
+  .side { position:sticky; top:16px; }
+  .phone { width:330px; margin:0 auto; background:#05060a; border-radius:46px; padding:10px; box-shadow:0 30px 70px rgba(15,23,41,.35); }
+  .screen { border-radius:37px; overflow:hidden; height:620px; position:relative; display:flex; flex-direction:column; }
+  .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:86px; height:24px; background:#05060a; border-radius:14px; z-index:4; }
+  .scroll { flex:1; overflow:auto; scrollbar-width:none; }
+  .scroll::-webkit-scrollbar { display:none; }
+  .banner { height:140px; }
+  .pbody { padding:0 20px 18px; text-align:center; }
+  .pbody.hasbanner { margin-top:-46px; }
+  .pbody.nobanner { padding-top:56px; }
+  .avatar { width:92px; height:92px; border-radius:50%; margin:0 auto; border:4px solid; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700; color:#fff; }
+  .avatar img { width:100%; height:100%; object-fit:cover; }
+  .pname { font-size:23px; font-weight:700; margin-top:12px; letter-spacing:-.4px; }
+  .phead { font-size:14px; opacity:.78; margin-top:2px; }
+  .pcomp { font-size:13px; opacity:.55; margin-top:1px; }
+  .pill { display:inline-block; margin-top:10px; padding:4px 11px; border-radius:99px; font-size:12px; font-weight:600; }
+  .cta { display:flex; gap:8px; margin:18px 0 14px; }
+  .cta button { flex:1; padding:12px 6px; border-radius:13px; border:none; font:600 13px inherit; font-family:inherit; cursor:pointer; }
+  .links { display:flex; flex-direction:column; gap:8px; text-align:left; }
+  .lk { display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:13px; font-size:14px; word-break:break-all; }
+  .lk b { min-width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex:none; }
+  .lk.lock { opacity:.7; font-size:13px; }
+  .okbar { margin:14px 0 0; padding:8px 12px; border-radius:11px; font-size:12px; font-weight:600; text-align:center; }
+  .foot { text-align:center; font-size:11px; opacity:.45; padding:6px 0 20px; }
+  .qrbox { background:#fff; padding:14px; border-radius:18px; width:max-content; margin:60px auto 12px; }
+  .sheetp { position:absolute; left:0; right:0; bottom:0; background:#fff; color:#14141c; border-radius:24px 24px 0 0; padding:20px; z-index:6; display:none; box-shadow:0 -10px 30px rgba(0,0,0,.25); }
+  .sheetp.open { display:block; }
+  .sheetp h3 { margin:0 0 4px; font-size:17px; }
+  .sheetp p { margin:0 0 12px; font-size:13px; color:#5b6578; }
+  .sheetp input { margin-bottom:8px; }
+  .ptabs { display:flex; justify-content:center; gap:8px; margin-top:16px; }
+  .linkbox { margin:14px auto 0; width:330px; display:flex; gap:8px; align-items:center; background:#fff; border-radius:14px; padding:8px 8px 8px 14px; font-size:13px; }
+  .linkbox span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--slate); }
+  .actions { width:330px; margin:10px auto 0; display:flex; gap:8px; flex-wrap:wrap; }
+  .actions .btn { flex:1; white-space:nowrap; }
+  dialog { background:#fff; color:var(--ink); border:none; border-radius:20px; padding:24px; max-width:360px; box-shadow:0 30px 80px rgba(15,23,41,.4); }
+  dialog::backdrop { background:rgba(15,23,41,.55); }
+  dialog h3 { margin:0 0 8px; font-size:20px; }
+  dialog ul { padding-left:18px; color:var(--slate); font-size:14px; line-height:1.8; margin:8px 0 16px; }
+  .nav { display:flex; gap:4px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:12px; }
+  .ntab { border:none; background:none; padding:8px 14px; border-radius:10px; color:var(--slate); font:600 14px inherit; font-family:inherit; cursor:pointer; }
+  .ntab.active { background:var(--mist); color:var(--ink); }
+  .ntab.locked::after { content:" Pro"; font-size:10px; color:var(--gold); font-weight:700; }
+  [hidden] { display:none !important; }
+  textarea { width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); font:400 14px inherit; font-family:inherit; resize:vertical; min-height:84px; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .toolbar input[type=text] { flex:1; min-width:140px; }
+  .toolbar select { width:auto; }
+  .crow { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+  .crow:hover { background:#fafbfd; }
+  .cname { font-weight:600; font-size:15px; }
+  .cmeta { color:var(--slate); font-size:12px; margin-top:2px; }
+  .cright { text-align:right; font-size:12px; color:var(--slate); display:flex; flex-direction:column; gap:4px; align-items:flex-end; flex:none; }
+  .temp { padding:3px 10px; border-radius:99px; font-weight:700; font-size:12px; }
+  .temp.hot { background:#fdecec; color:#b42318; }
+  .temp.warm { background:#fff1d6; color:#9a5b00; }
+  .temp.cold { background:#e8ecff; color:#2d45f5; }
+  .overdue { color:#b42318; font-weight:600; }
+  .mcard { border-bottom:1px solid var(--line); padding:14px 0; }
+  .mcard h3 { margin:0; font-size:15px; }
+  .mnotes { white-space:pre-wrap; font-size:13px; color:var(--slate); margin:8px 0; }
+  .act { display:flex; align-items:center; gap:8px; font-size:13px; padding:2px 0; }
+  .act.done span { text-decoration:line-through; color:var(--slate); }
+  .bars { display:flex; align-items:flex-end; gap:10px; height:120px; margin:8px 0 6px; }
+  .bar { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px; height:100%; font-size:11px; color:var(--slate); }
+  .bar i { display:block; width:100%; background:var(--cobalt); border-radius:6px 6px 0 0; min-height:2px; }
+  table.rm { width:100%; border-collapse:collapse; font-size:13px; }
+  table.rm td { padding:10px 8px 10px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.rm td:first-child { font-weight:600; width:38%; }
+  .chip { padding:3px 10px; border-radius:99px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .chip.ok { background:#e3f7ea; color:#14733a; }
+  .chip.be { background:#e8ecff; color:#2d45f5; }
+  .chip.pt { background:var(--goldbg); color:var(--gold); }
+  .pkwrap { background:var(--mist); border-radius:16px; padding:16px; text-align:center; }
+  .pkwrap canvas { max-width:100%; max-height:520px; width:auto; height:auto; border-radius:12px; box-shadow:0 10px 30px rgba(15,23,41,.2); }
+  dialog.wide { max-width:460px; width:92vw; }
+  .dgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .dgrid .full { grid-column:1 / -1; }
+  @media (prefers-reduced-motion:reduce){ .meter i { transition:none; } }
+
+  /* ---------- Nearby Share (radar) ---------- */
+  .tab.live::after { content:""; display:inline-block; width:7px; height:7px; border-radius:50%; margin-left:6px; background:#2cf5b0; box-shadow:0 0 8px #2cf5b0; vertical-align:middle; }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .nbview { min-height:100%; padding:40px 14px 14px; display:flex; flex-direction:column; align-items:center; text-align:center;
+    background:radial-gradient(120% 70% at 50% 28%, #0b2030 0%, #04070d 68%); color:#e8fbff; --cy:#35e8ff; --gr:#2cf5b0; --dim:rgba(232,251,255,.62); }
+  .nbview h3 { margin:0; font-size:19px; letter-spacing:-.3px; }
+  .nbview .nbsub { font-size:12px; color:var(--dim); margin:3px 0 0; max-width:30ch; }
+  .radar { position:relative; width:236px; height:236px; margin:10px auto 4px; border-radius:50%; flex:none; }
+  .radar .ring { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border-radius:50%; border:1px solid rgba(53,232,255,.22); }
+  .radar .r1 { width:33.3%; height:33.3%; } .radar .r2 { width:66.6%; height:66.6%; }
+  .radar .r3 { width:100%; height:100%; border-color:rgba(53,232,255,.5); box-shadow:0 0 26px rgba(53,232,255,.2), inset 0 0 34px rgba(53,232,255,.09); }
+  .radar .cross::before, .radar .cross::after { content:""; position:absolute; background:rgba(53,232,255,.12); }
+  .radar .cross::before { left:50%; top:0; bottom:0; width:1px; } .radar .cross::after { top:50%; left:0; right:0; height:1px; }
+  .radar .cross { position:absolute; inset:0; }
+  .radar .sweep { position:absolute; inset:0; border-radius:50%; opacity:0; transition:opacity .5s;
+    background:conic-gradient(from 0deg, rgba(44,245,176,0) 0deg, rgba(44,245,176,0) 240deg, rgba(44,245,176,.34) 356deg, rgba(150,255,225,.85) 360deg); }
+  .radar.on .sweep { opacity:1; animation:nbspin 3.4s linear infinite; }
+  .radar:not(.on) .r3 { border-color:rgba(53,232,255,.25); box-shadow:none; }
+  @keyframes nbspin { to { transform:rotate(360deg); } }
+  .radar .me { position:absolute; left:50%; top:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:var(--gr);
+    box-shadow:0 0 0 3px rgba(44,245,176,.2), 0 0 18px 4px rgba(44,245,176,.7); }
+  .radar.on .me::after { content:""; position:absolute; inset:-3px; border-radius:50%; border:2px solid var(--gr); animation:nbme 2.2s ease-out infinite; }
+  @keyframes nbme { from { transform:scale(1); opacity:.7; } to { transform:scale(4.2); opacity:0; } }
+  .radar .dots { position:absolute; inset:0; }
+  .nbdot { position:absolute; width:40px; height:40px; transform:translate(-50%,-50%); border:1.5px solid var(--cy); border-radius:50%; padding:0; cursor:pointer;
+    background:radial-gradient(circle at 35% 30%, #46dcf0, #0e6a85 70%); color:#031a22; font:800 14px inherit; font-family:inherit;
+    box-shadow:0 0 18px 2px rgba(53,232,255,.65); transition:left .7s cubic-bezier(.2,.8,.2,1), top .7s cubic-bezier(.2,.8,.2,1), opacity .4s, transform .4s, box-shadow .3s;
+    animation:nbin .6s cubic-bezier(.2,.9,.3,1.3) both; }
+  .nbdot::after { content:""; position:absolute; inset:-2px; border-radius:50%; border:2px solid var(--cy); opacity:0; }
+  .nbdot.fresh::after { animation:nbping 1.5s ease-out 1; }
+  .nbdot.gone { opacity:0; transform:translate(-50%,-50%) scale(.3); pointer-events:none; }
+  .nbdot.sel { border-color:var(--gr); box-shadow:0 0 0 3px rgba(44,245,176,.25), 0 0 22px rgba(44,245,176,.8); }
+  .nbdot .lab { position:absolute; top:44px; left:50%; transform:translateX(-50%); font-size:10.5px; font-weight:600; white-space:nowrap; max-width:84px; overflow:hidden; text-overflow:ellipsis; color:#e8fbff; text-shadow:0 1px 6px #000; }
+  @keyframes nbin { from { opacity:0; transform:translate(-50%,-50%) scale(.2); } }
+  @keyframes nbping { 0% { opacity:.9; transform:scale(1); } 100% { opacity:0; transform:scale(3.4); } }
+  .nbstat { font-size:13px; font-weight:600; min-height:20px; margin-top:6px; }
+  .nbsel { font-size:12px; color:var(--dim); min-height:18px; margin-top:2px; }
+  .nberr { margin:8px 0 0; padding:10px 12px; border-radius:12px; background:rgba(255,120,90,.12); border:1px solid rgba(255,120,90,.4); font-size:12.5px; text-align:left; width:100%; }
+  .nbfield { width:100%; margin-top:6px; text-align:left; }
+  .nbfield label { display:block; font-size:11px; color:var(--dim); margin-bottom:4px; }
+  .nbfield input { width:100%; padding:9px 11px; border-radius:11px; border:1px solid rgba(53,232,255,.3); background:rgba(53,232,255,.06); color:#e8fbff; font:500 14px inherit; font-family:inherit; }
+  .nbfield input:disabled { opacity:.5; }
+  .nbbtn { border:1px solid rgba(53,232,255,.38); background:rgba(53,232,255,.08); color:#e8fbff; padding:12px 14px; border-radius:14px; font:600 14px inherit; font-family:inherit; cursor:pointer; }
+  .nbbtn:focus-visible, .nbdot:focus-visible, .nbview input:focus-visible { outline:2px solid var(--cy, #35e8ff); outline-offset:2px; }
+  .nbbtn.go { border:none; color:#04202a; background:linear-gradient(135deg,#2cf5b0,#35e8ff); box-shadow:0 0 24px rgba(44,245,176,.42); }
+  .nbbtn.stop { border-color:rgba(255,120,90,.6); background:rgba(255,120,90,.1); }
+  .nbbtn.quiet { border-color:transparent; background:none; color:rgba(232,251,255,.65); font-size:13px; padding:8px; text-decoration:underline; }
+  .nbbtn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
+  .nbactions { display:flex; flex-direction:column; gap:6px; width:100%; margin-top:10px; }
+  .nbnote { font-size:11px; color:rgba(232,251,255,.5); margin-top:10px; line-height:1.45; max-width:34ch; }
+
+  .nbsheet { position:absolute; inset:0; z-index:8; overflow-y:auto; scrollbar-width:none; color:#e8fbff; border-radius:inherit;
+    background:radial-gradient(120% 60% at 50% 0%, #0d2636 0%, #050912 64%); transform:translateY(102%); transition:transform .5s cubic-bezier(.2,.9,.25,1); --cy:#35e8ff; --gr:#2cf5b0; --dim:rgba(232,251,255,.62); }
+  .nbsheet::-webkit-scrollbar { display:none; }
+  .nbsheet.in { transform:none; }
+  .nbs.still .nbcard, .nbs.still .nbcard::before { animation:none; } .nbs.still .nbcard::before { display:none; }
+  .nbs { padding:44px 16px 22px; display:flex; flex-direction:column; gap:12px; min-height:100%; }
+  .nbs h3 { margin:0; font-size:19px; letter-spacing:-.3px; }
+  .nbs .sub { font-size:12.5px; color:var(--dim); margin:2px 0 0; }
+  .nbs .exp { font-size:12px; color:var(--dim); line-height:1.5; }
+  .nbs .grow { flex:1; }
+  .nbs .btns { display:flex; flex-direction:column; gap:8px; position:sticky; bottom:0; margin:0 -16px -22px; padding:22px 16px 22px; background:linear-gradient(to bottom, rgba(5,9,18,0), #050912 34%); z-index:2; }
+  .nbchip { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; padding:5px 11px; border-radius:99px; background:rgba(53,232,255,.1); border:1px solid rgba(53,232,255,.3); width:max-content; }
+  .nbchip i { width:8px; height:8px; border-radius:50%; background:var(--cy); box-shadow:0 0 8px var(--cy); }
+  .nbchip.ok { background:rgba(44,245,176,.12); border-color:rgba(44,245,176,.45); } .nbchip.ok i { background:var(--gr); box-shadow:0 0 8px var(--gr); }
+  .nbchip.wait i { animation:nbblink 1.1s ease-in-out infinite; }
+  .nbchip.bad { background:rgba(255,120,90,.12); border-color:rgba(255,120,90,.5); } .nbchip.bad i { background:#ff785a; box-shadow:0 0 8px #ff785a; }
+  @keyframes nbblink { 50% { opacity:.25; } }
+  .nbcode { font-size:12px; color:var(--dim); } .nbcode b { color:#e8fbff; font-size:15px; letter-spacing:3px; margin:0 4px; font-variant-numeric:tabular-nums; }
+  .nbchips { display:flex; gap:6px; flex-wrap:wrap; }
+  .nbidc { border:1px solid rgba(53,232,255,.3); background:none; color:#e8fbff; padding:5px 12px; border-radius:99px; font:600 12px inherit; font-family:inherit; cursor:pointer; }
+  .nbidc.on { background:rgba(53,232,255,.2); border-color:var(--cy); }
+  .nbcard { position:relative; border-radius:26px; padding:20px 16px 16px; text-align:center; overflow:hidden; animation:nbcardin .75s cubic-bezier(.2,.9,.25,1) both; }
+  .nbcard::before { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.24) 48%, transparent 66%); transform:translateX(-130%); animation:nbshine 1.5s .4s ease-out 1 forwards; }
+  @keyframes nbcardin { from { opacity:0; transform:translateY(26px) scale(.93); filter:blur(6px); } }
+  @keyframes nbshine { to { transform:translateX(130%); } }
+  .nbav { width:84px; height:84px; border-radius:50%; margin:0 auto 10px; border:3px solid rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:700; background:rgba(0,0,0,.28); overflow:hidden; box-shadow:0 0 30px rgba(255,255,255,.22); }
+  .nbav img { width:100%; height:100%; object-fit:cover; }
+  .nbname { font-size:24px; font-weight:700; letter-spacing:-.5px; line-height:1.15; overflow-wrap:anywhere; }
+  .nbrole { font-size:13px; opacity:.88; margin-top:3px; overflow-wrap:anywhere; } .nbco { font-size:12px; opacity:.68; margin-top:1px; overflow-wrap:anywhere; }
+  .nbpill { display:inline-block; margin-top:9px; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600; background:rgba(0,0,0,.3); }
+  .nbrows { margin-top:14px; display:flex; flex-direction:column; gap:6px; text-align:left; }
+  .nbrow { display:flex; gap:10px; align-items:center; padding:8px 10px; border-radius:12px; background:rgba(0,0,0,.26); font-size:13px; overflow-wrap:anywhere; }
+  .nbrow b { min-width:30px; height:26px; border-radius:8px; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:10.5px; flex:none; }
+  .nbcard.compact { padding:12px; } .nbcard.compact .nbav { width:52px; height:52px; font-size:18px; margin-bottom:6px; } .nbcard.compact .nbname { font-size:18px; }
+  .nbck { display:flex; gap:10px; align-items:center; padding:9px 10px; border-radius:12px; background:rgba(53,232,255,.06); border:1px solid rgba(53,232,255,.16); font-size:13px; cursor:pointer; }
+  .nbck input { accent-color:#2cf5b0; width:17px; height:17px; flex:none; }
+  .nbck .l { color:var(--dim); font-size:11px; display:block; } .nbck .v { overflow-wrap:anywhere; display:block; }
+  .nbck em { font-style:normal; font-size:10px; margin-left:auto; padding:2px 7px; border-radius:99px; background:rgba(53,232,255,.14); white-space:nowrap; flex:none; }
+  .nbck.fixed { cursor:default; opacity:.85; }
+  .nbsteps { display:flex; gap:4px; }
+  .nbstep { flex:1; text-align:center; font-size:10.5px; color:var(--dim); } .nbstep i { display:block; height:4px; border-radius:4px; background:rgba(53,232,255,.18); margin-bottom:5px; }
+  .nbstep.done { color:#e8fbff; } .nbstep.done i { background:var(--gr); box-shadow:0 0 8px var(--gr); }
+  .nbstep.act i { background:var(--cy); animation:nbblink 1.1s ease-in-out infinite; } .nbstep.fail i { background:#ff785a; }
+  .nbmsg { font-size:13px; line-height:1.5; padding:10px 12px; border-radius:12px; background:rgba(53,232,255,.07); border:1px solid rgba(53,232,255,.2); }
+  .nbmsg.good { background:rgba(44,245,176,.1); border-color:rgba(44,245,176,.45); } .nbmsg.bad { background:rgba(255,120,90,.1); border-color:rgba(255,120,90,.45); }
+  @media (prefers-reduced-motion:reduce) {
+    .radar.on .sweep, .radar.on .me::after, .nbdot, .nbdot.fresh::after, .nbcard, .nbcard::before, .nbchip.wait i, .nbstep.act i { animation:none !important; }
+    .radar.on .sweep { background:conic-gradient(from 0deg, rgba(44,245,176,0) 0deg 300deg, rgba(44,245,176,.25) 360deg); }
+    .nbsheet, .nbdot { transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <main class="sheet">
+    <div class="top">
+      <div class="logo">Tapcard<span>prototype</span></div>
+      <div class="plan" id="plan" role="group" aria-label="Plan (demo)">
+        <button data-p="free">Free</button>
+        <button data-p="premium" class="prem">Premium</button>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+
+    <div id="v_card">
+    <section>
+      <h2>Identity</h2>
+      <p class="sub">Keep a separate card for each part of your life. Free includes one identity; Premium includes five.</p>
+      <div class="tabs" id="tabs"></div>
+      <div class="grid2">
+        <div><label class="f" for="cat">Category</label><select id="cat"></select></div>
+        <div><label class="f" for="status">Status badge</label><select id="status"></select></div>
+      </div>
+      <div class="photo">
+        <div class="thumb" id="thumb"></div>
+        <div>
+          <div class="row">
+            <button class="btn pro" id="upload">Upload photo</button>
+            <button class="btn" id="removePhoto">Remove</button>
+          </div>
+          <div class="note" id="photoNote"></div>
+        </div>
+        <input type="file" id="file" accept="image/*" hidden>
+      </div>
+      <div class="strength">
+        <div class="row" style="justify-content:space-between"><b id="strPct">0%</b><span class="note" style="margin:0" id="strTip"></span></div>
+        <div class="meter"><i id="strBar" style="width:0"></i></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Details and privacy</h2>
+      <p class="sub">Choose who can see each detail. "After connect" details stay hidden until the other person shares theirs back.</p>
+      <div id="fields"></div>
+      <label class="f" for="slug">Profile link</label>
+      <div class="slugrow"><span>tapcard.example/u/</span><input type="text" id="slug" autocomplete="off"></div>
+      <div class="note">Placeholder address. The link goes live when the backend is built.</div>
+    </section>
+
+    <section>
+      <h2>Design</h2>
+      <p class="sub" id="designNote"></p>
+      <div class="tpls" id="tpls"></div>
+      <div class="row">
+        <input type="color" id="bg" title="Background color" aria-label="Background color">
+        <input type="color" id="fg" title="Text color" aria-label="Text color">
+        <select id="font" style="width:auto" aria-label="Font">
+          <option value="'Schibsted Grotesk',system-ui">Modern</option>
+          <option value="Georgia, serif">Editorial</option>
+          <option value="'Courier New', monospace">Mono</option>
+        </select>
+        <select id="style" style="width:auto" aria-label="Header style">
+          <option value="gradient">Gradient</option>
+          <option value="solid">Solid</option>
+        </select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Activity</h2>
+      <div id="tilesWrap"></div>
+      <div class="row" style="justify-content:space-between;margin-bottom:6px">
+        <b style="font-size:14px">Connections</b>
+        <button class="btn" id="relock">Lock private details again</button>
+      </div>
+      <div class="conns" id="conns"></div>
+      <div class="note">Demo: use "Share yours back" in the phone to see how a recipient connects with you. Data stays on this device.</div>
+    </section>
+    </div>
+
+    <div id="v_print" hidden>
+      <section>
+        <h2>Print kit</h2>
+        <p class="sub">Turn your QR code into a card, sticker or table sign. Print it at home or at a print shop. No special hardware needed.</p>
+        <div class="tpls" id="pkFormats"></div>
+        <div class="pkwrap"><canvas id="pkCanvas" width="1011" height="639" aria-label="Print preview"></canvas></div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn solid" id="pkDownload">Download PNG</button>
+          <span class="note" id="pkSize" style="margin:0"></span>
+        </div>
+        <div class="note">Prints use your contact QR code today, so reprint if your details change. Once profile links are live, prints can point to your link and stay correct.</div>
+        <div class="note">The review sign needs a Google review link. Add it on the Card tab under the Business category.</div>
+      </section>
+    </div>
+
+    <div id="v_contacts" hidden>
+      <section>
+        <h2>Contacts and leads</h2>
+        <p class="sub">People you meet, with a lead score and a follow-up date. Anyone who shares their card back is added automatically.</p>
+        <div class="toolbar">
+          <input type="text" id="cquery" placeholder="Search by name, company or email" aria-label="Search contacts">
+          <select id="cfilter" aria-label="Filter by lead temperature">
+            <option value="all">All leads</option><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option>
+          </select>
+          <button class="btn solid" id="cadd">Add contact</button>
+          <button class="btn pro" id="cexport">Export CSV</button>
+        </div>
+        <div class="note" id="ccount" style="margin:0 0 6px"></div>
+        <div id="clist"></div>
+        <div class="note">The lead score is a simple rule: it adds points for each detail you have (email, phone, company, role, where you met, follow-up date). Hot is 70 or more, warm is 40 to 69.</div>
+      </section>
+    </div>
+
+    <div id="v_meetings" hidden>
+      <section>
+        <h2>Meeting notes</h2>
+        <p class="sub">Write down what was said and the next steps. Action items become a checklist.</p>
+        <div class="lockedbox" id="mlock">Meeting notes are part of Premium.</div>
+        <div class="toolbar"><button class="btn solid" id="mnew">New meeting note</button></div>
+        <div id="mlist"></div>
+      </section>
+    </div>
+
+    <div id="v_insights" hidden>
+      <section>
+        <h2>Insights</h2>
+        <p class="sub">A quick read on your networking. Numbers come from this device while the app is a prototype.</p>
+        <div class="lockedbox" id="ilock">Insights are part of Premium.</div>
+        <div id="ibody"></div>
+      </section>
+    </div>
+
+    <div id="v_roadmap" hidden>
+      <section>
+        <h2>What works today and what comes next</h2>
+        <p class="sub">Some features need a server, a paid data provider, or developer accounts. This list shows which.</p>
+        <table class="rm" id="rmtable"></table>
+      </section>
+    </div>
+  </main>
+
+  <aside class="side">
+    <div class="phone">
+      <div class="screen">
+        <div class="notch"></div>
+        <div class="scroll" id="screen"></div>
+        <div class="sheetp" id="sheetp">
+          <h3>Share yours back</h3>
+          <p id="sheetSub">Send your details to this person.</p>
+          <input type="text" id="sbName" placeholder="Your name" aria-label="Your name">
+          <input type="text" id="sbContact" placeholder="Email or phone" aria-label="Email or phone">
+          <div class="row" style="margin-top:6px">
+            <button class="btn solid" id="sbSend">Send my card</button>
+            <button class="btn" id="sbCancel">Cancel</button>
+          </div>
+        </div>
+        <div class="nbsheet" id="nbSheet" role="dialog" aria-modal="true" aria-labelledby="nbSheetTitle" hidden></div>
+      </div>
+    </div>
+    <div class="ptabs">
+      <button class="tab" id="tProfile">Profile</button>
+      <button class="tab" id="tQr">QR code</button>
+      <button class="tab" id="tNearby">Nearby</button>
+    </div>
+    <div class="linkbox"><span id="linkText"></span><button class="btn" id="copy">Copy link</button></div>
+    <div class="actions">
+      <button class="btn solid" id="download">Save contact</button>
+      <button class="btn" id="dlQr">Download QR</button>
+      <button class="btn" id="shareBtn">Share</button>
+    </div>
+    <div class="note" style="text-align:center;width:330px;margin:10px auto 0">The QR code holds only your public details, so anyone with a phone camera can save you.</div>
+  </aside>
+</div>
+
+<dialog id="cdlg" class="wide">
+  <h3 id="cdTitle">Add contact</h3>
+  <div class="dgrid">
+    <div class="full"><label class="f" for="cd_name">Name</label><input type="text" id="cd_name"></div>
+    <div><label class="f" for="cd_company">Company</label><input type="text" id="cd_company"></div>
+    <div><label class="f" for="cd_role">Role</label><input type="text" id="cd_role"></div>
+    <div><label class="f" for="cd_email">Email</label><input type="text" id="cd_email"></div>
+    <div><label class="f" for="cd_phone">Phone</label><input type="text" id="cd_phone"></div>
+    <div><label class="f" for="cd_metAt">Where you met</label><input type="text" id="cd_metAt"></div>
+    <div><label class="f" for="cd_followUp">Follow up on</label><input type="text" id="cd_followUp" placeholder="YYYY-MM-DD"></div>
+    <div class="full"><label class="f" for="cd_stage">Stage</label>
+      <select id="cd_stage"><option>New</option><option>Contacted</option><option>Follow up</option><option>Won</option><option>Lost</option></select></div>
+    <div class="full"><label class="f" for="cd_notes">Notes</label><textarea id="cd_notes"></textarea></div>
+  </div>
+  <div class="row">
+    <button class="btn solid" id="cdSave">Save contact</button>
+    <button class="btn" id="cdCancel">Cancel</button>
+    <button class="btn" id="cdDelete" style="margin-left:auto;color:#b42318">Delete</button>
+  </div>
+</dialog>
+
+<dialog id="mdlg" class="wide">
+  <h3 id="mdTitle">New meeting note</h3>
+  <div class="dgrid">
+    <div class="full"><label class="f" for="md_title">Meeting title</label><input type="text" id="md_title"></div>
+    <div><label class="f" for="md_contact">With</label><select id="md_contact"></select></div>
+    <div><label class="f" for="md_date">Date</label><input type="text" id="md_date" placeholder="YYYY-MM-DD"></div>
+    <div class="full"><label class="f" for="md_notes">What was discussed</label><textarea id="md_notes"></textarea></div>
+    <div class="full"><label class="f" for="md_actions">Action items (one per line)</label><textarea id="md_actions"></textarea></div>
+  </div>
+  <div class="row">
+    <button class="btn solid" id="mdSave">Save note</button>
+    <button class="btn" id="mdCancel">Cancel</button>
+    <button class="btn" id="mdDelete" style="margin-left:auto;color:#b42318">Delete</button>
+  </div>
+  <div class="note">Automatic AI summaries need a server and are on the roadmap. Notes and action items work now.</div>
+</dialog>
+
+<dialog id="upsell">
+  <h3>Go Premium</h3>
+  <ul>
+    <li>Profile photo upload</li>
+    <li>Three profile templates</li>
+    <li>Custom colors, fonts and gradients</li>
+    <li>Up to five identities</li>
+    <li>Activity insights and no Tapcard footer</li>
+  </ul>
+  <div class="row">
+    <button class="btn pro" id="goPrem">Switch to Premium (demo)</button>
+    <button class="btn" id="notNow">Not now</button>
+  </div>
+  <div class="note">Demo only. No payment is taken in this prototype.</div>
+</dialog>
+
+<script>
+const FIELD_DEFS = {
+  name:'Full name', headline:'Headline or bio', company:'Company', phone:'Phone', email:'Email',
+  website:'Website', instagram:'Instagram username', tiktok:'TikTok username',
+  linkedin:'LinkedIn URL', youtube:'YouTube URL', whatsapp:'WhatsApp number', review:'Google review link'
+};
+const BADGE = { phone:'Call', email:'Mail', website:'Web', instagram:'IG', tiktok:'TT', linkedin:'in', youtube:'YT', whatsapp:'WA', review:'Rev' };
+const DEFAULT_PRIV = { phone:'connect', email:'connect', whatsapp:'connect' };
+const PRIV = [['public','Public'],['connect','After connect'],['hidden','Hidden']];
+const STATUSES = ['', 'Open to work', 'Hiring', 'Open to collaborate', 'Available for freelance', 'Just networking'];
+const CATS = {
+  professional:{ label:'Professional', fields:['name','headline','company','email','phone','linkedin','website'], accent:'#2d6bf5', bg:'#0f1f3d' },
+  business:    { label:'Business',     fields:['name','headline','company','phone','email','website','linkedin','review'], accent:'#0f9d8a', bg:'#0b2b2b' },
+  creator:     { label:'Creator',      fields:['name','headline','instagram','tiktok','youtube','website','email'], accent:'#9b4dff', bg:'#26103d' },
+  social:      { label:'Social',       fields:['name','headline','instagram','tiktok','whatsapp','phone'], accent:'#e8408f', bg:'#3a1030' },
+  personal:    { label:'Personal',     fields:['name','phone','email','whatsapp'], accent:'#e08a00', bg:'#33230a' }
+};
+const TEMPLATES = [['classic','Classic'],['minimal','Minimal'],['bold','Bold']];
+const MAX_PREMIUM = 5;
+const KEY = 'tapcard_v3';
+const FONT_UI = "'Schibsted Grotesk',system-ui";
+
+function slugify(s) { return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30); }
+function makeIdentity(cat) {
+  const vis = {}; Object.keys(FIELD_DEFS).forEach(k => vis[k] = DEFAULT_PRIV[k] || 'public');
+  return { cat, values:{}, vis, photo:null, status:'', template:'classic', customized:false, slug:'your-name', slugAuto:true,
+           theme:{ bg:CATS[cat].bg, fg:'#ffffff', font:FONT_UI, style:'gradient' } };
+}
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.ids && s.ids.length) return s; } catch (e) {}
+  return { plan:'free', active:0, view:'profile', stats:{ saves:0 }, conns:[], ids:[makeIdentity('professional')] };
+}
+let state = load();
+state.contacts = state.contacts || []; state.meetings = state.meetings || []; state.nav = state.nav || 'card';
+let unlocked = false;
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+const prem = () => state.plan === 'premium';
+const cur = () => state.ids[state.active];
+const $ = id => document.getElementById(id);
+
+const tplOf = id => prem() ? id.template : 'classic';
+const themeOf = id => prem() ? id.theme : { bg:CATS[id.cat].bg, fg:'#ffffff', font:FONT_UI, style:'gradient' };
+function pick(id, levels) {
+  return CATS[id.cat].fields.filter(k => levels.includes(id.vis[k]) && id.values[k]).map(k => [k, id.values[k]]);
+}
+function href(k, v) {
+  v = v.trim();
+  if (k === 'phone') return 'tel:' + v;
+  if (k === 'email') return 'mailto:' + v;
+  if (k === 'instagram') return 'https://instagram.com/' + v.replace('@','');
+  if (k === 'tiktok') return 'https://tiktok.com/@' + v.replace('@','');
+  if (k === 'whatsapp') return 'https://wa.me/' + v.replace(/\D/g,'');
+  return /^https?:\/\//i.test(v) ? v : 'https://' + v;
+}
+function vcard(id, withPrivate) {
+  const m = Object.fromEntries(pick(id, withPrivate ? ['public','connect'] : ['public']));
+  const L = ['BEGIN:VCARD','VERSION:3.0','FN:' + (m.name || 'Unnamed')];
+  if (m.headline) L.push('TITLE:' + m.headline);
+  if (m.company) L.push('ORG:' + m.company);
+  if (m.phone) L.push('TEL;TYPE=CELL:' + m.phone);
+  if (m.email) L.push('EMAIL:' + m.email);
+  ['website','instagram','tiktok','linkedin','youtube','whatsapp'].forEach(k => { if (m[k]) L.push('URL:' + href(k, m[k])); });
+  L.push('END:VCARD');
+  return L.join('\r\n');
+}
+function download(name, blob) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+function initials(id) {
+  const n = (id.values.name || '').trim();
+  return n ? n.split(/\s+/).slice(0,2).map(w => w[0].toUpperCase()).join('') : '?';
+}
+function openUpsell() { const d = $('upsell'); if (d.showModal) d.showModal(); else alert('This is a Premium feature'); }
+const linkOf = id => 'tapcard.example/u/' + (id.slug || 'your-name');
+
+/* ---------- editor rendering ---------- */
+function renderPlan() {
+  document.querySelectorAll('#plan button').forEach(b => b.classList.toggle('on', b.dataset.p === state.plan));
+}
+function renderTabs() {
+  const t = $('tabs'); t.innerHTML = '';
+  state.ids.forEach((id, i) => {
+    const b = document.createElement('button');
+    const locked = !prem() && i > 0;
+    b.className = 'tab' + (i === state.active ? ' active' : '') + (locked ? ' locked' : '');
+    b.textContent = CATS[id.cat].label;
+    b.onclick = () => { if (locked) return openUpsell(); state.active = i; unlocked = false; save(); renderAll(); };
+    t.appendChild(b);
+  });
+  const add = document.createElement('button');
+  add.className = 'tab' + (prem() ? '' : ' locked'); add.textContent = '+ Add identity';
+  add.onclick = () => {
+    if (!prem()) return openUpsell();
+    if (state.ids.length >= MAX_PREMIUM) return alert('You can have up to ' + MAX_PREMIUM + ' identities.');
+    const used = state.ids.map(i => i.cat);
+    const next = Object.keys(CATS).find(c => !used.includes(c)) || 'personal';
+    state.ids.push(makeIdentity(next)); state.active = state.ids.length - 1; unlocked = false; save(); renderAll();
+  };
+  t.appendChild(add);
+}
+function renderSelects() {
+  const c = $('cat'); c.innerHTML = '';
+  Object.keys(CATS).forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = CATS[k].label; c.appendChild(o); });
+  c.value = cur().cat;
+  const s = $('status'); s.innerHTML = '';
+  STATUSES.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v || 'No badge'; s.appendChild(o); });
+  s.value = cur().status || '';
+}
+function renderPhoto() {
+  const id = cur(), th = $('thumb'); th.innerHTML = '';
+  if (prem() && id.photo) { const im = document.createElement('img'); im.src = id.photo; im.alt = ''; th.appendChild(im); }
+  else th.textContent = initials(id);
+  $('removePhoto').style.display = (prem() && id.photo) ? '' : 'none';
+  $('photoNote').textContent = prem() ? 'Square photos look best. Stored on this device in the prototype.' : 'Photo upload is part of Premium. Free profiles show your initials.';
+}
+function renderStrength() {
+  const id = cur(), keys = CATS[id.cat].fields;
+  const filled = keys.filter(k => (id.values[k] || '').trim()).length;
+  const pct = Math.round(filled / keys.length * 100);
+  $('strPct').textContent = pct + '% complete';
+  $('strBar').style.width = pct + '%';
+  const miss = keys.find(k => !(id.values[k] || '').trim());
+  $('strTip').textContent = miss ? 'Next: add your ' + FIELD_DEFS[miss].toLowerCase() : 'Your card is complete';
+}
+function renderFields() {
+  const box = $('fields'); box.innerHTML = '';
+  const id = cur();
+  CATS[id.cat].fields.forEach(k => {
+    const row = document.createElement('div'); row.className = 'frow';
+    const left = document.createElement('div');
+    const lab = document.createElement('label'); lab.className = 'f'; lab.textContent = FIELD_DEFS[k]; lab.htmlFor = 'f_' + k;
+    const inp = document.createElement('input'); inp.type = 'text'; inp.id = 'f_' + k; inp.value = id.values[k] || '';
+    inp.oninput = () => {
+      id.values[k] = inp.value;
+      if (k === 'name' && id.slugAuto) { id.slug = slugify(inp.value) || 'your-name'; $('slug').value = id.slug; }
+      save(); renderStrength(); renderPhone(); renderPhotoThumb();
+    };
+    left.appendChild(lab); left.appendChild(inp);
+    const right = document.createElement('div');
+    if (k === 'name') {
+      const n = document.createElement('div'); n.className = 'note'; n.style.marginBottom = '10px'; n.textContent = 'Always public'; right.appendChild(n);
+    } else {
+      const l2 = document.createElement('label'); l2.className = 'f'; l2.textContent = 'Visible to'; l2.htmlFor = 'v_' + k;
+      const sel = document.createElement('select'); sel.id = 'v_' + k;
+      PRIV.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); });
+      sel.value = id.vis[k] || 'public';
+      sel.onchange = () => { id.vis[k] = sel.value; save(); renderPhone(); };
+      right.appendChild(l2); right.appendChild(sel);
+    }
+    row.appendChild(left); row.appendChild(right); box.appendChild(row);
+  });
+  $('slug').value = id.slug || '';
+}
+function renderPhotoThumb() { if (!(prem() && cur().photo)) $('thumb').textContent = initials(cur()); }
+function renderDesign() {
+  const id = cur(), t = prem() ? id.theme : themeOf(id);
+  $('bg').value = t.bg; $('fg').value = t.fg; $('font').value = t.font; $('style').value = t.style;
+  ['bg','fg','font','style'].forEach(k => $(k).disabled = !prem());
+  $('designNote').textContent = prem() ? 'Pick a template, then adjust colors and type. The phone updates as you go.' : 'Free profiles use a clean preset for each category. Premium unlocks templates and custom styling.';
+  const box = $('tpls'); box.innerHTML = '';
+  TEMPLATES.forEach(([k, label]) => {
+    const b = document.createElement('button');
+    const locked = !prem() && k !== 'classic';
+    b.className = 'tpl' + (tplOf(id) === k ? ' on' : '') + (locked ? ' locked' : '');
+    b.textContent = label;
+    b.onclick = () => { if (locked) return openUpsell(); id.template = k; save(); renderDesign(); renderPhone(); };
+    box.appendChild(b);
+  });
+}
+function renderActivity() {
+  const w = $('tilesWrap'); w.innerHTML = '';
+  if (!prem()) {
+    const d = document.createElement('div'); d.className = 'lockedbox';
+    d.textContent = 'Premium shows contacts saved, share-backs and profile strength at a glance.';
+    w.appendChild(d);
+  } else {
+    const t = document.createElement('div'); t.className = 'tiles';
+    const pct = $('strPct').textContent.replace(' complete','');
+    [[state.stats.saves, 'Contacts saved'], [state.conns.length, 'Share-backs'], [pct, 'Profile strength']].forEach(([n, l]) => {
+      const d = document.createElement('div'); d.className = 'tile';
+      const b = document.createElement('b'); b.textContent = n; const s = document.createElement('small'); s.textContent = l;
+      d.appendChild(b); d.appendChild(s); t.appendChild(d);
+    });
+    w.appendChild(t);
+  }
+  const c = $('conns'); c.innerHTML = '';
+  if (!state.conns.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'No connections yet. Tap "Share yours back" in the phone to try it.'; c.appendChild(e); }
+  state.conns.forEach(x => {
+    const r = document.createElement('div'); r.className = 'conn';
+    const a = document.createElement('div'); a.textContent = x.name;
+    const sm = document.createElement('small'); sm.textContent = x.contact; sm.style.display = 'block'; a.appendChild(sm);
+    const b = document.createElement('small'); b.textContent = new Date(x.t).toLocaleString();
+    r.appendChild(a); r.appendChild(b); c.appendChild(r);
+  });
+}
+
+/* ---------- phone rendering ---------- */
+function renderPhone() {
+  const id = cur(), th = themeOf(id), accent = CATS[id.cat].accent, tpl = tplOf(id);
+  $('tProfile').classList.toggle('active', state.view === 'profile');
+  $('tQr').classList.toggle('active', state.view === 'qr');
+  $('tNearby').classList.toggle('active', state.view === 'nearby');
+  $('linkText').textContent = linkOf(id);
+  const S = tpl === 'minimal'
+    ? { surf:'#fafafc', text:'#14141c', row:'#eeeef4', sec:'#e4e4ec', secText:'#14141c', ring:'#fafafc', banner:false }
+    : tpl === 'bold'
+    ? { surf:'linear-gradient(160deg,' + th.bg + ',' + accent + ')', text:th.fg, row:'rgba(255,255,255,.16)', sec:'rgba(255,255,255,.2)', secText:th.fg, ring:'rgba(255,255,255,.4)', banner:false }
+    : { surf:'#0d0d14', text:th.fg, row:'#171722', sec:'#1d1d2a', secText:'#fff', ring:'#0d0d14', banner:true };
+  const s = $('screen'); s.innerHTML = '';
+  s.style.background = S.surf; s.style.color = S.text; s.style.fontFamily = th.font;
+  const m = Object.fromEntries(pick(id, ['public']));
+
+  if (state.view === 'nearby') { NB.mount(s); return; }
+  if (state.view === 'qr') {
+    const box = document.createElement('div'); box.className = 'qrbox'; s.appendChild(box);
+    try { new QRCode(box, { text: vcard(id, false), width: 200, height: 200, correctLevel: QRCode.CorrectLevel.L }); }
+    catch (e) { box.textContent = 'Too much data for one QR code. Hide a detail.'; }
+    const p = document.createElement('div'); p.style.cssText = 'text-align:center;padding:6px 28px;font-size:14px;opacity:.75';
+    p.textContent = 'Scan with any phone camera to save ' + (m.name || 'this contact') + '.';
+    s.appendChild(p);
+    return;
+  }
+  if (S.banner) {
+    const b = document.createElement('div'); b.className = 'banner';
+    b.style.background = th.style === 'gradient' ? 'linear-gradient(135deg,' + th.bg + ',' + accent + ')' : th.bg;
+    s.appendChild(b);
+  }
+  const body = document.createElement('div'); body.className = 'pbody ' + (S.banner ? 'hasbanner' : 'nobanner'); s.appendChild(body);
+  const av = document.createElement('div'); av.className = 'avatar'; av.style.background = accent; av.style.borderColor = S.ring;
+  if (prem() && id.photo) { const im = document.createElement('img'); im.src = id.photo; im.alt = ''; av.appendChild(im); }
+  else av.textContent = initials(id);
+  body.appendChild(av);
+  const add = (cls, txt) => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; body.appendChild(d); return d; };
+  add('pname', m.name || 'Your name');
+  if (m.headline) add('phead', m.headline);
+  if (m.company) add('pcomp', m.company);
+  if (id.status) { const p = add('pill', id.status); p.style.background = accent; p.style.color = '#fff'; }
+
+  const cta = document.createElement('div'); cta.className = 'cta';
+  const a = document.createElement('button'); a.style.background = accent; a.style.color = '#fff'; a.textContent = 'Save contact';
+  a.onclick = () => { download((m.name || 'contact') + '.vcf', new Blob([vcard(id, unlocked)], { type:'text/vcard' })); state.stats.saves++; save(); renderActivity(); };
+  const b2 = document.createElement('button'); b2.style.background = S.sec; b2.style.color = S.secText; b2.textContent = 'Share yours back';
+  b2.onclick = () => { $('sheetSub').textContent = 'Send your details to ' + (m.name || 'this person') + ' and unlock their private details.'; $('sheetp').classList.add('open'); $('sbName').focus(); };
+  cta.appendChild(a); cta.appendChild(b2); body.appendChild(cta);
+
+  const links = document.createElement('div'); links.className = 'links';
+  const addRow = (k, text, isLock) => {
+    const r = document.createElement('div'); r.className = 'lk' + (isLock ? ' lock' : ''); r.style.background = S.row;
+    const bd = document.createElement('b'); bd.style.background = isLock ? 'rgba(128,128,150,.7)' : accent; bd.textContent = isLock ? '...' : BADGE[k];
+    const tx = document.createElement('span'); tx.textContent = text;
+    r.appendChild(bd); r.appendChild(tx); links.appendChild(r);
+  };
+  pick(id, ['public']).forEach(([k, v]) => { if (BADGE[k]) addRow(k, v, false); });
+  pick(id, ['connect']).forEach(([k, v]) => {
+    if (!BADGE[k]) return;
+    if (unlocked) addRow(k, v, false); else addRow(k, FIELD_DEFS[k] + ' is shared after you connect', true);
+  });
+  body.appendChild(links);
+  if (unlocked) { const ok = document.createElement('div'); ok.className = 'okbar'; ok.style.background = S.row; ok.textContent = 'Connected. Private details unlocked.'; body.appendChild(ok); }
+  if (!prem()) { const f = document.createElement('div'); f.className = 'foot'; f.textContent = 'Made with Tapcard'; s.appendChild(f); }
+}
+function renderAll() { renderPlan(); renderTabs(); renderSelects(); renderPhoto(); renderStrength(); renderFields(); renderDesign(); renderPhone(); renderActivity(); renderNav(); renderViews(); }
+
+/* ---------- events ---------- */
+document.querySelectorAll('#plan button').forEach(b => b.onclick = () => {
+  state.plan = b.dataset.p; if (!prem()) state.active = 0; save(); renderAll();
+});
+$('cat').onchange = e => {
+  const id = cur(); id.cat = e.target.value;
+  if (!id.customized) id.theme.bg = CATS[id.cat].bg;
+  save(); renderAll();
+};
+$('status').onchange = e => { cur().status = e.target.value; save(); renderPhone(); };
+['bg','fg'].forEach(k => $(k).oninput = e => { const id = cur(); id.theme[k] = e.target.value; id.customized = true; save(); renderPhone(); });
+$('font').onchange = e => { const id = cur(); id.theme.font = e.target.value; id.customized = true; save(); renderPhone(); };
+$('style').onchange = e => { const id = cur(); id.theme.style = e.target.value; id.customized = true; save(); renderPhone(); };
+$('slug').oninput = e => { const id = cur(); id.slug = slugify(e.target.value) || 'your-name'; id.slugAuto = false; save(); $('linkText').textContent = linkOf(id); };
+$('slug').onblur = () => { $('slug').value = cur().slug; };
+$('upload').onclick = () => { if (!prem()) return openUpsell(); $('file').click(); };
+$('removePhoto').onclick = () => { cur().photo = null; save(); renderPhoto(); renderPhone(); };
+$('file').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const S = 240, c = document.createElement('canvas'); c.width = S; c.height = S;
+      const side = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+      cur().photo = c.toDataURL('image/jpeg', 0.8); save(); renderPhoto(); renderPhone();
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(f); e.target.value = '';
+};
+$('tProfile').onclick = () => { state.view = 'profile'; save(); renderPhone(); };
+$('tQr').onclick = () => { state.view = 'qr'; save(); renderPhone(); };
+$('tNearby').onclick = () => { state.view = 'nearby'; save(); renderPhone(); };
+$('download').onclick = () => {
+  const id = cur();
+  download((id.values.name || 'contact') + '.vcf', new Blob([vcard(id, false)], { type:'text/vcard' }));
+  state.stats.saves++; save(); renderActivity();
+};
+$('dlQr').onclick = () => {
+  try {
+    const d = document.createElement('div');
+    new QRCode(d, { text: vcard(cur(), false), width: 512, height: 512, correctLevel: QRCode.CorrectLevel.L });
+    const c = d.querySelector('canvas');
+    const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = 'qr-' + cur().slug + '.png'; a.click();
+  } catch (e) { alert('Could not create the QR code. Hide a detail and try again.'); }
+};
+$('copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(linkOf(cur())); $('copy').textContent = 'Copied'; setTimeout(() => $('copy').textContent = 'Copy link', 1400); }
+  catch (e) { alert(linkOf(cur())); }
+};
+$('shareBtn').onclick = async () => {
+  const t = linkOf(cur());
+  if (navigator.share) { try { await navigator.share({ title:'My contact card', text:t }); } catch (e) {} }
+  else { try { await navigator.clipboard.writeText(t); alert('Link copied'); } catch (e) { alert(t); } }
+};
+$('sbCancel').onclick = () => $('sheetp').classList.remove('open');
+$('sbSend').onclick = () => {
+  const n = $('sbName').value.trim(), c = $('sbContact').value.trim();
+  if (!n || !c) { alert('Enter your name and an email or phone number.'); return; }
+  state.conns.unshift({ name:n, contact:c, t:Date.now() });
+  if (prem() || state.contacts.length < FREE_CONTACT_LIMIT) {
+    const isMail = c.includes('@');
+    state.contacts.unshift({ id:uid(), created:Date.now(), source:'Share-back', name:n, email:isMail ? c : '', phone:isMail ? '' : c,
+      company:'', role:'', metAt:'', followUp:'', stage:'New', notes:'' });
+  }
+  unlocked = true; save();
+  $('sbName').value = ''; $('sbContact').value = ''; $('sheetp').classList.remove('open');
+  renderPhone(); renderActivity(); renderContacts(); renderInsights();
+};
+$('relock').onclick = () => { unlocked = false; renderPhone(); };
+$('goPrem').onclick = () => { state.plan = 'premium'; save(); $('upsell').close(); renderAll(); };
+$('notNow').onclick = () => $('upsell').close();
+
+/* ---------- contacts, meetings, insights, roadmap ---------- */
+const FREE_CONTACT_LIMIT = 10;
+const NAV = [['card','Card'],['print','Print kit'],['contacts','Contacts'],['meetings','Meetings'],['insights','Insights'],['roadmap','Roadmap']];
+let cFilter = 'all', cQuery = '', editingContact = null, editingMeeting = null;
+const uid = () => Math.random().toString(36).slice(2, 10);
+const todayStr = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const validDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
+
+function leadScore(c) {
+  let s = 0;
+  if (c.email) s += 25;
+  if (c.phone) s += 20;
+  if (c.company) s += 15;
+  if (c.role) s += 10;
+  if (c.metAt) s += 10;
+  if (c.followUp) s += 10;
+  if ((c.notes || '').length > 20) s += 5;
+  if (c.stage === 'Contacted' || c.stage === 'Follow up') s += 5;
+  if (c.stage === 'Lost') s -= 30;
+  return Math.max(0, Math.min(100, s));
+}
+const tempOf = s => s >= 70 ? 'hot' : s >= 40 ? 'warm' : 'cold';
+const isOpen = c => c.stage !== 'Won' && c.stage !== 'Lost';
+const isDue = c => c.followUp && c.followUp <= todayStr() && isOpen(c);
+
+function renderNav() {
+  const n = $('nav'); n.innerHTML = '';
+  NAV.forEach(([k, l]) => {
+    const b = document.createElement('button');
+    b.className = 'ntab' + (state.nav === k ? ' active' : '') + (!prem() && (k === 'meetings' || k === 'insights') ? ' locked' : '');
+    b.textContent = l;
+    b.onclick = () => { state.nav = k; save(); renderNav(); renderViews(); };
+    n.appendChild(b);
+  });
+}
+function renderViews() {
+  NAV.forEach(([k]) => { $('v_' + k).hidden = state.nav !== k; });
+  renderContacts(); renderMeetings(); renderInsights(); renderRoadmap(); renderPrint();
+}
+
+function renderContacts() {
+  const p = prem(), list = $('clist'); list.innerHTML = '';
+  $('ccount').textContent = p ? state.contacts.length + ' contacts' : state.contacts.length + ' of ' + FREE_CONTACT_LIMIT + ' contacts on Free. Premium has no limit, lead scores and CSV export.';
+  $('cfilter').disabled = !p;
+  let rows = state.contacts.slice();
+  if (cQuery) { const q = cQuery.toLowerCase(); rows = rows.filter(c => [c.name, c.company, c.role, c.email].join(' ').toLowerCase().includes(q)); }
+  if (p && cFilter !== 'all') rows = rows.filter(c => tempOf(leadScore(c)) === cFilter);
+  rows.sort((a, b) => p ? leadScore(b) - leadScore(a) : b.created - a.created);
+  if (!rows.length) {
+    const e = document.createElement('div'); e.className = 'empty';
+    e.textContent = state.contacts.length ? 'No contacts match. Clear the search or filter.' : 'No contacts yet. Add one, or tap "Share yours back" in the phone preview.';
+    list.appendChild(e); return;
+  }
+  rows.forEach(c => {
+    const r = document.createElement('div'); r.className = 'crow'; r.tabIndex = 0; r.setAttribute('role', 'button');
+    const left = document.createElement('div');
+    const nm = document.createElement('div'); nm.className = 'cname'; nm.textContent = c.name;
+    const m1 = document.createElement('div'); m1.className = 'cmeta'; m1.textContent = [c.role, c.company].filter(Boolean).join(' at ') || (c.email || c.phone || '');
+    const m2 = document.createElement('div'); m2.className = 'cmeta'; m2.textContent = [c.metAt ? 'Met at ' + c.metAt : '', c.source].filter(Boolean).join(' · ');
+    left.appendChild(nm); left.appendChild(m1); left.appendChild(m2);
+    const right = document.createElement('div'); right.className = 'cright';
+    if (p) { const s = leadScore(c), t = document.createElement('span'); t.className = 'temp ' + tempOf(s); t.textContent = tempOf(s)[0].toUpperCase() + tempOf(s).slice(1) + ' ' + s; right.appendChild(t); }
+    const st = document.createElement('span'); st.textContent = c.stage || 'New'; right.appendChild(st);
+    if (c.followUp) { const f = document.createElement('span'); f.textContent = 'Follow up ' + c.followUp; if (isDue(c)) f.className = 'overdue'; right.appendChild(f); }
+    r.appendChild(left); r.appendChild(right);
+    r.onclick = () => openContact(c.id);
+    r.onkeydown = e => { if (e.key === 'Enter') openContact(c.id); };
+    list.appendChild(r);
+  });
+}
+function openContact(id) {
+  if (!id && !prem() && state.contacts.length >= FREE_CONTACT_LIMIT) return openUpsell();
+  editingContact = id;
+  const c = id ? (state.contacts.find(x => x.id === id) || {}) : {};
+  $('cdTitle').textContent = id ? 'Edit contact' : 'Add contact';
+  ['name','company','role','email','phone','metAt','followUp','notes'].forEach(k => { $('cd_' + k).value = c[k] || ''; });
+  $('cd_stage').value = c.stage || 'New';
+  $('cdDelete').style.display = id ? '' : 'none';
+  $('cdlg').showModal();
+}
+$('cadd').onclick = () => openContact(null);
+$('cquery').oninput = e => { cQuery = e.target.value.trim(); renderContacts(); };
+$('cfilter').onchange = e => { cFilter = e.target.value; renderContacts(); };
+$('cdCancel').onclick = () => $('cdlg').close();
+$('cdSave').onclick = () => {
+  const name = $('cd_name').value.trim();
+  if (!name) { alert('Enter a name for this contact.'); return; }
+  const fu = $('cd_followUp').value.trim();
+  if (fu && !validDate(fu)) { alert('Enter the follow-up date as YYYY-MM-DD, for example 2026-11-02.'); return; }
+  const data = { name, followUp:fu, stage:$('cd_stage').value };
+  ['company','role','email','phone','metAt','notes'].forEach(k => { data[k] = $('cd_' + k).value.trim(); });
+  if (editingContact) { const c = state.contacts.find(x => x.id === editingContact); if (c) Object.assign(c, data); }
+  else state.contacts.unshift(Object.assign({ id:uid(), created:Date.now(), source:'Manual' }, data));
+  save(); $('cdlg').close(); renderContacts(); renderInsights(); renderMeetings();
+};
+$('cdDelete').onclick = () => {
+  if (!editingContact || !confirm('Delete this contact?')) return;
+  state.contacts = state.contacts.filter(x => x.id !== editingContact);
+  save(); $('cdlg').close(); renderContacts(); renderInsights(); renderMeetings();
+};
+function csvCell(v) {
+  v = String(v == null ? '' : v);
+  if (/^[=+\-@\t\r]/.test(v) && !/^\+?[\d\s().-]+$/.test(v)) v = "'" + v;   // stop spreadsheet formulas
+  return '"' + v.replace(/"/g, '""') + '"';
+}
+$('cexport').onclick = () => {
+  if (!prem()) return openUpsell();
+  const head = ['Name','Company','Role','Email','Phone','Met at','Stage','Follow up','Lead score','Temperature','Source','Notes'];
+  const lines = [head.map(csvCell).join(',')];
+  state.contacts.forEach(c => {
+    const s = leadScore(c);
+    lines.push([c.name, c.company, c.role, c.email, c.phone, c.metAt, c.stage, c.followUp, s, tempOf(s), c.source, c.notes].map(csvCell).join(','));
+  });
+  download('contacts.csv', new Blob(['﻿' + lines.join('\r\n')], { type:'text/csv' }));
+};
+
+function renderMeetings() {
+  const box = $('mlist'); box.innerHTML = '';
+  $('mlock').hidden = prem();
+  if (!prem()) return;
+  if (!state.meetings.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'No meeting notes yet. Add one after your next conversation.'; box.appendChild(e); return; }
+  state.meetings.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(m => {
+    const card = document.createElement('div'); card.className = 'mcard';
+    const h = document.createElement('h3'); h.textContent = m.title; card.appendChild(h);
+    const con = state.contacts.find(c => c.id === m.contactId);
+    const meta = document.createElement('div'); meta.className = 'cmeta'; meta.textContent = [m.date, con ? 'With ' + con.name : ''].filter(Boolean).join(' · '); card.appendChild(meta);
+    if (m.notes) { const n = document.createElement('div'); n.className = 'mnotes'; n.textContent = m.notes; card.appendChild(n); }
+    (m.actions || []).forEach((a, i) => {
+      const row = document.createElement('label'); row.className = 'act' + (a.done ? ' done' : '');
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!a.done;
+      cb.onchange = () => { a.done = cb.checked; save(); renderMeetings(); renderInsights(); };
+      const sp = document.createElement('span'); sp.textContent = a.text;
+      row.appendChild(cb); row.appendChild(sp); card.appendChild(row);
+    });
+    const ed = document.createElement('button'); ed.className = 'btn'; ed.style.marginTop = '8px'; ed.textContent = 'Edit';
+    ed.onclick = () => openMeeting(m.id); card.appendChild(ed);
+    box.appendChild(card);
+  });
+}
+function openMeeting(id) {
+  if (!prem()) return openUpsell();
+  editingMeeting = id;
+  const m = id ? (state.meetings.find(x => x.id === id) || {}) : {};
+  $('mdTitle').textContent = id ? 'Edit meeting note' : 'New meeting note';
+  const sel = $('md_contact'); sel.innerHTML = '';
+  const none = document.createElement('option'); none.value = ''; none.textContent = 'No contact'; sel.appendChild(none);
+  state.contacts.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o); });
+  sel.value = m.contactId || '';
+  $('md_title').value = m.title || ''; $('md_date').value = m.date || todayStr(); $('md_notes').value = m.notes || '';
+  $('md_actions').value = (m.actions || []).map(a => a.text).join('\n');
+  $('mdDelete').style.display = id ? '' : 'none';
+  $('mdlg').showModal();
+}
+$('mnew').onclick = () => openMeeting(null);
+$('mdCancel').onclick = () => $('mdlg').close();
+$('mdSave').onclick = () => {
+  const title = $('md_title').value.trim();
+  if (!title) { alert('Enter a title for this meeting.'); return; }
+  const date = $('md_date').value.trim();
+  if (date && !validDate(date)) { alert('Enter the date as YYYY-MM-DD.'); return; }
+  const old = editingMeeting ? (state.meetings.find(x => x.id === editingMeeting) || {}) : {};
+  const prevDone = new Set((old.actions || []).filter(a => a.done).map(a => a.text));
+  const actions = $('md_actions').value.split('\n').map(s => s.trim()).filter(Boolean).map(t => ({ text:t, done:prevDone.has(t) }));
+  const data = { title, date, contactId:$('md_contact').value, notes:$('md_notes').value.trim(), actions };
+  if (editingMeeting && old.id) Object.assign(old, data); else state.meetings.unshift(Object.assign({ id:uid() }, data));
+  save(); $('mdlg').close(); renderMeetings(); renderInsights();
+};
+$('mdDelete').onclick = () => {
+  if (!editingMeeting || !confirm('Delete this meeting note?')) return;
+  state.meetings = state.meetings.filter(x => x.id !== editingMeeting);
+  save(); $('mdlg').close(); renderMeetings(); renderInsights();
+};
+
+function renderInsights() {
+  const body = $('ibody'); body.innerHTML = '';
+  $('ilock').hidden = prem();
+  if (!prem()) return;
+  const open = state.meetings.reduce((n, m) => n + (m.actions || []).filter(a => !a.done).length, 0);
+  const tiles = [
+    [state.contacts.length, 'Contacts'],
+    [state.contacts.filter(c => tempOf(leadScore(c)) === 'hot' && isOpen(c)).length, 'Hot leads'],
+    [state.contacts.filter(isDue).length, 'Follow-ups due'],
+    [open, 'Open action items'],
+    [state.stats.saves, 'Contacts saved'],
+    [state.conns.length, 'Share-backs']
+  ];
+  const t = document.createElement('div'); t.className = 'tiles';
+  tiles.forEach(([n, l]) => {
+    const d = document.createElement('div'); d.className = 'tile';
+    const b = document.createElement('b'); b.textContent = n; const s = document.createElement('small'); s.textContent = l;
+    d.appendChild(b); d.appendChild(s); t.appendChild(d);
+  });
+  body.appendChild(t);
+
+  const h = document.createElement('b'); h.style.fontSize = '14px'; h.textContent = 'New contacts, last 7 days'; body.appendChild(h);
+  const days = [];
+  for (let i = 6; i >= 0; i--) { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - i); days.push(d); }
+  const counts = days.map(d => state.contacts.filter(c => { const x = new Date(c.created); x.setHours(0,0,0,0); return x.getTime() === d.getTime(); }).length);
+  const max = Math.max(1, ...counts);
+  const bars = document.createElement('div'); bars.className = 'bars';
+  days.forEach((d, i) => {
+    const col = document.createElement('div'); col.className = 'bar';
+    const n = document.createElement('span'); n.textContent = counts[i];
+    const bar = document.createElement('i'); bar.style.height = Math.round(counts[i] / max * 80) + 'px';
+    const lb = document.createElement('span'); lb.textContent = d.toLocaleDateString(undefined, { weekday:'short' });
+    col.appendChild(n); col.appendChild(bar); col.appendChild(lb); bars.appendChild(col);
+  });
+  body.appendChild(bars);
+
+  const due = state.contacts.filter(isDue);
+  const h2 = document.createElement('b'); h2.style.cssText = 'font-size:14px;display:block;margin-top:18px'; h2.textContent = 'Follow up today or overdue'; body.appendChild(h2);
+  if (!due.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Nothing due. Set a follow-up date on a contact to see it here.'; body.appendChild(e); }
+  due.forEach(c => {
+    const r = document.createElement('div'); r.className = 'conn';
+    const a = document.createElement('div'); a.textContent = c.name;
+    const s = document.createElement('small'); s.className = 'overdue'; s.textContent = c.followUp;
+    r.appendChild(a); r.appendChild(s); body.appendChild(r);
+  });
+}
+
+const ROADMAP = [
+  ['Digital card, privacy levels, templates, QR and contact file', 'ok', 'Works in this prototype.'],
+  ['Lead capture by form, lead score, follow-up dates, CSV export', 'ok', 'Works in this prototype. Data stays on this device.'],
+  ['Meeting notes with action items', 'ok', 'Works in this prototype.'],
+  ['Hosted profile links, real profile views and analytics', 'be', 'Needs a backend (Supabase). Views cannot be counted without a server.'],
+  ['Automatic AI meeting summaries', 'be', 'Needs a backend that calls an AI model. Recording and transcription add cost.'],
+  ['CRM sync (HubSpot, Salesforce, Zoho, Pipedrive)', 'be', 'Needs a backend and each CRM\'s sign-in approval.'],
+  ['Team accounts, permissions and branded employee profiles', 'be', 'Needs a backend and a business plan.'],
+  ['Contact enrichment (find missing emails and phones)', 'pt', 'Needs a paid data provider. Check privacy rules before using one.'],
+  ['Scan business cards and event badges', 'pt', 'The camera can read QR codes. Reading printed text needs a text-recognition service.'],
+  ['Apple Wallet and Google Wallet passes', 'pt', 'Needs Apple and Google developer accounts and server-side pass signing.'],
+  ['Print kit: QR card, sticker, table sign and review sign', 'ok', 'Works in this prototype. Download a PNG and print it anywhere.'],
+  ['Nearby share between Tapcard windows in one browser: radar, invite, accept, encrypted transfer, save', 'ok', 'Works in this prototype. Open two windows, tap Nearby, then Start Radar in both. This is a test transport and cannot reach other phones.'],
+  ['Share a card with someone who does not have Tapcard (AirDrop, Quick Share, Bluetooth)', 'ok', 'Works on phones that support file sharing from the browser. It hands a standard contact file to the phone\'s own share sheet. Tapcard cannot see whether it arrived. On desktop it downloads the file instead.'],
+  ['Bluetooth radar between two phones', 'pt', 'Needs the Tapcard mobile app with a native Bluetooth plugin, and both people must have the app open. Browsers cannot advertise over Bluetooth and iPhone Safari has no Web Bluetooth.'],
+  ['NFC cards, keychains and stickers as an optional add-on', 'pt', 'Needs a supplier. Competitors sell these as hardware. Keep it an extra, since the core product must work without it.'],
+  ['NFC tap sharing', 'pt', 'iPhones cannot act as a tag for third-party apps. Plan on QR first and NFC cards or Android-to-iPhone as extras.']
+];
+const CHIP = { ok:['Works now','ok'], be:['Needs backend','be'], pt:['Needs partner or accounts','pt'] };
+function renderRoadmap() {
+  const t = $('rmtable'); t.innerHTML = '';
+  ROADMAP.forEach(([name, k, note]) => {
+    const tr = document.createElement('tr');
+    const a = document.createElement('td'); a.textContent = name;
+    const b = document.createElement('td'); const chip = document.createElement('span'); chip.className = 'chip ' + CHIP[k][1]; chip.textContent = CHIP[k][0]; b.appendChild(chip);
+    const c = document.createElement('td'); c.textContent = note; c.style.color = 'var(--slate)';
+    tr.appendChild(a); tr.appendChild(b); tr.appendChild(c); t.appendChild(tr);
+  });
+}
+
+/* ---------- print kit ---------- */
+const PK = [
+  ['card', 'Business card', 1011, 639, '85 x 55 mm'],
+  ['sticker', 'Round sticker', 900, 900, '60 mm across'],
+  ['sign', 'Table sign', 1240, 1748, 'A6 (105 x 148 mm)'],
+  ['review', 'Review sign', 1240, 1748, 'A6 (105 x 148 mm)']
+];
+let pkFmt = 'card';
+function rrect(g, x, y, w, h, r) {
+  g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+}
+function fit(g, text, maxW, size, weight, fam) {
+  let s = size; g.font = weight + ' ' + s + 'px ' + fam;
+  while (g.measureText(text).width > maxW && s > 14) { s -= 2; g.font = weight + ' ' + s + 'px ' + fam; }
+  return s;
+}
+function qrCanvas(text, size) {
+  const d = document.createElement('div');
+  new QRCode(d, { text, width:size, height:size, correctLevel:QRCode.CorrectLevel.L });
+  return d.querySelector('canvas');
+}
+function renderPrint() {
+  const fb = $('pkFormats'); fb.innerHTML = '';
+  PK.forEach(f => {
+    const b = document.createElement('button'); b.className = 'tpl' + (pkFmt === f[0] ? ' on' : ''); b.textContent = f[1];
+    b.onclick = () => { pkFmt = f[0]; renderPrint(); };
+    fb.appendChild(b);
+  });
+  if (state.nav !== 'print') return;
+  const f = PK.find(x => x[0] === pkFmt), k = f[0], W = f[2], H = f[3];
+  $('pkSize').textContent = 'Print size: ' + f[4] + ' at 300 dpi';
+  const id = cur(), th = themeOf(id), accent = CATS[id.cat].accent, fam = th.font;
+  const m = Object.fromEntries(pick(id, ['public']));
+  const cv = $('pkCanvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d'); const dl = $('pkDownload'); dl.disabled = false;
+  const msg = text => {
+    g.clearRect(0, 0, W, H); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.fillStyle = '#14141c'; g.textAlign = 'center';
+    const s = fit(g, text, W - 120, 44, '600', fam); g.font = '600 ' + s + 'px ' + fam; g.fillText(text, W / 2, H / 2); dl.disabled = true;
+  };
+  const review = (id.values.review || '').trim();
+  if (k === 'review' && !review) return msg('Add a Google review link on the Card tab (Business category).');
+  const qrText = k === 'review' ? href('review', review) : vcard(id, false);
+  const S = k === 'card' ? 340 : k === 'sticker' ? 460 : 720;
+  let q;
+  try { q = qrCanvas(qrText, S); } catch (e) { return msg('Too much data for one QR code. Hide a detail on the Card tab.'); }
+
+  g.save();
+  if (k === 'sticker') { g.beginPath(); g.arc(W / 2, H / 2, W / 2, 0, Math.PI * 2); g.clip(); }
+  if (th.style === 'gradient') { const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, th.bg); gr.addColorStop(1, accent); g.fillStyle = gr; }
+  else g.fillStyle = th.bg;
+  g.fillRect(0, 0, W, H);
+  const txt = (s, x, y, size, weight, align, maxW, alpha) => {
+    g.globalAlpha = alpha || 1; g.fillStyle = th.fg; g.textAlign = align;
+    const sz = fit(g, s, maxW, size, weight, fam); g.font = weight + ' ' + sz + 'px ' + fam; g.fillText(s, x, y); g.globalAlpha = 1;
+  };
+  const panel = (x, y, s) => { g.fillStyle = '#fff'; rrect(g, x - 24, y - 24, s + 48, s + 48, 30); g.fill(); g.drawImage(q, x, y, s, s); };
+  const nm = m.name || 'Your name', biz = m.company || nm, free = !prem();
+
+  if (k === 'card') {
+    const px = W - 48 - (S + 48) + 24, py = (H - S) / 2, maxW = px - 24 - 64 - 30;
+    g.fillStyle = '#fff'; g.fillRect(64, 150, 80, 8);
+    txt(nm, 64, 260, 72, '700', 'left', maxW);
+    if (m.headline) txt(m.headline, 64, 315, 34, '500', 'left', maxW, .85);
+    if (m.company) txt(m.company, 64, 362, 30, '400', 'left', maxW, .7);
+    txt('Scan to save my contact', 64, H - 80, 28, '600', 'left', maxW);
+    if (free) txt('Made with Tapcard', 64, H - 36, 20, '500', 'left', maxW, .55);
+    panel(px, py, S);
+  } else if (k === 'sticker') {
+    g.strokeStyle = '#fff'; g.globalAlpha = .6; g.lineWidth = 10; g.beginPath(); g.arc(W / 2, H / 2, W / 2 - 18, 0, Math.PI * 2); g.stroke(); g.globalAlpha = 1;
+    txt('Scan to connect', W / 2, 170, 56, '700', 'center', 560);
+    panel((W - S) / 2, 230, S);
+    txt(nm, W / 2, H - 140, 50, '700', 'center', 560);
+    if (free) txt('Made with Tapcard', W / 2, H - 92, 24, '500', 'center', 400, .55);
+  } else {
+    const isRev = k === 'review';
+    g.fillStyle = '#fff'; g.fillRect(W / 2 - 60, 190, 120, 10);
+    txt(isRev ? biz : nm, W / 2, 330, 110, '700', 'center', W - 160);
+    if (!isRev && m.headline) txt(m.headline, W / 2, 410, 48, '500', 'center', W - 200, .85);
+    if (!isRev && m.company) txt(m.company, W / 2, 470, 40, '400', 'center', W - 200, .7);
+    txt(isRev ? 'Scan to leave a review' : 'Scan to save my contact', W / 2, isRev ? 470 : 610, 64, '700', 'center', W - 160);
+    panel((W - S) / 2, 720, S);
+    txt(isRev ? 'Opens the review page on your phone' : 'Works with any phone camera. No app needed.', W / 2, 1550, 40, '400', 'center', W - 160, .85);
+    if (free) txt('Made with Tapcard', W / 2, H - 70, 28, '500', 'center', W - 160, .55);
+  }
+  g.restore();
+}
+$('pkDownload').onclick = () => {
+  $('pkCanvas').toBlob(b => { if (b) download(pkFmt + '-' + (cur().slug || 'card') + '.png', b); });
+};
+
+/* =====================================================================
+   NEARBY SHARE: radar discovery + consent-based contact card transfer
+   Layers (top to bottom):
+     1. Protocol    message shapes, strict validation of everything received
+     2. Crypto      per-session ECDH P-256 + AES-GCM, 4-digit pairing code
+     3. Transports  BroadcastTransport (test: other windows in this browser)
+                    NativeBleTransport (adapter for the mobile app's Bluetooth plugin)
+     4. Core        peer table, transfer state machines (outgoing / incoming)
+     5. UI          radar, sender preview sheet, recipient sheet, QR fallback
+   The QR code feature above is untouched; this is an extra tab beside it.
+   ===================================================================== */
+const NB = (() => {
+const CHANNEL = 'tapcard-nearby-v1', PRESENCE_MS = 1500, EXPIRE_MS = 6000, INVITE_MS = 45000, CARD_MS = 15000, MAX_QUEUE = 3;
+const enc = new TextEncoder(), dec = new TextDecoder();
+const h = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+/* ---------- 1. protocol and validation ---------- */
+const toB64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const fromB64 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; const b = atob(s), o = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) o[i] = b.charCodeAt(i); return o; };
+const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), b => b.toString(16).padStart(2, '0')).join('');
+const isId = s => typeof s === 'string' && /^[0-9a-f]{16}$/.test(s);
+const isB64 = (s, max) => typeof s === 'string' && s.length > 0 && s.length <= max && /^[A-Za-z0-9_-]+$/.test(s);
+// strips control characters and bidi-override characters, collapses whitespace, caps length
+const clean = (v, max) => typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '';
+const PROX = ['immediate', 'near', 'far'];
+const hex6 = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+const urlOk = v => { if (/^[a-z][a-z0-9+.-]*:/i.test(v) && !/^https?:\/\//i.test(v)) return false; try { return new URL(/^https?:\/\//i.test(v) ? v : 'https://' + v).hostname.includes('.'); } catch (e) { return false; } };
+const USER = /^@?[A-Za-z0-9._]{1,40}$/;
+const FIELD_RULES = {   // key: [max length, validator]
+  headline:[120], company:[80],
+  phone:[32, v => /^[+(]?\d[\d\s().-]{1,30}$/.test(v)], email:[120, v => /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]{2,}$/.test(v)],
+  website:[200, urlOk], linkedin:[200, urlOk], youtube:[200, urlOk],
+  instagram:[41, v => USER.test(v)], tiktok:[41, v => USER.test(v)], whatsapp:[24, v => /^\+?[\d\s()-]{5,24}$/.test(v)]
+};
+const lum = hx => { const [r, g, b] = [1, 3, 5].map(i => parseInt(hx.substr(i, 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * r + .7152 * g + .0722 * b; };
+const contrast = (a, b) => { const A = lum(a), B = lum(b); return (Math.max(A, B) + .05) / (Math.min(A, B) + .05); };
+function sanitizeCard(raw) {   // returns { card, dropped } or null when there is no usable name
+  if (!raw || typeof raw !== 'object') return null;
+  const name = clean(raw.name, 80); if (!name) return null;
+  const card = { name }, dropped = [];
+  Object.keys(FIELD_RULES).forEach(k => {
+    if (raw[k] == null || raw[k] === '') return;
+    const v = clean(raw[k], FIELD_RULES[k][0]);
+    if (v && (!FIELD_RULES[k][1] || FIELD_RULES[k][1](v))) card[k] = v; else dropped.push(k);
+  });
+  card.cat = Object.prototype.hasOwnProperty.call(CATS, raw.cat) ? raw.cat : 'professional';
+  card.accent = hex6(raw.accent) ? raw.accent : CATS[card.cat].accent;
+  card.bg = hex6(raw.bg) ? raw.bg : CATS[card.cat].bg;
+  let fg = hex6(raw.fg) ? raw.fg : '#ffffff';
+  if (Math.min(contrast(fg, card.bg), contrast(fg, card.accent)) < 2.5) fg = contrast('#ffffff', card.bg) >= contrast('#000000', card.bg) ? '#ffffff' : '#000000';
+  card.fg = fg;
+  card.status = STATUSES.includes(raw.status) ? raw.status : '';
+  card.photo = (typeof raw.photo === 'string' && raw.photo.length < 120000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(raw.photo)) ? raw.photo : '';
+  return { card, dropped };
+}
+const previewOf = c => ({ name:c.name, headline:c.headline || '', company:c.company || '', cat:c.cat, accent:c.accent, bg:c.bg, fg:c.fg });
+const vPresence = m => (m && isId(m.id) && typeof m.key === 'string' && m.key.length === 87 && isB64(m.key, 87))
+  ? { id:m.id, name:clean(m.name, 24) || 'Tapcard user', key:m.key, proximity:PROX.includes(m.proximity) ? m.proximity : null } : null;
+
+/* ---------- 2. crypto: ephemeral ECDH + AES-GCM ---------- */
+async function newKeys() {
+  const kp = await crypto.subtle.generateKey({ name:'ECDH', namedCurve:'P-256' }, false, ['deriveBits']);
+  return { priv:kp.privateKey, pub:new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey)) };
+}
+const cmp = (a, b) => { for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) return a[i] - b[i]; return a.length - b.length; };
+async function deriveSession(priv, peerPub, myPub) {
+  const [lo, hi] = [myPub, peerPub].sort(cmp);
+  const both = new Uint8Array(lo.length + hi.length); both.set(lo); both.set(hi, lo.length);
+  const dig = new Uint8Array(await crypto.subtle.digest('SHA-256', both));
+  const peerKey = await crypto.subtle.importKey('raw', peerPub, { name:'ECDH', namedCurve:'P-256' }, false, []);
+  const bits = await crypto.subtle.deriveBits({ name:'ECDH', public:peerKey }, priv, 256);
+  const hk = await crypto.subtle.importKey('raw', bits, 'HKDF', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({ name:'HKDF', hash:'SHA-256', salt:dig, info:enc.encode('tapcard-nearby-v1') }, hk, { name:'AES-GCM', length:256 }, false, ['encrypt', 'decrypt']);
+  const code = String(((dig[0] << 24 | dig[1] << 16 | dig[2] << 8 | dig[3]) >>> 0) % 10000).padStart(4, '0');
+  return { key, code };
+}
+async function seal(key, obj, aad) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv, additionalData:enc.encode(aad) }, key, enc.encode(JSON.stringify(obj)));
+  return { iv:toB64(iv), ct:toB64(new Uint8Array(ct)) };
+}
+async function unseal(key, iv, ct, aad) {
+  const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv:fromB64(iv), additionalData:enc.encode(aad) }, key, fromB64(ct));
+  return JSON.parse(dec.decode(pt));
+}
+
+/* ---------- 3. transports ---------- */
+// Contract: prepare() -> {ok, reason}; start(self, {onPeer, onGone, onMessage}); send(envelope); stop()
+class BroadcastTransport {
+  constructor() { this.label = 'Other Tapcard windows in this browser'; this.test = true; this.seen = new Map(); }
+  static ok() { return typeof BroadcastChannel === 'function'; }
+  async prepare() { return BroadcastTransport.ok() ? { ok:true } : { ok:false, reason:'This browser cannot talk to other Tapcard windows.' }; }
+  start(self, cb) {
+    this.self = self; this.cb = cb; this.ch = new BroadcastChannel(CHANNEL);
+    this.ch.onmessage = e => this._in(e.data);
+    this._announce(); this._post({ v:1, t:'probe', id:self.id });
+    this.t1 = setInterval(() => this._announce(), PRESENCE_MS);
+    this.t2 = setInterval(() => this._sweep(), 1000);
+  }
+  _post(m) { try { if (this.ch) this.ch.postMessage(m); } catch (e) {} }
+  _announce() { this._post({ v:1, t:'presence', id:this.self.id, name:this.self.name, key:this.self.key }); }
+  _in(m) {
+    if (!m || typeof m !== 'object' || m.v !== 1) return;
+    if (m.t === 'probe') { if (isId(m.id) && m.id !== this.self.id) this._announce(); return; }
+    if (m.t === 'bye') { if (isId(m.id) && this.seen.delete(m.id)) this.cb.onGone(m.id); return; }
+    if (m.t === 'presence') { const p = vPresence(m); if (!p || p.id === this.self.id) return; p.proximity = null; this.seen.set(p.id, Date.now()); this.cb.onPeer(p); return; }
+    if (m.t === 'enc' && m.to === this.self.id) this.cb.onMessage(m);
+  }
+  _sweep() { const now = Date.now(); this.seen.forEach((t, id) => { if (now - t > EXPIRE_MS) { this.seen.delete(id); this.cb.onGone(id); } }); }
+  async send(env) { this._post(env); }
+  stop() { this._post({ v:1, t:'bye', id:this.self.id }); clearInterval(this.t1); clearInterval(this.t2); if (this.ch) this.ch.close(); this.ch = null; this.seen.clear(); }
+}
+// Adapter for the mobile app. Expects a native plugin exposed as Capacitor.Plugins.TapcardNearby
+// (contract in NEARBY_NATIVE_SPEC.md). Not exercised in the browser prototype.
+class NativeBleTransport {
+  constructor() { this.label = 'Bluetooth (Tapcard app on both phones)'; this.test = false; this.handles = []; }
+  static plugin() { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TapcardNearby) || null; }
+  async prepare() {
+    const p = NativeBleTransport.plugin();
+    try {
+      const perm = await p.requestPermissions();
+      if (!perm || !perm.granted) return { ok:false, reason:(perm && perm.reason) || 'Bluetooth permission was not granted. You can allow it in Settings.' };
+      const av = await p.checkAvailability();
+      if (!av || !av.enabled) return { ok:false, reason:'Bluetooth is turned off. Turn it on, then try again.' };
+      return { ok:true };
+    } catch (e) { return { ok:false, reason:'Bluetooth could not be started on this phone.' }; }
+  }
+  async start(self, cb) {
+    const p = NativeBleTransport.plugin();
+    this.handles.push(await p.addListener('peerFound', e => { const q = vPresence(e); if (q) cb.onPeer(q); }));
+    this.handles.push(await p.addListener('peerLost', e => { if (e && isId(e.id)) cb.onGone(e.id); }));
+    this.handles.push(await p.addListener('message', e => { try { const m = JSON.parse(e.payload); if (m && m.t === 'enc') cb.onMessage(m); } catch (x) {} }));
+    await p.start({ id:self.id, name:self.name, key:self.key });
+  }
+  async send(env) { await NativeBleTransport.plugin().send({ to:env.to, payload:JSON.stringify(env) }); }
+  stop() { const p = NativeBleTransport.plugin(); this.handles.forEach(x => { try { x.remove(); } catch (e) {} }); this.handles = []; try { p.stop(); } catch (e) {} }
+}
+const pickTransport = () => NativeBleTransport.plugin() ? new NativeBleTransport() : BroadcastTransport.ok() ? new BroadcastTransport() : null;
+
+/* ---------- 4. core ---------- */
+const N = { on:false, starting:false, T:null, self:null, keys:null, peers:new Map(), sess:new Map(), xfers:new Map(), sel:null, view:null, draft:null, queue:[], err:'', ui:null, dots:new Map(), name:'' };
+const TERMINAL = ['delivered', 'declined', 'timeout', 'failed', 'cancelled', 'lost', 'expired', 'saved'];
+const isActive = x => !TERMINAL.includes(x.state) && x.state !== 'received';
+function live(msg) { if (N.ui) N.ui.live.textContent = msg; }
+async function sessionFor(peer) {
+  let s = N.sess.get(peer.id);
+  if (s && s.k === peer.key) return s;
+  s = await deriveSession(N.keys.priv, peer.keyBytes, N.keys.pub); s.k = peer.key; N.sess.set(peer.id, s); return s;
+}
+async function sendSecure(peer, obj) {
+  const s = await sessionFor(peer);
+  const { iv, ct } = await seal(s.key, obj, N.self.id + '>' + peer.id);
+  await N.T.send({ v:1, t:'enc', from:N.self.id, to:peer.id, key:N.self.key, iv, ct });
+}
+function onPeer(p) {
+  if (!N.on) return;
+  const old = N.peers.get(p.id), same = old && old.key === p.key;
+  if (old && !same) N.sess.delete(p.id);
+  const changed = !same || old.name !== p.name || old.proximity !== (p.proximity || null);
+  const rec = same ? old : { born:Date.now() };
+  Object.assign(rec, { id:p.id, name:p.name, key:p.key, keyBytes:fromB64(p.key), proximity:p.proximity || null });
+  N.peers.set(p.id, rec);
+  if (!changed) return;                       // presence is repeated every second or so; only redraw on a real change
+  if (!old) live(rec.name + ' found nearby');
+  renderRoot(); renderRadar(); if (N.draft) renderSheet();
+}
+function onGone(id) {
+  if (!N.peers.delete(id)) return;
+  N.sess.delete(id);
+  N.xfers.forEach(x => { if (x.peerId === id && isActive(x)) setState(x, 'lost', 'The connection to ' + x.peerName + ' was lost.'); });
+  if (N.sel === id) N.sel = null;
+  renderRoot(); renderRadar(); if (N.draft) renderSheet();
+}
+async function onMessage(env) {
+  if (!N.on || !env || env.t !== 'enc' || !isId(env.from) || env.to !== N.self.id || !isB64(env.iv, 16) || !isB64(env.ct, 300000)) return;
+  const peer = N.peers.get(env.from);
+  if (!peer || peer.key !== env.key) return;       // only peers we have discovered, with the key they advertised
+  let m; try { const s = await sessionFor(peer); m = await unseal(s.key, env.iv, env.ct, peer.id + '>' + N.self.id); } catch (e) { return; }
+  if (m && typeof m === 'object' && typeof m.k === 'string' && isId(m.x)) handle(peer, m);
+}
+function setState(x, st, note) {
+  x.state = st; x.note = note || ''; clearTimeout(x.timer); clearInterval(x.tick);
+  live((x.dir === 'out' ? 'Sending: ' : 'Receiving: ') + st);
+  if (N.view === x.id) renderSheet();
+  if (TERMINAL.includes(st) && N.view !== x.id) nextQueued();
+  renderRoot();
+}
+const timer = (x, ms, st, note) => { clearTimeout(x.timer); x.timer = setTimeout(() => { if (isActive(x)) { if (x.dir === 'out') quiet(x, { k:'cancel', x:x.id }); setState(x, st, note); } }, ms); };
+function quiet(x, msg) { const p = N.peers.get(x.peerId); if (p) sendSecure(p, msg).catch(() => {}); }
+
+function handle(peer, m) {
+  const x = N.xfers.get(m.x);
+  if (m.k === 'invite') {
+    if (x) return;
+    const pv = sanitizeCard(Object.assign({}, m.preview, { name:m.preview && m.preview.name })); if (!pv) return;
+    const open = [...N.xfers.values()].filter(q => q.dir === 'in' && q.state === 'invited');
+    if (open.some(q => q.peerId === peer.id)) return;                                  // one pending request per sender
+    const nx = { id:m.x, dir:'in', peerId:peer.id, peerName:peer.name, state:'invited', preview:pv.card, card:null, note:'' };
+    N.xfers.set(nx.id, nx);
+    if (N.view || N.draft) {
+      if (open.length >= MAX_QUEUE) { sendSecure(peer, { k:'decline', x:nx.id, why:'busy' }).catch(() => {}); N.xfers.delete(nx.id); return; }
+      N.queue.push(nx.id); timer(nx, INVITE_MS, 'expired', 'This request expired.'); return;
+    }
+    showIncoming(nx); return;
+  }
+  if (!x || x.peerId !== peer.id) return;
+  if (x.dir === 'out') {
+    if (m.k === 'accept' && x.state === 'inviting') {
+      x.reached = 2; setState(x, 'sending'); timer(x, CARD_MS, 'failed', 'No confirmation came back. The card may not have arrived.');
+      sendSecure(peer, { k:'card', x:x.id, card:x.card }).catch(() => setState(x, 'failed', 'The card could not be sent.'));
+    } else if (m.k === 'decline' && x.state === 'inviting') setState(x, 'declined', m.why === 'busy' ? peer.name + ' is busy right now.' : peer.name + ' declined.');
+    else if (m.k === 'received' && x.state === 'sending') { x.reached = 4; setState(x, 'delivered'); }
+    else if (m.k === 'error' && isActive(x)) setState(x, 'failed', peer.name + "'s device could not read the card.");
+    else if (m.k === 'cancel' && isActive(x)) setState(x, 'cancelled', peer.name + ' cancelled.');
+  } else {
+    if (m.k === 'card' && x.state === 'accepted') {
+      const r = sanitizeCard(m.card);
+      if (!r) { quiet(x, { k:'error', x:x.id }); return setState(x, 'failed', 'The card that arrived was not valid, so it was discarded.'); }
+      x.card = r.card; quiet(x, { k:'received', x:x.id }); setState(x, 'received');
+    } else if (m.k === 'cancel' && isActive(x)) setState(x, 'cancelled', peer.name + ' cancelled the request.');
+  }
+}
+
+/* sender actions */
+function shareable(id) {   // [key, value] pairs this identity may share; hidden fields never appear, review links are not contact details
+  return CATS[id.cat].fields.filter(k => k !== 'name' && k !== 'review' && id.vis[k] !== 'hidden' && (id.values[k] || '').trim()).map(k => [k, id.values[k].trim()]);
+}
+function buildCard(id, off) {
+  const th = themeOf(id), raw = { name:(id.values.name || '').trim(), cat:id.cat, accent:CATS[id.cat].accent, bg:th.bg, fg:th.fg, status:id.status || '' };
+  shareable(id).forEach(([k, v]) => { if (!off.has(k)) raw[k] = v; });
+  if (prem() && id.photo && !off.has('photo')) raw.photo = id.photo;
+  return sanitizeCard(raw);
+}
+function openDraft(peerId) {
+  const act = [...N.xfers.values()].find(x => x.dir === 'out' && x.peerId === peerId && isActive(x));
+  N.sel = peerId; renderRadar(); renderRoot();
+  if (act) { N.view = act.id; N.draft = null; } else { N.view = null; N.draft = { peerId, idx:prem() ? state.active : 0, off:new Set() }; }
+  renderSheet();
+}
+/* share with someone who does not have Tapcard: hand a standard .vcf to the phone's own share sheet (AirDrop, Quick Share, Bluetooth) */
+const defaultOff = (id, anyone) => new Set(anyone ? shareable(id).filter(([k]) => id.vis[k] === 'connect').map(([k]) => k) : []);
+function openAnyone() {
+  const idx = prem() ? state.active : 0;
+  N.view = null; N.draft = { anyone:true, peerId:null, idx, off:defaultOff(state.ids[idx], true), result:null };
+  renderSheet();
+}
+async function shareOut(d) {
+  const r = buildCard(state.ids[d.idx], d.off); if (!r) return;
+  const c = r.card, file = new File([vcardOf(c)], (c.name.replace(/[^\w .-]/g, '').trim() || 'contact') + '.vcf', { type:'text/vcard' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files:[file] })) {
+      await navigator.share({ files:[file], title:c.name + ' contact card' });
+      d.result = { tone:'good', text:"Your phone's share sheet was used. Tapcard can't see whether they accepted. They get their phone's normal accept prompt." };
+    } else {
+      download(file.name, file);
+      d.result = { tone:'', text:"This browser can't open a share sheet, so the card was saved as a .vcf file. Send it by Bluetooth, AirDrop or message, or show the QR code." };
+    }
+  } catch (e) { d.result = e && e.name === 'AbortError' ? { tone:'', text:'Sharing was cancelled. Nothing was sent.' } : { tone:'bad', text:"The share sheet could not be opened. Show the QR code instead." }; }
+  if (N.draft === d) renderSheet();
+}
+async function sendInvite() {
+  const d = N.draft, peer = d && N.peers.get(d.peerId); if (!peer) return;
+  const r = buildCard(state.ids[d.idx], d.off); if (!r) return;
+  const x = { id:rid(), dir:'out', peerId:peer.id, peerName:peer.name, state:'inviting', card:r.card, reached:1, note:'' };
+  N.xfers.set(x.id, x); N.view = x.id; N.draft = null; renderSheet();
+  try { await sendSecure(peer, { k:'invite', x:x.id, preview:previewOf(r.card) }); timer(x, INVITE_MS, 'timeout', peer.name + ' did not respond.'); }
+  catch (e) { setState(x, 'failed', 'Could not reach ' + peer.name + '.'); }
+}
+function cancelOut(x) { if (isActive(x)) { quiet(x, { k:'cancel', x:x.id }); setState(x, 'cancelled', 'You cancelled the request.'); } }
+
+/* recipient actions */
+function showIncoming(x) {
+  if (x.state !== 'invited') return;
+  x.deadline = Date.now() + INVITE_MS; timer(x, INVITE_MS, 'expired', 'This request expired.');
+  N.view = x.id; N.draft = null; renderSheet();
+  x.tick = setInterval(() => { const c = document.getElementById('nbCount'); if (c) c.textContent = Math.max(0, Math.round((x.deadline - Date.now()) / 1000)) + 's'; }, 1000);
+  if (document.hidden) { document.title = '● Contact card request'; }
+  live(x.peerName + ' wants to share a contact card');
+}
+function nextQueued() {
+  if (N.view || N.draft) return;
+  while (N.queue.length) { const x = N.xfers.get(N.queue.shift()); if (x && x.state === 'invited') { showIncoming(x); return; } }
+}
+function acceptIn(x) {
+  const peer = N.peers.get(x.peerId); if (x.state !== 'invited') return;
+  if (!peer) return setState(x, 'lost', 'The sender is no longer nearby.');
+  clearInterval(x.tick); setState(x, 'accepted'); timer(x, CARD_MS, 'failed', 'The card never arrived.');
+  sendSecure(peer, { k:'accept', x:x.id }).catch(() => setState(x, 'failed', 'Could not reach the sender.'));
+}
+function declineIn(x) { if (x.state !== 'invited') return; quiet(x, { k:'decline', x:x.id, why:'declined' }); setState(x, 'declined'); closeSheet(true); }
+function saveIn(x) {
+  if (x.state !== 'received' || !x.card) return;
+  if (!prem() && state.contacts.length >= FREE_CONTACT_LIMIT) { x.note = 'Free plans hold ' + FREE_CONTACT_LIMIT + ' contacts. Go Premium for more, or save to your phone with the .vcf button.'; renderSheet(); return openUpsell(); }
+  const c = x.card, links = ['website', 'linkedin', 'youtube', 'instagram', 'tiktok', 'whatsapp'].filter(k => c[k]).map(k => FIELD_DEFS[k] + ': ' + c[k]);
+  state.contacts.unshift({ id:uid(), created:Date.now(), source:'Nearby share', name:c.name, email:c.email || '', phone:c.phone || '', company:c.company || '', role:c.headline || '', metAt:'', followUp:'', stage:'New', notes:links.join('\n') });
+  save(); setState(x, 'saved'); renderContacts(); renderInsights(); renderActivity();
+}
+const vEsc = s => String(s).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
+const vFold = l => { const o = []; while (l.length > 74) { o.push(l.slice(0, 74)); l = ' ' + l.slice(74); } o.push(l); return o.join('\r\n'); };
+function vcardOf(c) {
+  const parts = c.name.split(' '), last = parts.length > 1 ? parts.pop() : '';
+  const L = ['BEGIN:VCARD', 'VERSION:3.0', 'FN:' + vEsc(c.name), 'N:' + vEsc(last) + ';' + vEsc(parts.join(' ')) + ';;;'];
+  if (c.headline) L.push('TITLE:' + vEsc(c.headline)); if (c.company) L.push('ORG:' + vEsc(c.company));
+  if (c.phone) L.push('TEL;TYPE=CELL:' + vEsc(c.phone)); if (c.email) L.push('EMAIL:' + vEsc(c.email));
+  ['website', 'instagram', 'tiktok', 'linkedin', 'youtube', 'whatsapp'].forEach(k => { if (c[k]) L.push('URL:' + vEsc(href(k, c[k]))); });
+  if (c.photo) L.push('PHOTO;ENCODING=b;TYPE=JPEG:' + c.photo.split(',')[1]);
+  L.push('END:VCARD'); return L.map(vFold).join('\r\n');
+}
+
+/* start / stop */
+async function start() {
+  if (N.on || N.starting) return;
+  N.starting = true; N.err = ''; renderRoot();
+  let T = null;
+  try {
+    T = pickTransport();
+    if (!T) throw new Error('This browser cannot find nearby devices. Use the QR code to share instead.');
+    if (!(window.crypto && crypto.subtle)) throw new Error('Encrypted sharing needs a secure page (https). Use the QR code to share instead.');
+    const p = await T.prepare(); if (!p.ok) throw new Error(p.reason + ' You can still share with the QR code.');
+    N.keys = await newKeys();
+    N.self = { id:rid(), name:N.name || 'Tapcard user', key:toB64(N.keys.pub) };
+    N.T = T; N.on = true;
+    await T.start(N.self, { onPeer, onGone, onMessage });
+  } catch (e) { N.on = false; N.T = null; try { if (T) T.stop(); } catch (x) {} N.err = e.message || 'Could not start the radar.'; }
+  N.starting = false; syncTab(); renderRoot(); renderRadar();
+}
+function stop() {
+  if (!N.on && !N.T) return;
+  N.xfers.forEach(x => { if (isActive(x)) { quiet(x, { k:'cancel', x:x.id }); setState(x, 'cancelled', 'Radar was stopped.'); } });
+  const keep = N.view && N.xfers.get(N.view) && ['received', 'saved'].includes(N.xfers.get(N.view).state);
+  try { N.T && N.T.stop(); } catch (e) {}
+  N.on = false; N.T = null; N.peers.clear(); N.sess.clear(); N.sel = null; N.queue = [];
+  if (!keep) { N.view = null; N.draft = null; hideSheet(); }
+  syncTab(); renderRoot(); renderRadar(); live('Radar stopped');
+}
+const syncTab = () => { const t = document.getElementById('tNearby'); if (t) t.classList.toggle('live', N.on); };
+
+/* ---------- 5. UI ---------- */
+function ensureRoot() {
+  if (N.ui) return N.ui;
+  N.name = clean(state.nearbyName, 24);
+  const root = h('div', 'nbview'), ui = { root, dots:new Map() };
+  const t = h('div'); t.appendChild(h('h3', '', 'Nearby Share')); t.appendChild(h('p', 'nbsub', 'Share your card with people close to you.')); root.appendChild(t);
+  ui.radar = h('div', 'radar'); ui.radar.setAttribute('role', 'group'); ui.radar.setAttribute('aria-label', 'Nearby radar. Positions are illustrative, not real directions or distances.');
+  ['r1', 'r2', 'r3'].forEach(c => ui.radar.appendChild(h('div', 'ring ' + c)));
+  ui.radar.appendChild(h('div', 'cross')); ui.radar.appendChild(h('div', 'sweep'));
+  ui.layer = h('div', 'dots'); ui.radar.appendChild(ui.layer); const me = h('div', 'me'); me.title = 'You'; ui.radar.appendChild(me); root.appendChild(ui.radar);
+  ui.stat = h('div', 'nbstat'); root.appendChild(ui.stat);
+  ui.selTxt = h('div', 'nbsel'); root.appendChild(ui.selTxt);
+  ui.err = h('div', 'nberr'); ui.err.setAttribute('role', 'alert'); root.appendChild(ui.err);
+  const f = h('div', 'nbfield'); const lb = h('label', '', 'Shown to others as'); lb.htmlFor = 'nbName';
+  ui.input = h('input'); ui.input.id = 'nbName'; ui.input.type = 'text'; ui.input.maxLength = 24; ui.input.placeholder = 'Tapcard user'; ui.input.autocomplete = 'off'; ui.input.value = N.name;
+  ui.input.oninput = () => { N.name = clean(ui.input.value, 24); state.nearbyName = N.name; save(); };
+  f.appendChild(lb); f.appendChild(ui.input); root.appendChild(f);
+  const a = h('div', 'nbactions'); ui.go = h('button', 'nbbtn go', 'Start Radar'); ui.go.onclick = () => N.on ? stop() : start();
+  ui.any = h('button', 'nbbtn', 'Share with anyone nearby'); ui.any.title = "For people without Tapcard: uses your phone's share sheet (AirDrop, Quick Share, Bluetooth)"; ui.any.onclick = openAnyone;
+  ui.qr = h('button', 'nbbtn quiet', 'Use QR code instead'); ui.qr.onclick = () => { state.view = 'qr'; save(); renderPhone(); };
+  a.appendChild(ui.go); a.appendChild(ui.any); a.appendChild(ui.qr); root.appendChild(a);
+  ui.note = h('div', 'nbnote'); root.appendChild(ui.note);
+  ui.live = h('div', 'sr'); ui.live.setAttribute('aria-live', 'polite'); root.appendChild(ui.live);
+  N.ui = ui; return ui;
+}
+function renderRoot() {
+  const ui = N.ui; if (!ui) return;
+  const T = N.T || pickTransport(), n = N.peers.size;
+  ui.radar.classList.toggle('on', N.on);
+  ui.stat.textContent = N.starting ? (T && T.test ? 'Starting…' : 'Checking permissions and Bluetooth…') : !N.on ? 'Radar is off' : n ? n + (n > 1 ? ' devices' : ' device') + ' found. Tap one to share.' : 'Scanning… no Tapcard users found yet';
+  const sp = N.sel && N.peers.get(N.sel);
+  ui.selTxt.textContent = sp ? sp.name + ': ' + statusText(sp) : (N.on && !n ? 'Ask them to open Tapcard, tap Nearby, then Start Radar.' : '');
+  ui.err.hidden = !N.err; ui.err.textContent = N.err;
+  ui.go.textContent = N.on ? 'Stop radar' : 'Start Radar'; ui.go.classList.toggle('go', !N.on); ui.go.classList.toggle('stop', N.on); ui.go.disabled = N.starting;
+  ui.input.disabled = N.on || N.starting;
+  ui.note.textContent = (T ? (T.test ? 'Test mode: finds other Tapcard windows in this browser. Phones need the Tapcard mobile app to find each other over Bluetooth. ' : 'Using ' + T.label + '. ') : 'Nearby discovery is not available here. ')
+    + 'Dots are placed around the radar only to tell devices apart. They do not show direction or exact distance.';
+}
+function statusText(p) {
+  const x = [...N.xfers.values()].reverse().find(q => q.peerId === p.id && q.dir === 'out' && (isActive(q) || q.state === 'delivered'));
+  if (x) return ({ inviting:'Waiting for them to accept', sending:'Sending card', delivered:'Card delivered' })[x.state] || 'Connection available';
+  return p.proximity ? ({ immediate:'Very close', near:'Nearby', far:'Farther away' })[p.proximity] + ' · Connection available' : 'Signal detected · Connection available';
+}
+const hashN = s => { let v = 2166136261; for (let i = 0; i < s.length; i++) { v ^= s.charCodeAt(i); v = Math.imul(v, 16777619); } return v >>> 0; };
+const angDiff = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; };
+function renderRadar() {
+  const ui = N.ui; if (!ui) return;
+  const list = [...N.peers.values()].sort((a, b) => a.id < b.id ? -1 : 1), placed = [];
+  list.forEach(p => {
+    let a = hashN(p.id) % 360, tries = 0;
+    while (placed.some(q => angDiff(q, a) < 42) && tries++ < 9) a = (a + 47) % 360;
+    placed.push(a);
+    const r = p.proximity === 'immediate' ? .24 : p.proximity === 'near' ? .55 : p.proximity === 'far' ? .84 : .62;   // no proximity evidence: every device shares one ring
+    let d = ui.dots.get(p.id);
+    if (!d) {
+      const el = h('button', 'nbdot fresh'); el.type = 'button'; el.appendChild(h('span', '', '')); el.appendChild(h('span', 'lab', ''));
+      el.onclick = () => openDraft(p.id); ui.layer.appendChild(el); d = { el }; ui.dots.set(p.id, d);
+      setTimeout(() => el.classList.remove('fresh'), 1600);
+    }
+    const rad = a * Math.PI / 180;
+    d.el.style.left = (50 + Math.sin(rad) * r * 46) + '%'; d.el.style.top = (50 - Math.cos(rad) * r * 46) + '%';
+    d.el.firstChild.textContent = (p.name.trim()[0] || '?').toUpperCase(); d.el.lastChild.textContent = p.name;
+    d.el.classList.toggle('sel', N.sel === p.id);
+    d.el.setAttribute('aria-label', 'Share a contact card with ' + p.name + '. ' + statusText(p));
+  });
+  ui.dots.forEach((d, id) => { if (!N.peers.has(id)) { ui.dots.delete(id); d.el.classList.add('gone'); d.el.disabled = true; setTimeout(() => d.el.remove(), 450); } });
+}
+
+/* contact card element (used for the sender preview, the invitation and the received card) */
+function cardEl(c, o) {
+  o = o || {};
+  const card = h('div', 'nbcard' + (o.compact ? ' compact' : '')); card.style.background = 'linear-gradient(155deg,' + c.bg + ',' + c.accent + ')'; card.style.color = c.fg;
+  card.style.boxShadow = '0 18px 46px -14px ' + c.accent + 'cc, 0 0 0 1px rgba(255,255,255,.16) inset';
+  const av = h('div', 'nbav');
+  if (c.photo) { const im = h('img'); im.src = c.photo; im.alt = ''; av.appendChild(im); } else av.textContent = c.name.split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+  card.appendChild(av); card.appendChild(h('div', 'nbname', c.name));
+  if (c.headline) card.appendChild(h('div', 'nbrole', c.headline)); if (c.company) card.appendChild(h('div', 'nbco', c.company));
+  if (c.status) card.appendChild(h('span', 'nbpill', c.status));
+  if (!o.compact) {
+    const rows = h('div', 'nbrows');
+    ['phone', 'email', 'website', 'linkedin', 'youtube', 'instagram', 'tiktok', 'whatsapp'].forEach(k => { if (c[k]) { const r = h('div', 'nbrow'); r.appendChild(h('b', '', BADGE[k])); r.appendChild(h('span', '', c[k])); rows.appendChild(r); } });
+    if (rows.children.length) card.appendChild(rows);
+  }
+  return card;
+}
+const chip = (txt, tone) => { const c = h('span', 'nbchip ' + (tone || '')); c.appendChild(h('i')); c.appendChild(document.createTextNode(txt)); return c; };
+function codeLine(peer) {
+  const l = h('div', 'nbcode', 'Pairing code…');
+  sessionFor(peer).then(s => { l.textContent = ''; l.appendChild(document.createTextNode('Pairing code')); l.appendChild(h('b', '', s.code)); l.appendChild(document.createTextNode('Check it matches on ' + peer.name + "'s screen.")); }).catch(() => { l.textContent = ''; });
+  return l;
+}
+const head = (wrap, title, sub) => { const t = h('div'); const e = h('h3', '', title); e.id = 'nbSheetTitle'; t.appendChild(e); if (sub) t.appendChild(h('p', 'sub', sub)); wrap.appendChild(t); };
+const btn = (txt, cls, fn) => { const b = h('button', 'nbbtn ' + (cls || ''), txt); b.type = 'button'; b.onclick = fn; return b; };
+
+function renderSheet() {
+  const sh = document.getElementById('nbSheet'); if (!sh) return;
+  const x = N.view && N.xfers.get(N.view);
+  if (!x && !N.draft) return hideSheet();
+  const first = sh.hidden, ae = document.activeElement;
+  const ci = (!first && ae && sh.contains(ae) && ae.type === 'checkbox') ? [...sh.querySelectorAll('input[type=checkbox]')].indexOf(ae) : -1;
+  const wrap = h('div', 'nbs' + (first ? '' : ' still')); sh.replaceChildren(wrap);
+  (x ? (x.dir === 'out' ? viewOut : viewIn) : viewDraft)(wrap, x || N.draft);
+  sh.hidden = false;
+  if (first) requestAnimationFrame(() => requestAnimationFrame(() => sh.classList.add('in'))); else sh.classList.add('in');
+  const f = wrap.querySelector('[data-focus]'); if (f && first) f.focus({ preventScroll:true });
+  if (ci >= 0) { const c = sh.querySelectorAll('input[type=checkbox]')[ci]; if (c) c.focus({ preventScroll:true }); }
+}
+function hideSheet() { const sh = document.getElementById('nbSheet'); if (!sh || sh.hidden) return; sh.classList.remove('in'); setTimeout(() => { if (!N.view && !N.draft) { sh.hidden = true; sh.replaceChildren(); } }, 400); document.title = document.title.replace(/^● Contact card request$/, 'Tapcard prototype v6'); }
+function closeSheet(skipDecline) {
+  const x = N.view && N.xfers.get(N.view);
+  if (x) { if (x.dir === 'out' && isActive(x)) cancelOut(x); else if (x.dir === 'in' && !skipDecline) { if (x.state === 'invited') { quiet(x, { k:'decline', x:x.id, why:'declined' }); setState(x, 'declined'); } else if (x.state === 'accepted') { quiet(x, { k:'cancel', x:x.id }); setState(x, 'cancelled'); } } clearInterval(x.tick); }
+  N.view = null; N.draft = null; hideSheet(); renderRoot(); setTimeout(nextQueued, 450);
+}
+
+function viewDraft(wrap, d) {
+  const peer = d.anyone ? null : N.peers.get(d.peerId);
+  if (d.anyone) head(wrap, 'Share with anyone nearby', "They don't need Tapcard. Your phone's own sharing (AirDrop, Quick Share or Bluetooth) delivers the card.");
+  else {
+    head(wrap, 'Share contact card', 'To ' + (peer ? peer.name : 'this device'));
+    wrap.appendChild(peer ? chip('Connection available', 'ok') : chip('No longer nearby', 'bad'));
+    if (peer) wrap.appendChild(codeLine(peer));
+  }
+  if (state.ids.length > 1) {
+    const cs = h('div', 'nbchips');
+    state.ids.forEach((id, i) => { const locked = !prem() && i > 0; const b = h('button', 'nbidc' + (i === d.idx ? ' on' : ''), CATS[id.cat].label + (locked ? ' (Pro)' : '')); b.type = 'button'; b.onclick = () => { if (locked) return openUpsell(); d.idx = i; d.off = defaultOff(state.ids[i], d.anyone); renderSheet(); }; cs.appendChild(b); });
+    wrap.appendChild(cs);
+  }
+  const id = state.ids[d.idx], r = buildCard(id, d.off);
+  if (!r) {
+    wrap.appendChild(h('div', 'nbmsg', 'Your card needs a name before you can share it. Create it first, then come back.'));
+    const b = btn('Create my card', 'go', () => { closeSheet(); state.nav = 'card'; save(); renderNav(); renderViews(); const f = document.getElementById('f_name'); if (f) f.focus(); }); b.dataset.focus = 1; wrap.appendChild(b);
+    wrap.appendChild(btn('Cancel', 'quiet', () => closeSheet())); return;
+  }
+  wrap.appendChild(cardEl(r.card));
+  wrap.appendChild(h('div', 'exp', 'Choose what to include. This is exactly what will be sent.'));
+  const list = h('div', 'nbrows'); list.style.gap = '6px';
+  const fixed = h('div', 'nbck fixed'); fixed.appendChild(h('span', 'v', 'Name')); fixed.appendChild(h('em', '', 'Always shared')); list.appendChild(fixed);
+  const items = shareable(id).map(([k, v]) => [k, FIELD_DEFS[k], v, id.vis[k] === 'connect' ? (d.anyone ? 'Private by default' : 'After connect') : 'Public']);
+  if (prem() && id.photo) items.push(['photo', 'Profile photo', 'Your photo', '']);
+  items.forEach(([k, lab, val, tag]) => {
+    const row = h('label', 'nbck'), cb = h('input'); cb.type = 'checkbox'; cb.checked = !d.off.has(k);
+    cb.onchange = () => { cb.checked ? d.off.delete(k) : d.off.add(k); renderSheet(); };
+    const tx = h('span'); tx.appendChild(h('span', 'l', lab + (tag ? ' · ' + tag : ''))); tx.appendChild(h('span', 'v', val));
+    row.appendChild(cb); row.appendChild(tx); list.appendChild(row);
+  });
+  wrap.appendChild(list);
+  const hidden = CATS[id.cat].fields.filter(k => k !== 'name' && k !== 'review' && id.vis[k] === 'hidden' && (id.values[k] || '').trim()).length;
+  if (hidden) wrap.appendChild(h('div', 'exp', hidden + ' hidden detail' + (hidden > 1 ? 's' : '') + ' will never be sent.'));
+  if (r.dropped.length) wrap.appendChild(h('div', 'nbmsg bad', 'Not sent because the format looks invalid: ' + r.dropped.map(k => FIELD_DEFS[k]).join(', ') + '.'));
+  if (d.anyone) wrap.appendChild(h('div', 'exp', 'Details marked "After connect" are left unticked, because someone without Tapcard cannot connect back. Tick them only if you want them to have them. This sends a standard contact file with exactly what is ticked. They see their phone\'s own accept prompt and choose whether to add you.'));
+  else wrap.appendChild(h('div', 'exp', (peer ? peer.name : 'They') + ' first sees only your name' + (d.off.has('headline') && d.off.has('company') ? '' : ', title and company') + '. Everything checked above is sent only if they accept, and it is encrypted between your two devices.'));
+  if (d.result) wrap.appendChild(h('div', 'nbmsg' + (d.result.tone ? ' ' + d.result.tone : ''), d.result.text));
+  wrap.appendChild(h('div', 'grow'));
+  const bs = h('div', 'btns');
+  if (d.anyone) {
+    const go = btn(d.result ? 'Share again' : 'Choose how to share…', 'go', () => shareOut(d)); go.dataset.focus = 1; bs.appendChild(go);
+    bs.appendChild(btn('Show QR code instead', '', () => { closeSheet(); state.view = 'qr'; save(); renderPhone(); }));
+    bs.appendChild(btn(d.result ? 'Done' : 'Cancel', 'quiet', () => closeSheet()));
+  } else {
+    const send = btn('Send Contact Card', 'go', sendInvite); send.disabled = !peer; send.dataset.focus = 1;
+    bs.appendChild(send); bs.appendChild(btn('Cancel', '', () => closeSheet()));
+  }
+  wrap.appendChild(bs);
+}
+function stepsEl(x) {
+  const names = ['Invite sent', 'Accepted', 'Sending', 'Delivered'], box = h('div', 'nbsteps'), bad = ['declined', 'timeout', 'failed', 'cancelled', 'lost'].includes(x.state), n = x.reached || 1;
+  names.forEach((t, i) => { const s = h('div', 'nbstep' + (i < n ? ' done' : i === n ? (bad ? ' fail' : x.state === 'delivered' ? '' : ' act') : '')); s.appendChild(h('i')); s.appendChild(document.createTextNode(t)); box.appendChild(s); });
+  return box;
+}
+function viewOut(wrap, x) {
+  const st = x.state, peer = N.peers.get(x.peerId);
+  head(wrap, st === 'delivered' ? 'Card delivered' : 'Contact card request', 'To ' + x.peerName);
+  const label = { inviting:'Waiting for them to accept…', sending:'Sending…', delivered:'Delivered', declined:'Declined', timeout:'No response', failed:'Failed', cancelled:'Cancelled', lost:'Connection lost' }[st];
+  wrap.appendChild(chip(label, st === 'delivered' ? 'ok' : isActive(x) ? 'wait' : 'bad'));
+  wrap.appendChild(stepsEl(x));
+  wrap.appendChild(cardEl(x.card, { compact:true }));
+  wrap.appendChild(h('div', 'nbmsg' + (st === 'delivered' ? ' good' : isActive(x) ? '' : ' bad'),
+    st === 'inviting' ? x.peerName + ' sees your name, title and company. The rest is sent only if they accept.' : st === 'sending' ? 'They accepted. Sending your card, encrypted…' : st === 'delivered' ? x.peerName + ' received your card. They choose whether to save it.' : x.note));
+  wrap.appendChild(h('div', 'grow'));
+  const bs = h('div', 'btns');
+  if (isActive(x)) { const c = btn('Cancel request', '', () => { cancelOut(x); }); c.dataset.focus = 1; bs.appendChild(c); }
+  else {
+    if (st !== 'delivered' && peer) bs.appendChild(btn('Try again', 'go', () => { N.view = null; N.draft = { peerId:x.peerId, idx:prem() ? state.active : 0, off:new Set() }; renderSheet(); }));
+    if (['failed', 'lost', 'timeout'].includes(st)) bs.appendChild(btn('Share with QR code instead', '', () => { closeSheet(); state.view = 'qr'; save(); renderPhone(); }));
+    const d = btn('Done', st === 'delivered' ? 'go' : 'quiet', () => closeSheet()); d.dataset.focus = 1; bs.appendChild(d);
+  }
+  wrap.appendChild(bs);
+}
+function viewIn(wrap, x) {
+  const st = x.state, peer = N.peers.get(x.peerId);
+  if (st === 'invited') {
+    head(wrap, x.peerName + ' wants to share a contact card', 'Nothing is saved or shared unless you accept.');
+    const t = h('div', 'nbchip wait'); t.appendChild(h('i')); t.appendChild(document.createTextNode('Expires in ')); const c = h('span', '', Math.max(0, Math.round((x.deadline - Date.now()) / 1000)) + 's'); c.id = 'nbCount'; t.appendChild(c); wrap.appendChild(t);
+    if (peer) wrap.appendChild(codeLine(peer));
+    wrap.appendChild(cardEl(x.preview, { compact:true }));
+    wrap.appendChild(h('div', 'exp', 'This is all you can see for now. Their phone, email and links are sent only after you accept, and they stay in this app until you choose to save them.'));
+    wrap.appendChild(h('div', 'grow'));
+    const bs = h('div', 'btns'), a = btn('Accept', 'go', () => acceptIn(x)); a.dataset.focus = 1; bs.appendChild(a); bs.appendChild(btn('Decline', '', () => declineIn(x))); wrap.appendChild(bs);
+  } else if (st === 'accepted') {
+    head(wrap, 'Receiving card…', 'From ' + x.peerName); wrap.appendChild(chip('Waiting for the card', 'wait')); wrap.appendChild(cardEl(x.preview, { compact:true })); wrap.appendChild(h('div', 'grow'));
+    const b = btn('Cancel', '', () => closeSheet()); b.dataset.focus = 1; wrap.appendChild(b);
+  } else if (st === 'received' || st === 'saved') {
+    head(wrap, 'Card from ' + x.peerName, st === 'saved' ? 'Saved' : 'Review it, then choose whether to save it.');
+    if (st === 'saved') wrap.appendChild(h('div', 'nbmsg good', 'Saved to your Tapcard contacts. Find it under Contacts.'));
+    wrap.appendChild(cardEl(x.card));
+    if (x.note) wrap.appendChild(h('div', 'nbmsg bad', x.note));
+    wrap.appendChild(h('div', 'exp', 'Saving adds this person to your Tapcard contacts. To add them to your phone\'s address book, download the .vcf file. Your phone asks you to confirm before anything is added.'));
+    wrap.appendChild(h('div', 'grow'));
+    const bs = h('div', 'btns');
+    if (st === 'received') { const s = btn('Save to Contacts', 'go', () => saveIn(x)); s.dataset.focus = 1; bs.appendChild(s); }
+    bs.appendChild(btn('Add to phone (.vcf)', '', () => download(x.card.name.replace(/[^\w .-]/g, '') + '.vcf', new Blob([vcardOf(x.card)], { type:'text/vcard' }))));
+    bs.appendChild(btn(st === 'saved' ? 'Done' : 'Close', 'quiet', () => closeSheet())); wrap.appendChild(bs);
+  } else {
+    head(wrap, st === 'declined' ? 'Declined' : 'Request ended', 'From ' + x.peerName);
+    wrap.appendChild(h('div', 'nbmsg bad', x.note || 'This request is no longer active.')); wrap.appendChild(h('div', 'grow'));
+    const b = btn('Close', '', () => closeSheet(true)); b.dataset.focus = 1; wrap.appendChild(b);
+  }
+}
+
+/* keyboard: Escape closes the sheet, Tab stays inside it */
+document.addEventListener('keydown', e => {
+  const sh = document.getElementById('nbSheet'); if (!sh || sh.hidden || document.querySelector('dialog[open]')) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeSheet(); }
+  else if (e.key === 'Tab') { const f = [...sh.querySelectorAll('button:not(:disabled),input')]; if (!f.length) return; const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } }
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) document.title = document.title.replace(/^● Contact card request$/, 'Tapcard prototype v6'); });
+window.addEventListener('pagehide', () => { try { if (N.on) { N.xfers.forEach(x => { if (isActive(x)) quiet(x, { k:'cancel', x:x.id }); }); N.T && N.T.stop(); } } catch (e) {} });
+
+return {
+  mount(s) { const ui = ensureRoot(); s.style.background = '#04070d'; s.style.color = '#e8fbff'; s.style.fontFamily = FONT_UI; s.appendChild(ui.root); renderRoot(); renderRadar(); syncTab(); },
+  stop, isOn: () => N.on, syncTab,
+  _debug: () => ({ on:N.on, peers:[...N.peers.values()].map(p => ({ id:p.id, name:p.name, proximity:p.proximity })), xfers:[...N.xfers.values()].map(x => ({ id:x.id, dir:x.dir, state:x.state })) }),
+  _test: { sanitizeCard, vcardOf }
+};
+})();
+
+renderAll();
+</script>
+</body>
+</html>

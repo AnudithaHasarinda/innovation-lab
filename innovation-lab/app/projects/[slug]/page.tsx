@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getProject, projects } from "@/data/projects";
 import { DemoSlot } from "@/components/DemoSlot";
 import { EmptyState, StatusBadge } from "@/components/ui";
+import { assetPath } from "@/lib/assetPath";
 
 type Params = { slug: string };
 
@@ -56,7 +57,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
         {p.statusNote ? <p className="mt-5 max-w-2xl rounded-xl border border-line bg-panel px-4 py-3 text-sm leading-relaxed text-mute">{p.statusNote}</p> : null}
         <div className="mt-6 flex flex-wrap gap-3">
           {p.demo?.kind === "built-in" ? <a href="#demo" className="btn btn-primary">{p.demo.label}</a> : null}
-          {p.demo?.kind === "external" && p.demo.url ? <a href={p.demo.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">{p.demo.label} ↗</a> : null}
+          {p.demo?.kind === "external" && p.demo.url ? <a href={assetPath(p.demo.url)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">{p.demo.label} ↗</a> : null}
           {p.repo ? <a href={p.repo} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">GitHub ↗</a> : null}
         </div>
       </header>
@@ -95,7 +96,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
         {p.demo?.kind === "built-in" ? (
           <DemoSlot slug={p.slug} />
         ) : p.demo?.kind === "external" && p.demo.url ? (
-          <a href={p.demo.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">{p.demo.label} ↗</a>
+          <a href={assetPath(p.demo.url)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">{p.demo.label} ↗</a>
         ) : (
           <EmptyState title="No interactive demo yet">This project does not have a live demonstration. When it does, it will appear here.</EmptyState>
         )}
@@ -107,7 +108,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
             {p.screenshots.map((s) => (
               <figure key={s.src} className="card overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.src} alt={s.alt} className="w-full" loading="lazy" />
+                <img src={assetPath(s.src)} alt={s.alt} className="w-full" loading="lazy" />
               </figure>
             ))}
           </div>
