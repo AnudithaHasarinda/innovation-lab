@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Folio – Proposals, quotes and invoices in LKR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDEFF4;--panel:#fff;--ink:#0B1F3A;--mute:#5B6B82;--line:#DCE1EA;--acc:#2447D6;--accink:#fff;--field:#F5F7FA;--r:10px;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#08111F;--panel:#0F1C32;--ink:#E8EEF8;--mute:#8FA0BA;--line:#22324D;--acc:#7F98FF;--accink:#08111F;--field:#0B1730;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#08111F;--panel:#0F1C32;--ink:#E8EEF8;--mute:#8FA0BA;--line:#22324D;--acc:#7F98FF;--accink:#08111F;--field:#0B1730;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px clamp(14px,3vw,28px);background:var(--panel);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--panel);z-index:10}
+.logo{font:600 24px/1 Newsreader,Georgia,serif;letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px}
+.logo small{font:500 13px "Schibsted Grotesk",sans-serif;color:var(--mute)}
+.seg{display:inline-flex;background:var(--field);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;padding:7px 16px;border-radius:999px;cursor:pointer;color:var(--mute);font-weight:500}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--panel)}
+.acts{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:500}
+.btn.pri{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.btn:hover{filter:brightness(.96)}
+.app{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:clamp(14px,2.5vw,32px);padding:clamp(14px,2.5vw,28px);align-items:start}
+.editor{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.card h3{margin:0 0 12px;font:600 17px Newsreader,Georgia,serif}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12.5px;color:var(--mute);font-weight:500}
+label input,label textarea,label select{display:block;width:100%;margin-top:4px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--field);font-size:14.5px}
+label textarea{resize:vertical;min-height:64px}
+.full{grid-column:1/-1}
+.row{display:grid;grid-template-columns:1fr 64px 112px 30px;gap:8px;align-items:end;padding:10px 0;border-top:1px dashed var(--line)}
+.row:first-of-type{border-top:0}
+.row .lt{grid-column:1/-1;font-size:12.5px;color:var(--mute);text-align:right;font-variant-numeric:tabular-nums}
+.x{border:0;background:none;color:var(--mute);cursor:pointer;font-size:20px;line-height:1;padding:6px;border-radius:6px}
+.x:hover{color:#C0392B}
+.add{margin-top:8px;border:1px dashed var(--line);background:none;border-radius:8px;padding:9px;width:100%;cursor:pointer;color:var(--acc);font-weight:500}
+.sw{display:flex;gap:8px;margin-top:6px}
+.sw button{width:26px;height:26px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.sw button[aria-pressed=true]{box-shadow:0 0 0 2px var(--ink)}
+.only-prop,.only-inv{display:none}
+body[data-type=proposal] .only-prop{display:block}
+body[data-type=invoice] .only-inv{display:block}
+.stage{min-width:0}
+.tip{font-size:12.5px;color:var(--mute);margin:0 0 10px;text-align:center}
+/* paper */
+.paper{--pa:#2447D6;background:#fff;color:#0B1F3A;width:min(210mm,100%);margin:0 auto;padding:clamp(18px,5vw,15mm);border-radius:6px;box-shadow:0 1px 2px rgba(11,31,58,.08),0 18px 50px -20px rgba(11,31,58,.35);font-size:13px;line-height:1.5;min-height:297mm}
+.paper *{min-width:0}
+.ph{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+.ph h2{margin:0;font:500 clamp(34px,7vw,48px)/1 Newsreader,Georgia,serif;letter-spacing:-.02em}
+.ph .n{margin:6px 0 0;color:#5B6B82;font-variant-numeric:tabular-nums}
+.brand{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.brand img{max-height:52px;max-width:150px;object-fit:contain}
+.brand b{font:600 17px Newsreader,Georgia,serif}
+.band{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:22px 0;padding:16px 20px;background:var(--pa);color:#fff;border-radius:8px}
+.band span{display:block;font-size:12px;opacity:.8}
+.band strong{font:500 clamp(22px,4.5vw,30px)/1.15 Newsreader,Georgia,serif;font-variant-numeric:tabular-nums}
+.band .r{text-align:right}
+.pt{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:20px}
+.pt h4,.sec h4{margin:0 0 4px;font-size:12px;color:#5B6B82;font-weight:500}
+.pt p,.sec p{margin:0;white-space:pre-line}
+.pt b{font-weight:600}
+.sec{margin-bottom:16px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:12px;font-weight:500;color:#5B6B82;text-align:right;padding:8px 6px;border-bottom:1.5px solid #0B1F3A}
+td{padding:10px 6px;border-bottom:1px solid #E3E7EE;text-align:right;vertical-align:top}
+th:first-child,td:first-child{text-align:left;padding-left:0;width:50%;white-space:pre-line}
+th:last-child,td:last-child{padding-right:0}
+.tot{margin:14px 0 0 auto;width:min(300px,100%);font-variant-numeric:tabular-nums}
+.tot div{display:flex;justify-content:space-between;gap:12px;padding:5px 0}
+.tot .gt{border-top:1.5px solid #0B1F3A;margin-top:4px;padding-top:9px;font:600 17px Newsreader,Georgia,serif}
+.tot .bd{color:var(--pa);font-weight:600}
+.words{margin:12px 0 22px;color:#5B6B82;font-style:italic;font-family:Newsreader,Georgia,serif;font-size:14px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:34px}
+.sign div{border-top:1px solid #0B1F3A;padding-top:5px;color:#5B6B82;font-size:12px}
+.foot{margin-top:26px;padding-top:10px;border-top:1px solid #E3E7EE;color:#8A97AB;font-size:11.5px;display:flex;justify-content:space-between}
+.logoph{border:1.5px dashed #AEB8C8;background:#F7F9FC;color:#5B6B82;border-radius:8px;padding:12px 18px;cursor:pointer;font:500 12.5px "Schibsted Grotesk",sans-serif}.logoph:hover{border-color:var(--pa);color:var(--pa)}
+.lbox{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--field)}.lbox img{max-height:44px;max-width:120px;object-fit:contain;background:#fff;border-radius:4px;padding:2px}.lbox .btn{padding:6px 12px;font-size:13px}.lbox span{flex:1;min-width:140px;font-size:12.5px;color:var(--mute)}
+.mtabs{display:none}
+@media (max-width:900px){
+ .app{grid-template-columns:1fr;padding-bottom:84px}
+ body[data-view=edit] .stage{display:none}
+ body[data-view=view] .editor{display:none}
+ .mtabs{display:flex;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+ .mtabs.seg{background:var(--panel)}
+ .pt{grid-template-columns:1fr 1fr}
+ .row{grid-template-columns:1fr 60px 96px 28px}
+ .paper{min-height:0}
+}
+@media print{
+ @page{size:A4;margin:0}
+ body{background:#fff}
+ body::before,.bar,.editor,.mtabs,.tip,.logoph{display:none!important}
+ .app{display:block;padding:0}
+ .stage{display:block!important}
+ .paper{width:210mm;box-shadow:none;border-radius:0;padding:15mm;min-height:297mm;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body data-type="invoice" data-view="edit">
+<header class="bar">
+ <div class="logo">Folio <small>Proposals, quotes and invoices in LKR</small></div>
+ <div class="seg" id="types" role="group" aria-label="Document type">
+  <button data-t="quote">Quote</button><button data-t="proposal">Proposal</button><button data-t="invoice">Invoice</button>
+ </div>
+ <div class="acts"><button class="btn" id="new">New document</button><button class="btn pri" id="print">Print or save PDF</button></div>
+</header>
+<main class="app">
+ <section class="editor" id="ed" aria-label="Document details"></section>
+ <section class="stage"><p class="tip">Live preview. In the print dialog, choose “Save as PDF” to get a file.</p><article class="paper" id="paper"></article></section>
+</main>
+<div class="seg mtabs" id="mt" role="group" aria-label="View"><button data-v="edit">Edit</button><button data-v="view">Preview</button></div>
+<script>
+const KEY='folio:v1',$=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>d.toISOString().slice(0,10),addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
+const PRE={invoice:'INV',quote:'QUO',proposal:'PRP'},TITLE={invoice:'Invoice',quote:'Quote',proposal:'Proposal'};
+const COLORS=['#2447D6','#0F6B5C','#A3243B','#2B3340','#8A6A1F'];
+const base=()=>({type:'invoice',accent:COLORS[0],logo:'',num:'INV-2026-001',issued:iso(new Date()),due:addDays(14),ref:'',
+ from:{name:'Sampath Design Studio',email:'hello@sampath.lk',phone:'+94 77 123 4567',addr:'42 Galle Road\nColombo 03',reg:'VAT reg. 1234-5678'},
+ client:{name:'Lanka Tea Exports (Pvt) Ltd',contact:'Attn: Nimali Perera',email:'accounts@lankatea.lk',addr:'18 Temple Road\nKandy'},
+ summary:'A refreshed brand identity and a five-page website for your export range, built so buyers abroad can find and trust you quickly.',
+ timeline:'Week 1: discovery and moodboards\nWeeks 2–3: identity design and revisions\nWeeks 4–5: website build and launch',
+ items:[{d:'Brand identity (logo, colours, typography)',q:1,p:185000},{d:'Website design and build, 5 pages',q:1,p:320000},{d:'Product photography, per shoot day',q:2,p:45000}],
+ discT:'pct',disc:5,taxes:[{n:'VAT',r:18}],paid:0,
+ notes:'Thank you for your business. Work begins once the first payment is received.',
+ terms:'Payment due within 14 days. Late payments may incur a 2% monthly charge.',
+ bank:'Bank: Commercial Bank, Colombo 03\nAccount name: Sampath Design Studio\nAccount no.: 8001234567',sign:''});
+let S=base(),numEdited=false;
+try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.items)S=Object.assign(base(),r)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const get=p=>p.split('.').reduce((o,k)=>o?.[k],S);
+const set=(p,v)=>{const a=p.split('.'),l=a.pop();a.reduce((o,k)=>o[k],S)[l]=v};
+const num=n=>(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const lkr=n=>'LKR '+num(n);
+const fd=s=>s?new Date(s+'T00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'–';
+function words(n){const o=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'],t=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'],u=['',' Thousand',' Million',' Billion'];
+ const h=x=>x<20?o[x]:x<100?t[x/10|0]+(x%10?'-'+o[x%10]:''):o[x/100|0]+' Hundred'+(x%100?' and '+h(x%100):'');
+ if(!n)return 'Zero';let r='',i=0;while(n>0){const c=n%1000;if(c)r=h(c)+u[i]+(r?' '+r:'');n=Math.floor(n/1000);i++}return r}
+function calc(){const sub=S.items.reduce((a,i)=>a+(+i.q||0)*(+i.p||0),0);
+ const disc=Math.min(sub,S.discT==='pct'?sub*(+S.disc||0)/100:+S.disc||0),base=sub-disc;
+ const taxes=S.taxes.map(t=>({n:t.n||'Tax',r:+t.r||0,a:base*(+t.r||0)/100}));
+ const total=base+taxes.reduce((a,t)=>a+t.a,0),paid=+S.paid||0;return{sub,disc,taxes,total,paid,bal:total-paid}}
+const F=(l,p,o={})=>`<label class="${o.c||''}">${l}${o.ta?`<textarea data-p="${p}" rows="${o.ta}">${esc(get(p))}</textarea>`:`<input data-p="${p}" type="${o.t||'text'}" value="${esc(get(p))}"${o.t==='number'?' min="0" step="any"':''}>`}</label>`;
+function itemsHTML(){return S.items.map((it,i)=>`<div class="row">${F('Description',`items.${i}.d`)}${F('Qty',`items.${i}.q`,{t:'number'})}${F('Unit price (LKR)',`items.${i}.p`,{t:'number'})}<button class="x" data-rm="${i}" aria-label="Remove item ${i+1}">×</button><div class="lt" data-lt="${i}">${num(it.q*it.p)}</div></div>`).join('')}
+function taxesHTML(){return S.taxes.map((t,i)=>`<div class="row" style="grid-template-columns:1fr 90px 30px">${F('Tax name',`taxes.${i}.n`)}${F('Rate %',`taxes.${i}.r`,{t:'number'})}<button class="x" data-rt="${i}" aria-label="Remove tax">×</button></div>`).join('')}
+function build(){$('#ed').innerHTML=`
+<div class="card"><h3>Your business</h3><div class="g2">${F('Business name','from.name',{c:'full'})}${F('Email','from.email')}${F('Phone','from.phone')}${F('Address','from.addr',{ta:2,c:'full'})}${F('Tax or registration no.','from.reg',{c:'full'})}
+<div class="full"><label style="margin:0">Brand logo</label><div class="lbox" id="lb"></div><input type="file" id="logo" accept="image/*" hidden></div>
+<div class="full"><label style="margin:0">Accent colour</label><div class="sw" id="sw">${COLORS.map(c=>`<button style="background:${c}" data-c="${c}" aria-label="Accent ${c}" aria-pressed="${S.accent===c}"></button>`).join('')}</div></div></div></div>
+<div class="card"><h3>Client</h3><div class="g2">${F('Client or company','client.name',{c:'full'})}${F('Contact person','client.contact')}${F('Email','client.email')}${F('Address','client.addr',{ta:2,c:'full'})}</div></div>
+<div class="card"><h3>Details</h3><div class="g2">${F('Document number','num')}${F('Your reference','ref')}${F('Issue date','issued',{t:'date'})}<label><span id="duel"></span><input data-p="due" type="date" value="${esc(S.due)}"></label></div></div>
+<div class="card only-prop"><h3>Proposal</h3><div class="g2">${F('Scope and approach','summary',{ta:4,c:'full'})}${F('Timeline','timeline',{ta:4,c:'full'})}</div></div>
+<div class="card"><h3>Services</h3><div id="items">${itemsHTML()}</div><button class="add" id="addi">Add service</button></div>
+<div class="card"><h3>Discount and tax</h3><div class="g2"><label>Discount type<select id="dt"><option value="pct">Percentage (%)</option><option value="amt">Fixed amount (LKR)</option></select></label>${F('Discount','disc',{t:'number'})}</div>
+<div id="taxes" style="margin-top:6px">${taxesHTML()}</div><button class="add" id="addt">Add tax</button>
+<div class="only-inv" style="margin-top:10px">${F('Amount already paid (LKR)','paid',{t:'number'})}</div></div>
+<div class="card"><h3>Notes and payment</h3><div class="g2">${F('Notes','notes',{ta:2,c:'full'})}${F('Terms','terms',{ta:2,c:'full'})}${F('Bank details','bank',{ta:3,c:'full'})}</div></div>`;
+ $('#dt').value=S.discT;lbox();head()}
+function lbox(){const b=$('#lb');if(b)b.innerHTML=S.logo?`<img src="${S.logo}" alt="Your logo"><span>Logo added</span><button class="btn" data-lg="pick">Replace</button><button class="btn" data-lg="rm">Remove</button>`:`<span>PNG, JPG or SVG. It appears at the top right of the document.</span><button class="btn pri" data-lg="pick">Upload logo</button>`}
+function head(){document.body.dataset.type=S.type;document.querySelectorAll('#types button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===S.type));
+ const d=$('#duel');if(d)d.textContent=S.type==='invoice'?'Due date':'Valid until'}
+function paper(){const t=S.type,c=calc(),inv=t==='invoice',P=$('#paper');P.style.setProperty('--pa',S.accent);
+ const big=inv?c.bal:c.total,w=Math.floor(big+1e-9),cents=Math.round((big-w)*100);
+ const bl=x=>esc(x).replace(/\n/g,'<br>');
+ P.innerHTML=`<div class="ph"><div><h2>${TITLE[t]}</h2><p class="n">${esc(S.num)}${S.ref?' · Ref '+esc(S.ref):''}</p></div><div class="brand">${S.logo?`<img src="${S.logo}" alt="">`:`<button class="logoph" id="lp" type="button">+ Add your logo</button>`}<b>${esc(S.from.name)}</b></div></div>
+<div class="band"><div><span>${inv?'Balance due':'Total'}</span><strong>${lkr(big)}</strong></div><div class="r"><span>${inv?'Due':'Valid until'}</span><strong>${fd(S.due)}</strong></div></div>
+<div class="pt"><div><h4>From</h4><p><b>${esc(S.from.name)}</b>\n${bl(S.from.addr)}\n${esc(S.from.email)}\n${esc(S.from.phone)}\n${esc(S.from.reg)}</p></div>
+<div><h4>${inv?'Billed to':'Prepared for'}</h4><p><b>${esc(S.client.name)}</b>\n${esc(S.client.contact)}\n${bl(S.client.addr)}\n${esc(S.client.email)}</p></div>
+<div><h4>Issued</h4><p>${fd(S.issued)}</p></div></div>
+${t==='proposal'?`<div class="sec"><h4>Scope and approach</h4><p>${esc(S.summary)}</p></div><div class="sec"><h4>Timeline</h4><p>${esc(S.timeline)}</p></div>`:''}
+<div class="tw"><table><thead><tr><th>Service</th><th>Qty</th><th>Unit price (LKR)</th><th>Amount (LKR)</th></tr></thead><tbody>${S.items.map(i=>`<tr><td>${esc(i.d)}</td><td>${+i.q||0}</td><td>${num(i.p)}</td><td>${num((+i.q||0)*(+i.p||0))}</td></tr>`).join('')}</tbody></table></div>
+<div class="tot"><div><span>Subtotal</span><span>${lkr(c.sub)}</span></div>${c.disc?`<div><span>Discount${S.discT==='pct'?' ('+(+S.disc)+'%)':''}</span><span>− ${lkr(c.disc)}</span></div>`:''}${c.taxes.map(x=>`<div><span>${esc(x.n)} (${x.r}%)</span><span>${lkr(x.a)}</span></div>`).join('')}<div class="gt"><span>Total</span><span>${lkr(c.total)}</span></div>${inv&&c.paid?`<div><span>Paid</span><span>− ${lkr(c.paid)}</span></div>`:''}${inv?`<div class="bd"><span>Balance due</span><span>${lkr(c.bal)}</span></div>`:''}</div>
+<p class="words">Rupees ${words(w)}${cents?' and '+words(cents)+' cents':''} only.</p>
+<div class="cols">${S.notes?`<div class="sec"><h4>Notes</h4><p>${esc(S.notes)}</p></div>`:''}${S.terms?`<div class="sec"><h4>Terms</h4><p>${esc(S.terms)}</p></div>`:''}${S.bank?`<div class="sec"><h4>${inv?'Pay by bank transfer':'Payment details'}</h4><p>${esc(S.bank)}</p></div>`:''}</div>
+${inv?'':`<div class="sign"><div>Accepted by (name and signature)</div><div>Date</div></div>`}
+<div class="foot"><span>${esc(S.from.name)}</span><span>${esc(S.num)}</span></div>`;
+ document.querySelectorAll('[data-lt]').forEach(e=>{const i=S.items[e.dataset.lt];if(i)e.textContent=num((+i.q||0)*(+i.p||0))})}
+$('#ed').addEventListener('input',e=>{const p=e.target.dataset.p;if(!p)return;
+ let v=e.target.value;if(e.target.type==='number')v=parseFloat(v)||0;set(p,v);if(p==='num')numEdited=true;paper();save()});
+$('#ed').addEventListener('change',e=>{if(e.target.id==='dt'){S.discT=e.target.value;paper();save()}
+ if(e.target.id==='logo'){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{S.logo=r.result;lbox();paper();save()};r.readAsDataURL(f)}});
+$('#ed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.rm!==undefined){S.items.splice(+b.dataset.rm,1);$('#items').innerHTML=itemsHTML()}
+ else if(b.id==='addi'){S.items.push({d:'',q:1,p:0});$('#items').innerHTML=itemsHTML()}
+ else if(b.dataset.rt!==undefined){S.taxes.splice(+b.dataset.rt,1);$('#taxes').innerHTML=taxesHTML()}
+ else if(b.id==='addt'){S.taxes.push({n:'',r:0});$('#taxes').innerHTML=taxesHTML()}
+ else if(b.dataset.c){S.accent=b.dataset.c;document.querySelectorAll('#sw button').forEach(x=>x.setAttribute('aria-pressed',x===b))}
+ else if(b.dataset.lg==='pick'){$('#logo').click();return}
+ else if(b.dataset.lg==='rm'){S.logo='';lbox()}
+ else return;paper();save()});
+$('#paper').addEventListener('click',e=>{if(e.target.closest('#lp'))$('#logo').click()});
+$('#types').addEventListener('click',e=>{const t=e.target.dataset.t;if(!t)return;S.type=t;
+ if(!numEdited)S.num=S.num.replace(/^(INV|QUO|PRP)-/,PRE[t]+'-');
+ build();paper();save()});
+$('#mt').addEventListener('click',e=>{const v=e.target.dataset.v;if(!v)return;document.body.dataset.view=v;
+ document.querySelectorAll('#mt button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));scrollTo(0,0)});
+$('#new').onclick=()=>{const f=S.from,l=S.logo,a=S.accent,ty=S.type;S=base();S.from=f;S.logo=l;S.accent=a;S.type=ty;S.num=PRE[ty]+'-2026-001';
+ S.client={name:'',contact:'',email:'',addr:''};S.items=[{d:'',q:1,p:0}];S.disc=0;S.summary='';S.timeline='';S.ref='';numEdited=false;build();paper();save()};
+$('#print').onclick=()=>{document.body.dataset.view='view';setTimeout(()=>window.print(),50)};
+document.querySelectorAll('#mt button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==='edit'));
+build();paper();
+</script>
+</body>
+</html>

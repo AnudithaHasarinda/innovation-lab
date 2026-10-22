@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Production Budget & Shot Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#15171c;--mut:#6b6f7a;--line:#e7e3d9;--acc:#a97b2c;--acc2:#1d2433;--soft:#faf8f3;--ok:#2f8f5b;--bad:#c4473a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1015;--card:#161922;--ink:#ece9e2;--mut:#8c909c;--line:#272b37;--acc:#d6a954;--acc2:#e9e4d8;--soft:#1b1f2a;--ok:#4cc58a;--bad:#ef7a6c;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0e1015;--card:#161922;--ink:#ece9e2;--mut:#8c909c;--line:#272b37;--acc:#d6a954;--acc2:#e9e4d8;--soft:#1b1f2a;--ok:#4cc58a;--bad:#ef7a6c;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:center;justify-content:space-between;padding:12px 24px;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--acc),#6d4b12);display:grid;place-items:center;color:#fff;font-size:18px}
+.brand b{font:600 17px Fraunces,Georgia,serif;display:block;line-height:1.1}.brand small{color:var(--mut);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+nav{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);padding:4px;border-radius:12px;overflow-x:auto;max-width:100%}
+nav button{border:0;background:none;color:var(--mut);padding:8px 14px;border-radius:9px;font:500 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--acc2);color:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 24px 60px}
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.k span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.k b{display:block;font:600 24px Fraunces,Georgia,serif;margin-top:2px}.k.hero{background:var(--acc2);color:var(--bg);border:0}.k.hero span{color:inherit;opacity:.7}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+h2{font:600 26px Fraunces,Georgia,serif;margin:4px 0 2px}h3{font:600 17px Fraunces,Georgia,serif;margin:0}
+.sub{color:var(--mut);margin:0 0 16px}
+.pill{background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:3px 11px;font-size:12px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+label{display:block;font-size:11.5px;color:var(--mut);font-weight:500;letter-spacing:.03em}
+input,select,textarea{width:100%;background:var(--soft);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;margin-top:4px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+textarea{resize:vertical;min-height:70px}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);text-align:left;padding:6px 4px;font-weight:600}
+td{padding:3px 4px;border-top:1px solid var(--line)}td input,td select{margin:0;padding:7px 8px;background:transparent;border-color:transparent}
+td input:hover,td select:hover{border-color:var(--line)}
+.n{text-align:right}td.t{text-align:right;font-weight:600;white-space:nowrap;padding-right:8px}
+td input[type=number]{text-align:right}
+button.b,button.ghost{font:600 13px Inter,sans-serif;border-radius:10px;padding:9px 14px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+button.b.p{background:var(--acc);border-color:var(--acc);color:#fff}
+button.ghost{border-style:dashed;color:var(--mut);margin-top:8px}
+button.b:hover,button.ghost:hover{border-color:var(--acc)}
+.x{border:0;background:none;color:var(--mut);cursor:pointer;font-size:18px;padding:0 6px}.x:hover{color:var(--bad)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.two{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.two>*{min-width:0}
+.bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--soft);margin:10px 0 14px}
+.bar i{display:block}
+.ln{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line)}.ln span{display:flex;gap:8px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%}
+.tot{font:600 22px Fraunces,Georgia,serif}
+.badge{padding:4px 11px;border-radius:99px;font-size:12px;font-weight:600}.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}.bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.sheet{display:grid;grid-template-columns:100px 1fr 1fr;gap:6px 12px;align-items:center}
+.sheet div.tm{font-weight:600;font-variant-numeric:tabular-nums}.meal{color:var(--acc);font-weight:600}
+.ph{display:none}
+.chk{width:18px;height:18px;accent-color:var(--acc)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--acc2);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:40}.toast.on{opacity:1}
+@media screen{
+:root{--sh:0 1px 2px rgba(30,22,5,.05),0 22px 44px -28px rgba(45,32,5,.35);--hair:color-mix(in srgb,var(--acc) 32%,var(--line))}
+*{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+::selection{background:color-mix(in srgb,var(--acc) 35%,transparent)}
+body{background:radial-gradient(900px 420px at 88% -8%,color-mix(in srgb,var(--acc) 16%,transparent),transparent 70%),radial-gradient(700px 360px at -5% 4%,color-mix(in srgb,var(--acc2) 7%,transparent),transparent 70%),var(--bg);background-attachment:fixed;letter-spacing:.005em;-webkit-font-smoothing:antialiased}
+header{background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:saturate(1.5) blur(18px);backdrop-filter:saturate(1.5) blur(18px);border-bottom:0;padding:14px 28px}
+header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:.45}
+.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#e0b765,#a97b2c 55%,#6d4b12);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 8px 18px -6px rgba(169,123,44,.7);font-size:19px}
+.brand b{font-size:19px;letter-spacing:-.01em}
+.brand small{color:var(--acc);font-weight:600}
+nav{border-radius:14px;padding:5px;box-shadow:var(--sh);background:color-mix(in srgb,var(--card) 85%,transparent)}
+nav button{border-radius:10px;padding:9px 16px;transition:background .25s,color .25s,box-shadow .25s}
+nav button:hover:not(.on){color:var(--ink);background:var(--soft)}
+nav button.on{background:linear-gradient(180deg,color-mix(in srgb,var(--acc2) 88%,#fff),var(--acc2));box-shadow:0 6px 16px -6px rgba(10,12,20,.55)}
+.wrap{padding-top:28px}
+h2{font-size:clamp(26px,5vw,34px);letter-spacing:-.015em}
+.sub{font-size:14.5px}
+.card{border-radius:20px;padding:22px;box-shadow:var(--sh)}
+.k{border-radius:18px;padding:18px 20px;box-shadow:var(--sh);transition:transform .25s}
+.k:hover{transform:translateY(-2px)}
+.k span{letter-spacing:.12em;font-size:10.5px;font-weight:600}
+.k b{font-size:28px;letter-spacing:-.01em;margin-top:6px;font-variant-numeric:tabular-nums}
+.k.hero{background:linear-gradient(135deg,#171c2c 0%,#262c44 58%,#5a4420 130%);color:#f7f1e3;position:relative;overflow:hidden}
+.k.hero::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(224,183,101,.45),transparent 70%)}
+.k.hero b{color:#f7f1e3}
+input,select,textarea{border-radius:11px;transition:border-color .2s,box-shadow .2s,background .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 24%,transparent);background:var(--card)}
+label{letter-spacing:.05em;text-transform:uppercase;font-size:10.5px;font-weight:600}
+th{padding:10px 6px;border-bottom:1px solid var(--line);letter-spacing:.1em;font-size:10.5px}
+td{border-top-color:color-mix(in srgb,var(--line) 70%,transparent);transition:background .15s}
+tbody tr:hover td{background:color-mix(in srgb,var(--acc) 6%,transparent)}
+button.b,button.ghost{border-radius:12px;padding:10px 16px;transition:transform .15s,box-shadow .2s,border-color .2s,background .2s}
+button.b:hover{transform:translateY(-1px);box-shadow:var(--sh)}
+button.b:active{transform:translateY(0)}
+button.b.p{background:linear-gradient(180deg,#cfa24d,#a97b2c);border-color:#a97b2c;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -8px rgba(169,123,44,.8)}
+button.ghost:hover{background:color-mix(in srgb,var(--acc) 7%,transparent);color:var(--ink)}
+.x{transition:color .2s,transform .2s}.x:hover{transform:scale(1.15)}
+.pill{background:color-mix(in srgb,var(--acc) 10%,var(--soft));border-color:var(--hair);color:var(--ink)}
+.bar{height:14px;gap:2px;padding:2px}.bar i{border-radius:99px}
+.ln{border-top-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.tot,.t{font-variant-numeric:tabular-nums}.tot{letter-spacing:-.01em}
+.sheet div.tm{color:var(--acc)}
+.grid>.card{transition:transform .25s,border-color .25s}.grid>.card:hover{transform:translateY(-3px);border-color:var(--acc)}
+.grid>button.b{transition:transform .2s,box-shadow .2s,border-color .2s}.grid>button.b:hover{transform:translateY(-3px);border-color:var(--acc)}
+.toast{box-shadow:0 18px 40px -12px rgba(0,0,0,.5)}
+}
+@media screen and (prefers-color-scheme:dark){:root:not([data-theme=light]){--sh:0 1px 2px rgba(0,0,0,.4),0 22px 44px -26px rgba(0,0,0,.8)}}
+:root[data-theme=dark]{--sh:0 1px 2px rgba(0,0,0,.4),0 22px 44px -26px rgba(0,0,0,.8)}
+@media(max-width:760px){.kpi{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.wrap{padding:14px}header{padding:10px 14px}.sheet{grid-template-columns:70px 1fr}}
+@media print{body::before,header,.kpi,.row,.ghost,.x,.noprint{display:none!important}body{background:#fff;color:#000}.card{border:1px solid #ccc;break-inside:avoid;background:#fff}.wrap{padding:0}.ph{display:block;border-bottom:2px solid #000;margin-bottom:14px;padding-bottom:8px}.ph h1{font:600 22px Fraunces,Georgia,serif;margin:0}input,select,textarea{border:0!important;background:none!important;color:#000!important;padding:2px!important;appearance:none}textarea{resize:none}.sc{overflow:visible}table{min-width:0}}
+</style></head><body>
+<header><div class="brand"><div class="logo">🎬</div><div><b>Production Budget &amp; Shot Planner</b><small>Film · TV · Podcast · Videography · Photography</small></div></div><nav id="nav"></nav></header>
+<div class="wrap"><div id="ph" class="ph"></div><section id="kpi" class="kpi"></section><main id="main"></main></div>
+<div id="toast" class="toast"></div>
+<script>
+const $=q=>document.querySelector(q),esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const FX={LKR:1,USD:.0033,EUR:.003,GBP:.0026,INR:.28,AUD:.005},KEY='pbsp-v1',LIB='pbsp-lib-v1';
+const SIZES=['ECU','CU','MCU','MS','MWS','WS','EWS','OTS','POV','Insert'],MOVES=['Static','Pan','Tilt','Dolly','Track','Handheld','Gimbal','Crane','Drone','Zoom'];
+const LENS={ECU:'100mm macro',CU:'85mm',MCU:'50mm',MS:'35mm',MWS:'35mm',WS:'24mm',EWS:'16mm',OTS:'50mm',POV:'35mm',Insert:'100mm macro'};
+const PRE={
+film:{crew:[['Director',75000],['Producer',60000],['Director of Photography',65000],['1st Assistant Director',35000],['Camera Operator',40000],['1st AC / Focus Puller',25000],['Gaffer',30000],['Key Grip',25000],['Sound Recordist',30000],['Production Designer',35000],['Make-up & Wardrobe',20000],['Production Assistant',10000,2]],
+gear:[['Cinema camera package',85000],['Prime lens set',30000],['Lighting package',45000],['Grip & support',20000],['Audio kit (boom + lavs)',18000],['Gimbal / stabiliser',15000],['Wireless video monitoring',15000]],
+other:[['Location fees',50000,1],['Cast / talent',120000,1],['Catering & craft',35000,1],['Transport & fuel',30000,1],['Insurance & permits',40000],['Edit & colour grade',200000],['Sound design & mix',100000],['Music licensing',60000]]},
+tv:{crew:[['Director',60000],['Producer',50000],['Technical Director / Vision Mixer',40000],['Camera Operator',35000,3],['Floor Manager',20000],['Sound Mixer',30000],['Lighting Director',30000],['Graphics Operator',20000],['Autocue Operator',12000],['Make-up Artist',15000,2],['Production Assistant',10000,2]],
+gear:[['Multi-camera studio package',150000],['Vision mixer & switcher',60000],['Lighting rig',60000],['Audio desk & mics',40000],['Teleprompter',12000],['Graphics system',25000],['Intercom',10000]],
+other:[['Studio / location hire',120000,1],['Presenters & guests',100000,1],['Set dressing',50000,1],['Catering',30000,1],['Edit & online finish',120000],['Broadcast delivery & licences',40000]]},
+pod:{crew:[['Host / Producer',40000],['Camera Operator',30000,2],['Audio Engineer',30000],['Multicam Director',35000]],
+gear:[['Camera body + lens',25000,3],['Lighting kit',20000],['Broadcast mics',4000,3],['Audio interface / mixer',8000],['Backdrop & set pieces',10000]],
+other:[['Studio hire',40000,1],['Catering',12000,1],['Full episode edit',60000],['Short-form clips (5)',40000],['Show art & motion graphics',50000],['Hosting & distribution setup',20000]]},
+vid:{crew:[['Lead Videographer',45000],['Second Shooter',30000],['Drone Pilot',30000],['Audio Technician',20000],['Assistant',10000]],
+gear:[['Cinema / mirrorless camera body',30000,2],['Lens kit',15000],['Gimbal / stabiliser',15000],['Drone',25000],['Lighting kit',20000],['Wireless mics',8000],['Tripod & slider',8000]],
+other:[['Travel & transport',20000,1],['Catering',10000,1],['Highlight film edit & colour',120000],['Social media cut-downs',40000],['Music licensing',25000],['Storage & delivery',10000]]},
+photo:{crew:[['Lead Photographer',40000],['Second Photographer',25000],['Photo Assistant',12000],['Stylist / Make-up',20000],['Lighting Technician',20000]],
+gear:[['Camera body',20000,2],['Lens kit',15000],['Strobe lighting kit',25000],['Modifiers & stands',8000],['Backdrops & props',10000],['Tethering setup',6000]],
+other:[['Studio / location hire',40000,1],['Models / talent',30000,1],['Travel & transport',15000,1],['Retouching',60000],['Prints & albums',50000],['Online gallery & delivery',15000],['Usage licence',30000]]}};
+const COV={film:[['Master',,'WS',25],['Two-shot',,'MS',20],['OTS A',,'OTS',20],['OTS B',,'OTS',20],['Close-up',,'CU',15],['Insert / cutaway',,'Insert',10]],pod:[['Wide establishing',,'WS',10],['Host close-up',,'CU',10],['Guest close-up',,'CU',10],['Two-shot',,'MS',10],['B-roll inserts',,'Insert',15]],
+vid:[['Establishing wide',,'WS',10],['Medium action',,'MS',10],['Close-up detail',,'CU',8],['Interview / talking head',,'MCU',15],['Aerial / drone',,'EWS',15],['B-roll inserts',,'Insert',10]],
+photo:[['Hero portrait',,'MCU',15],['Full-length',,'MWS',10],['Group / family',,'WS',15],['Detail / product',,'Insert',10],['Candid / lifestyle',,'MS',10],['Location wide',,'EWS',10]]};
+let s,tab='home';
+const def=()=>({p:{name:'Untitled Production',client:'',co:'',type:'film',days:5,hrs:10,cur:'LKR',cont:10,mk:0,tax:0,date:'',call:'07:00',loc:'',addr:'',hosp:'',contact:'',cast:'',notes:'',sd:1},crew:[],gear:[],other:[],shots:[]});
+function uid(){return Math.random().toString(36).slice(2,9)}
+function getLib(){try{return JSON.parse(localStorage.getItem(LIB))||[]}catch(e){return[]}}
+function putLib(a){try{localStorage.setItem(LIB,JSON.stringify(a))}catch(e){}}
+function newSheet(){s=def();s.id=uid();preset('film');cover(1)}
+function totOf(x){const t=k=>x[k].reduce((a,r)=>a+r.r*r.q*r.d,0),p=x.p,c=(t('crew')+t('gear')+t('other'))*(1+p.cont/100),m=c*(1+p.mk/100);return m*(1+p.tax/100)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}const L=getLib().filter(x=>x.id!==s.id);L.push({id:s.id,u:Date.now(),s:JSON.parse(JSON.stringify(s))});putLib(L)}
+function preset(t){const P=PRE[t],m=FX[s.p.cur]||1,rd=v=>{v*=m;return v>=100?Math.round(v/5)*5:Math.round(v*100)/100},d=s.p.days;s.p.type=t;
+s.crew=P.crew.map(([n,r,q])=>({n,r:rd(r),q:q||1,d}));s.gear=P.gear.map(([n,r,q])=>({n,r:rd(r),q:q||1,d}));s.other=P.other.map(([n,r,pd])=>({n,r:rd(r),q:1,d:pd?d:1}))}
+function cover(sc){const L=COV[COV[s.p.type]?s.p.type:'film'],last=s.shots.filter(x=>x.sc==sc).length;L.forEach(([dsc,,size,min],i)=>s.shots.push({sc,sh:String.fromCharCode(65+(last+i)%26),d:dsc,size,mv:'Static',lens:LENS[size],loc:'',min,day:1,done:false}))}
+try{s=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!s||!s.p){s=def();preset('film');cover(1)}
+if(!s.id)s.id=uid();save();
+const fmt=n=>s.p.cur+' '+Math.round(n).toLocaleString('en-US'),tm=m=>{m=((Math.round(m)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')},mn=t=>{const[a,b]=(t||'07:00').split(':');return +a*60+ +b};
+function calc(){const t=k=>s[k].reduce((a,r)=>a+r.r*r.q*r.d,0),p=s.p,c=t('crew'),g=t('gear'),o=t('other'),sub=c+g+o,ct=sub*p.cont/100,mk=(sub+ct)*p.mk/100,tx=(sub+ct+mk)*p.tax/100;return{c,g,o,sub,ct,mk,tx,tot:sub+ct+mk+tx}}
+function est(){const m=s.shots.reduce((a,x)=>a+(+x.min||0),0),d=m/(s.p.hrs*60*.7);return{m,d}}
+const set=(id,h)=>{const e=document.getElementById(id);if(e)e.innerHTML=h};
+function refresh(){const c=calc(),e=est(),p=s.p;
+$('#kpi').innerHTML=`<div class="k hero"><span>Estimated total${p.ovT>0?' · manual':''}</span><b>${fmt(p.ovT>0?p.ovT:c.tot)}</b></div><div class="k"><span>Per shoot day${p.ovD>0?' · manual':''}</span><b>${fmt(p.ovD>0?p.ovD:(p.ovT>0?p.ovT:c.tot)/Math.max(1,p.days))}</b></div><div class="k"><span>Shots planned${p.ovS>0?' · manual':''}</span><b>${p.ovS>0?p.ovS:s.shots.length}</b></div><div class="k"><span>Days needed (shot list)</span><b>${e.d.toFixed(1)} <small style="font:12px Inter;color:var(--mut)">/ ${p.days} budgeted</small></b></div>`;
+document.querySelectorAll('[data-t]').forEach(el=>{const[k,i]=el.dataset.t.split(':'),r=s[k][i];if(r)el.textContent=fmt(r.r*r.q*r.d)});
+set('sub-crew',fmt(c.c));set('sub-gear',fmt(c.g));set('sub-other',fmt(c.o));
+const L=[['Crew',c.c,'#a97b2c'],['Gear',c.g,'#3d5a80'],['Other & post',c.o,'#7a8f6a'],['Contingency',c.ct,'#b4584a'],['Markup / fee',c.mk,'#8a6fa8'],['Tax',c.tx,'#7d8794']];
+set('brk',`<div class="bar">${L.map(l=>`<i style="width:${c.tot?l[1]/c.tot*100:0}%;background:${l[2]}"></i>`).join('')}</div>`+L.map(l=>`<div class="ln"><span><i class="dot" style="background:${l[2]}"></i>${l[0]}</span><b>${fmt(l[1])} <small style="color:var(--mut);font-weight:400">${c.tot?Math.round(l[1]/c.tot*100):0}%</small></b></div>`).join('')+`<div class="ln"><span class="tot">Total</span><span class="tot">${fmt(c.tot)}</span></div><div class="ln"><span>Per shot</span><b>${s.shots.length?fmt(c.tot/s.shots.length):'–'}</b></div>`);
+set('ssum',`<span class="pill">${s.shots.length} shots</span> <span class="pill">${(e.m/60).toFixed(1)} h setup + shoot</span> <span class="badge ${e.d<=p.days?'ok':'bad'}">${e.d<=p.days?'Fits '+p.days+' day plan':'Over by '+(e.d-p.days).toFixed(1)+' day(s)'}</span> <span class="pill">${s.shots.filter(x=>x.done).length} done</span>`);
+set('ph',`<h1>${esc(p.name)}</h1><div>${esc(p.client)}${p.co?' · '+esc(p.co):''} · ${p.date||new Date().toLocaleDateString()} · ${{home:'Main menu',setup:'Project brief',budget:'Budget estimate',shots:'Shot list',sheets:'Saved sheets',call:'Call sheet – Day '+p.sd}[tab]}</div>`)}
+function inp(f,l,t='text',ex=''){const v=s.p[f];return`<div><label>${l}<input type="${t}" data-p="${f}" ${t==='number'?'data-n=1':''} value="${esc(v)}" ${ex}></label></div>`}
+function row(k,i,r){return`<tr><td><input data-k="${k}" data-i="${i}" data-f="n" value="${esc(r.n)}"></td><td><input type="number" min="0" data-k="${k}" data-i="${i}" data-f="r" value="${r.r}" style="width:110px"></td><td><input type="number" min="0" data-k="${k}" data-i="${i}" data-f="q" value="${r.q}" style="width:64px"></td><td><input type="number" min="0" data-k="${k}" data-i="${i}" data-f="d" value="${r.d}" style="width:64px"></td><td class="t" data-t="${k}:${i}"></td><td><button class="x" data-del="${k}:${i}" title="Remove">×</button></td></tr>`}
+const sec=(k,t,a)=>`<div class="card"><div class="ch"><h3>${t}</h3><span class="pill" id="sub-${k}"></span></div><div class="sc"><table><thead><tr><th>Item<th class="n">Rate<th class="n">Qty<th class="n">Days<th class="n">Total<th></tr></thead><tbody>${s[k].map((r,i)=>row(k,i,r)).join('')}</tbody></table></div><button class="ghost" data-add="${k}">+ Add ${a}</button></div>`;
+const V={
+home:()=>{const c=calc(),p=s.p,tile=(t,h,d)=>`<button class="b" data-tab="${t}" style="text-align:left;padding:18px;border-radius:14px"><b style="font:600 17px Fraunces,Georgia,serif;display:block">${h}</b><span style="color:var(--mut);font-weight:400">${d}</span></button>`;return`<h2>Main menu</h2><p class="sub">Jump to any tool, and set the headline numbers shown at the top. Leave a field empty to calculate it automatically.</p><div class="card"><h3>Headline numbers</h3><div class="grid" style="margin-top:10px">${inp('ovT','Estimated total ('+p.cur+')','number','min=0 placeholder="Auto: '+Math.round(c.tot)+'"')}${inp('ovD','Per shoot day ('+p.cur+')','number','min=0 placeholder="Auto"')}${inp('ovS','Shots planned','number','min=0 placeholder="Auto: '+s.shots.length+'"')}</div><p class="sub" style="margin:10px 0 0">Calculated from your budget: <b>${fmt(c.tot)}</b> total · ${fmt(c.tot/Math.max(1,p.days))} per day · ${s.shots.length} shots.</p></div><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">${tile('setup','Setup','Title, client, format, days, currency')}${tile('budget','Budget','Crew, gear and other costs')}${tile('shots','Shot list','Plan shots and days needed')}${tile('call','Call sheet','Daily schedule and crew calls')}${tile('sheets','Saved sheets','Create, open and duplicate sheets')}</div>`},
+setup:()=>`<h2>Project brief</h2><p class="sub">Set the basics once. Everything — budget, shot list and call sheet — builds from here.</p><div class="card"><div class="grid">${inp('name','Production title')}${inp('client','Client')}${inp('co','Production company')}${inp('date','Shoot start date','date')}
+<div><label>Format<select data-p="type"><option value="film">Film / commercial</option><option value="tv">TV programme</option><option value="pod">Podcast / video podcast</option><option value="vid">Videography (events, weddings, corporate)</option><option value="photo">Photography (portraits, events, commercial)</option></select></label></div>
+${inp('days','Shoot days','number','min=1')}${inp('hrs','Hours per shoot day','number','min=1')}
+<div><label>Currency<select data-p="cur" data-re>${Object.keys(FX).map(c=>`<option>${c}</option>`).join('')}</select></label></div>
+${inp('cont','Contingency %','number','step=0.5')}${inp('mk','Production fee / markup %','number','step=0.5')}${inp('tax','Tax / VAT %','number','step=0.5')}</div>
+<div class="row"><button class="b p" data-preset="1">Load starter budget for this format</button><button class="b" data-sync="1">Apply shoot days to all crew &amp; gear</button></div><p class="sub" style="margin:0">Starter rates are editable market-style defaults in LKR (converted for other currencies). Replace them with your own rate card or vendor quotes.</p></div>
+<div class="card"><h3>How it works</h3><p class="sub" style="margin:6px 0 0">1 · Tune the <b>Budget</b> by crew, gear and days. 2 · Build the <b>Shot list</b> — setup minutes tell you how many days you really need. 3 · Assign shots to days and print the <b>Call sheet</b>. Export any view to CSV or save as PDF with Print.</p></div>`,
+budget:()=>`<div class="ch"><div><h2>Budget estimate</h2><p class="sub" style="margin:0">Rate × quantity × days. Totals update live.</p></div><div class="row noprint"><button class="b" data-csv="budget">Export CSV</button><button class="b p" data-print="1">Print / PDF</button></div></div><div class="two"><div>${sec('crew','Crew','crew role')}${sec('gear','Gear &amp; equipment','gear item')}${sec('other','Locations, talent, post &amp; other','line')}</div><div><div class="card" style="position:sticky;top:90px"><h3>Cost breakdown</h3><div id="brk"></div></div></div></div>`,
+shots:()=>`<div class="ch"><div><h2>Shot list</h2><p class="sub" style="margin:0">Setup + shoot minutes per shot drive the day-count check.</p></div><div class="row noprint"><button class="b" data-cov="1">+ Coverage set</button><button class="b" data-csv="shots">Export CSV</button><button class="b p" data-print="1">Print / PDF</button></div></div><div class="card"><div id="ssum" style="margin-bottom:10px"></div><div class="sc"><table style="min-width:980px"><thead><tr><th>Sc<th>Shot<th>Description<th>Size<th>Movement<th>Lens<th>Location<th class="n">Min<th class="n">Day<th>✓<th></tr></thead><tbody>${s.shots.map((x,i)=>`<tr>${[['sc',50],['sh',50]].map(([f,w])=>`<td><input data-s="${i}" data-f="${f}" value="${esc(x[f])}" style="width:${w}px"></td>`).join('')}<td><input data-s="${i}" data-f="d" value="${esc(x.d)}" style="min-width:190px"></td><td><select data-s="${i}" data-f="size">${SIZES.map(o=>`<option ${o==x.size?'selected':''}>${o}</option>`).join('')}</select></td><td><select data-s="${i}" data-f="mv">${MOVES.map(o=>`<option ${o==x.mv?'selected':''}>${o}</option>`).join('')}</select></td><td><input data-s="${i}" data-f="lens" value="${esc(x.lens)}" style="width:100px"></td><td><input data-s="${i}" data-f="loc" value="${esc(x.loc)}" style="width:120px"></td><td><input type="number" data-s="${i}" data-f="min" data-n="1" value="${x.min}" style="width:64px"></td><td><input type="number" data-s="${i}" data-f="day" data-n="1" value="${x.day}" style="width:56px"></td><td><input type="checkbox" class="chk" data-s="${i}" data-f="done" ${x.done?'checked':''}></td><td><button class="x" data-delshot="${i}">×</button></td></tr>`).join('')}</tbody></table></div><div class="row noprint"><button class="ghost" data-addshot="1">+ Add shot</button></div></div>`,
+sheets:()=>{const L=getLib().sort((a,b)=>b.u-a.u);return`<div class="ch"><div><h2>Saved sheets</h2><p class="sub" style="margin:0">Every sheet saves automatically on this device. Open one to keep working, or start a fresh one.</p></div><div class="row noprint"><button class="b p" data-newsheet="1">+ New sheet</button></div></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${L.map(e=>{const x=e.s,p=x.p,cur=e.id===s.id;return`<div class="card" style="margin:0${cur?';border-color:var(--acc)':''}"><div class="ch" style="margin:0"><h3>${esc(p.name)||'Untitled'}</h3>${cur?'<span class="badge ok">Open</span>':''}</div><p class="sub" style="margin:4px 0 10px">${esc(p.client)||'No client'} · ${{film:'Film',tv:'TV',pod:'Podcast',vid:'Videography',photo:'Photography'}[p.type]||''} · ${p.days} day(s)</p><div class="tot">${p.cur} ${Math.round(totOf(x)).toLocaleString('en-US')}</div><p class="sub" style="margin:2px 0 12px">${x.shots.length} shots · saved ${new Date(e.u).toLocaleDateString()}</p><div class="row" style="margin:0"><button class="b p" data-open="${e.id}">Open</button><button class="b" data-dup="${e.id}">Duplicate</button><button class="b" data-delsheet="${e.id}">Delete</button></div></div>`}).join('')}</div>`},
+call:()=>{const p=s.p,sh=s.shots.filter(x=>+x.day===+p.sd);let t=mn(p.call)+60,ate=false,out='';
+sh.forEach(x=>{if(!ate&&t-mn(p.call)>=270){out+=`<div class="tm meal">${tm(t)}</div><div class="meal" style="grid-column:2/4">Lunch · 45 min</div>`;t+=45;ate=true}
+out+=`<div class="tm">${tm(t)}</div><div><b>Sc ${esc(x.sc)}${esc(x.sh)}</b> · ${esc(x.d)}</div><div style="color:var(--mut)">${esc(x.size)} · ${esc(x.mv)} · ${esc(x.lens)}${x.loc?' · '+esc(x.loc):''}</div>`;t+=+x.min||0});
+const crew=s.crew.map(r=>`${esc(r.n)}${r.q>1?' ×'+r.q:''}`);
+return`<div class="ch"><div><h2>Call sheet</h2><p class="sub" style="margin:0">Schedule builds from shots assigned to this day.</p></div><div class="row noprint"><button class="b" data-csv="call">Export CSV</button><button class="b p" data-print="1">Print / PDF</button></div></div>
+<div class="card"><div class="grid"><div><label>Shoot day<select data-p="sd" data-n="1" data-re>${Array.from({length:Math.max(1,p.days)},(_,i)=>`<option value="${i+1}" ${i+1==p.sd?'selected':''}>Day ${i+1}</option>`).join('')}</select></label></div>${inp('call','General call time','time','data-re')}${inp('loc','Location')}${inp('addr','Address / map link')}${inp('hosp','Nearest hospital')}${inp('contact','Production contact & phone')}</div></div>
+<div class="two"><div class="card"><h3>Schedule · Day ${p.sd} <small style="color:var(--mut);font-weight:400">(estimated wrap ${sh.length?tm(t):'–'})</small></h3><div class="sheet" style="margin-top:10px"><div class="tm">${tm(mn(p.call))}</div><div style="grid-column:2/4"><b>General call</b> · crew arrive, setup &amp; briefing (60 min)</div>${out||'<div style="grid-column:1/4;color:var(--mut)">No shots assigned to this day yet. Set the Day column in the Shot list.</div>'}</div></div>
+<div><div class="card"><h3>Crew called</h3><p class="sub" style="margin:6px 0 0">All at <b>${tm(mn(p.call))}</b>: ${crew.join(' · ')||'–'}</p></div><div class="card"><label>Cast &amp; talent calls<textarea data-p="cast" placeholder="e.g. Lead actor 08:30 · Guest 10:00">${esc(p.cast)}</textarea></label><label style="margin-top:10px">Notes (safety, parking, catering, weather)<textarea data-p="notes">${esc(p.notes)}</textarea></label></div></div></div>`}};
+function render(){const T={home:'Main menu',setup:'Setup',budget:'Budget',shots:'Shot list',call:'Call sheet',sheets:'Sheets'};$('#nav').innerHTML=Object.keys(T).map(k=>`<button data-tab="${k}" class="${k==tab?'on':''}">${T[k]}</button>`).join('');$('#main').innerHTML=V[tab]();document.querySelectorAll('[data-p]').forEach(e=>{if(e.tagName==='SELECT'&&s.p[e.dataset.p]!=null)e.value=s.p[e.dataset.p]});refresh()}
+function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2200)}
+async function dl(name,rows){const txt='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n');try{const d=window.claude&&await claude.use('downloads');if(d){await d.save({filename:name,data:txt});toast('Export ready');return}}catch(e){if(e&&e.code==='declined')return}
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'}));a.download=name;a.click()}
+function exportCsv(w){const p=s.p,c=calc(),f=p.name.replace(/\W+/g,'-').toLowerCase()||'production';
+if(w==='budget'){const r=[['Production',p.name],['Client',p.client],['Currency',p.cur],[],['Section','Item','Rate','Qty','Days','Total']];[['crew','Crew'],['gear','Gear'],['other','Other']].forEach(([k,l])=>s[k].forEach(x=>r.push([l,x.n,x.r,x.q,x.d,x.r*x.q*x.d])));r.push([],['','Subtotal','','','',c.sub],['','Contingency '+p.cont+'%','','','',c.ct],['','Markup '+p.mk+'%','','','',c.mk],['','Tax '+p.tax+'%','','','',c.tx],['','TOTAL','','','',c.tot]);dl(f+'-budget.csv',r)}
+if(w==='shots')dl(f+'-shot-list.csv',[['Scene','Shot','Description','Size','Movement','Lens','Location','Minutes','Day','Done']].concat(s.shots.map(x=>[x.sc,x.sh,x.d,x.size,x.mv,x.lens,x.loc,x.min,x.day,x.done?'Yes':'No'])));
+if(w==='call'){let t=mn(p.call);const r=[['Call sheet',p.name],['Client',p.client],['Day',p.sd],['Date',p.date],['Location',p.loc],['Address',p.addr],['Hospital',p.hosp],['Contact',p.contact],[],['Time','Scene','Description','Setup']];r.push([tm(t),'','General call','']);t+=60;s.shots.filter(x=>+x.day===+p.sd).forEach(x=>{r.push([tm(t),x.sc+x.sh,x.d,x.size+' / '+x.mv+' / '+x.lens]);t+=+x.min||0});r.push([],['Crew','Qty']);s.crew.forEach(x=>r.push([x.n,x.q]));dl(f+'-call-sheet.csv',r)}}
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(d.p){s.p[d.p]=d.n?+t.value:t.value}else if(d.k){s[d.k][d.i][d.f]=d.f==='n'?t.value:+t.value}else if(d.s!=null){s.shots[d.s][d.f]=d.f==='done'?t.checked:d.n?+t.value:t.value;if(d.f==='size'&&!s.shots[d.s].lens)s.shots[d.s].lens=LENS[t.value]}else return;save();refresh()});
+document.addEventListener('change',e=>{if(e.target.hasAttribute('data-re'))render()});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+if(d.tab){tab=d.tab;render();scrollTo(0,0);return}
+if(d.add){s[d.add].push({n:'',r:0,q:1,d:d.add==='other'?1:s.p.days})}
+else if(d.del){const[k,i]=d.del.split(':');s[k].splice(i,1)}
+else if(d.preset){preset(s.p.type);toast('Starter budget loaded')}
+else if(d.sync){['crew','gear'].forEach(k=>s[k].forEach(r=>r.d=s.p.days));toast('Days applied')}
+else if(d.cov){const m=Math.max(0,...s.shots.map(x=>parseInt(x.sc)||0));cover(m+1)}
+else if(d.addshot){const l=s.shots[s.shots.length-1]||{sc:1,day:1,loc:''};s.shots.push({sc:l.sc,sh:'',d:'',size:'MS',mv:'Static',lens:'35mm',loc:l.loc,min:15,day:l.day,done:false})}
+else if(d.delshot!=null){s.shots.splice(d.delshot,1)}
+else if(d.csv){exportCsv(d.csv);return}
+else if(d.print){window.print();return}
+else if(d.newsheet){newSheet();tab='setup';toast('New sheet created')}
+else if(d.open){const e=getLib().find(x=>x.id===d.open);if(!e)return;s=JSON.parse(JSON.stringify(e.s));s.id=e.id;tab='budget'}
+else if(d.dup){const e=getLib().find(x=>x.id===d.dup);if(!e)return;const c=JSON.parse(JSON.stringify(e.s));c.id=uid();c.p.name+=' (copy)';const L=getLib();L.push({id:c.id,u:Date.now(),s:c});putLib(L);toast('Sheet duplicated')}
+else if(d.delsheet){if(!b.dataset.arm){b.dataset.arm=1;b.textContent='Sure?';return}const L=getLib().filter(x=>x.id!==d.delsheet);if(s.id===d.delsheet){if(L.length){s=JSON.parse(JSON.stringify(L[0].s));s.id=L[0].id}else newSheet()}putLib(L);toast('Sheet deleted')}
+else return;save();render()});
+render();
+</script></body></html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Content Calendar &amp; Post Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDF2F1;--panel:#fff;--ink:#10272B;--mut:#5B6F72;--line:#D3DDDC;--accent:#0E6F6E;--on:#fff;--soft:#E3EFEE;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1819;--panel:#142426;--ink:#E6F0EF;--mut:#93AAAC;--line:#243C3F;--accent:#4FC3BE;--on:#06201F;--soft:#1B3234}}
+:root[data-theme="dark"]{--bg:#0D1819;--panel:#142426;--ink:#E6F0EF;--mut:#93AAAC;--line:#243C3F;--accent:#4FC3BE;--on:#06201F;--soft:#1B3234}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "DM Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;margin:0;letter-spacing:-.02em}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+header{margin-bottom:22px}
+h1{font-size:clamp(28px,4.4vw,46px);line-height:1.05;font-weight:700;max-width:16ch}
+header p{color:var(--mut);max-width:58ch;margin:10px 0 0}
+.layout{display:grid;grid-template-columns:310px 1fr;gap:20px;align-items:start}
+.layout>*{min-width:0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+label,.lab{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}
+label:first-child,.lab:first-child{margin-top:0}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+textarea{resize:vertical}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:500}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on);font-weight:700}
+.btn.full{width:100%;margin-top:18px;padding:11px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.balance{display:flex;height:34px;border-radius:10px;overflow:hidden;margin:6px 0 8px}
+.balance div{display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--mut);font-size:13px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin:14px 0 4px;font-size:13px;color:var(--mut)}
+.stats b{display:block;font-size:22px;color:var(--ink);font-family:"Bricolage Grotesque",sans-serif}
+.tabs{display:flex;gap:4px;margin:18px 0 12px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;padding:10px 14px;cursor:pointer;font-weight:500;color:var(--mut);border-bottom:2px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent);font-weight:700}
+.scroll{overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(112px,1fr));gap:6px;min-width:800px}
+.dow{font-size:12px;font-weight:700;color:var(--mut);padding:2px 4px}
+.day{min-height:112px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.day.empty{background:transparent;border-style:dashed;cursor:default;opacity:.4}
+.day .n{font-size:12px;color:var(--mut);font-weight:700}
+.post{display:block;width:100%;text-align:left;border:0;border-left:4px solid;border-radius:6px;padding:4px 6px;font-size:12px;line-height:1.3;background:var(--soft);cursor:pointer}
+.post b{display:block;font-size:11px}
+.post span{display:block;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.post.sel{outline:2px solid var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
+th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--mut)}
+tr.click{cursor:pointer}tr.click:hover{background:var(--soft)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.note{color:var(--mut);font-size:13px;margin:10px 0 0}
+.editor{margin-top:16px}
+.editor h3{font-size:20px;margin-bottom:12px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--soft)}
+.hide{display:none}
+.exp textarea{min-height:260px;font:12.5px/1.5 ui-monospace,Menlo,monospace}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px}
+@media print{.setup,.tabs,.acts,.editor,.nobtn,#toast{display:none!important}.layout{display:block}.card{border:0;padding:0}.panel{display:none!important}#p-list{display:block!important}body{background:#fff;color:#000}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Content Calendar &amp; Post Planner</h1>
+<p>Choose the themes your brand stands for. The planner turns them into a month of posts with ideas, hooks, times and a plan you can export.</p>
+</header>
+<div class="layout">
+<aside class="card setup">
+<label for="brand">Brand name</label>
+<input id="brand" value="Your Brand" autocomplete="off">
+<div class="lab">Start date</div>
+<div class="row" style="grid-template-columns:1fr 1.4fr .8fr">
+<select id="year" aria-label="Year"></select>
+<select id="mon" aria-label="Month"></select>
+<select id="startDay" aria-label="Day"></select>
+</div>
+<div class="row">
+<div><label for="perWeek">Posts per week</label>
+<select id="perWeek"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+<div><label for="goal">Main goal</label>
+<select id="goal"><option>Awareness</option><option>Trust</option><option>Sales</option></select></div>
+</div>
+<div class="lab">Content themes</div>
+<div class="chips" id="themeChips"></div>
+<div class="lab">Platforms</div>
+<div class="chips" id="platChips"></div>
+<button class="btn pri full" id="gen">Build my month</button>
+<button class="btn full" id="fresh" style="margin-top:8px">New beginning</button>
+<p class="note">Building again replaces the current plan.</p>
+</aside>
+
+<main>
+<section class="card">
+<h2 style="font-size:22px">Theme balance</h2>
+<div class="balance" id="balance"></div>
+<div class="legend" id="legend"></div>
+<div class="stats" id="stats"></div>
+</section>
+
+<div class="tabs" role="tablist">
+<button class="tab" role="tab" data-t="cal" aria-selected="true">Calendar</button>
+<button class="tab" role="tab" data-t="list" aria-selected="false">Post list</button>
+<button class="tab" role="tab" data-t="times" aria-selected="false">Best times</button>
+<button class="tab" role="tab" data-t="exp" aria-selected="false">Export</button>
+</div>
+
+<section class="panel" id="p-cal"><div class="scroll"><div class="grid" id="grid"></div></div>
+<p class="note">Select a post to edit it. Select an empty day to add a post.</p></section>
+
+<section class="panel hide" id="p-list"><div class="card scroll"><table id="listTbl"></table></div></section>
+
+<section class="panel hide" id="p-times"><div class="card scroll"><table id="timeTbl"></table>
+<p class="note">Times are starting points in Sri Lanka time (UTC+5:30), not measured results. After two weeks, compare them with your own platform insights and move posts to where your audience actually responds.</p></div></section>
+
+<section class="panel hide exp" id="p-exp"><div class="card">
+<div class="acts" style="margin:0 0 12px">
+<button class="btn" data-f="csv">CSV</button>
+<button class="btn" data-f="md">Text plan</button>
+<button class="btn pri" id="copy">Copy</button>
+<button class="btn nobtn" id="print">Print plan</button>
+</div>
+<textarea id="out" readonly aria-label="Export preview"></textarea>
+<p class="note">Paste the CSV into Google Sheets or Excel, or copy the text plan into a brief for your team.</p></div></section>
+
+<section class="card editor hide" id="editor"></section>
+</main>
+</div>
+</div>
+<div class="toast hide" id="toast" role="status"></div>
+
+<script>
+const T=[
+{id:'edu',n:'Educational',c:'#0E7C7B',f:['Carousel','Reel'],i:['Three myths about our work, busted|Everyone believes the first one.','A 60-second how-to from the {b} team|Save this for when you need it.','The beginner’s checklist|What to sort out before you spend a rupee.','Your top question, answered|You asked, so we answered.']},
+{id:'bts',n:'Behind the scenes',c:'#C2571A',f:['Reel','Story'],i:['A day in the life at {b}|Nobody sees this part.','From brief to final: how one project comes together|The messy middle, shown honestly.','Meet the person behind the work|Ten questions, no script.','Our tools and workspace tour|What we actually use every day.']},
+{id:'proof',n:'Client proof',c:'#7A3FA0',f:['Carousel','Photo'],i:['Before and after: one client’s result|Same business, ninety days apart.','A customer’s story, in their words|Why they chose {b}.','Numbers that moved this month|Small wins, real data.','Testimonial spotlight|What working with {b} feels like.']},
+{id:'story',n:'Brand story',c:'#B0306B',f:['Reel','Photo'],i:['Why {b} exists|The moment we decided to start.','Our values in one real example|We don’t just print them on a wall.','A lesson from our hardest week|What we would tell our past selves.','Where we’re headed next year|The vision, plainly stated.']},
+{id:'promo',n:'Offer',c:'#B8860B',f:['Photo','Carousel'],i:['This month’s offer, explained simply|Here’s exactly what you get.','Limited slots open next month|Book early to lock your date.','Bundle spotlight|Better together, at a better price.','New service now open|Be one of the first to try it.']},
+{id:'comm',n:'Community',c:'#2F6FD0',f:['Story','Photo'],i:['Poll: what should we make next?|You decide, we deliver.','Shout-out to a community member|Celebrating someone who inspires us.','Weekly question for our followers|Tell us in the comments.','Share your story with our hashtag|We’ll feature our favourites.']},
+{id:'trend',n:'Trends',c:'#D13F3F',f:['Reel','Carousel'],i:['Our take on this week’s trend|What it means for your brand.','Trend or fad? A quick verdict|Worth your time, or skip it?','A seasonal moment and how to join in|Make the most of it before it passes.','Industry news in plain language|What changed and what to do.']},
+{id:'lead',n:'Point of view',c:'#3C7A3C',f:['Carousel','Photo'],i:['One strong opinion about our industry|Here’s what we would change.','The framework we use to decide|A simple model you can steal.','Our prediction for the next 12 months|Bookmark this and check back.','What we’d do differently if we started today|Hard-won lessons.']}
+];
+const P=['Instagram','Facebook','LinkedIn','TikTok','X','Threads'];
+const AB={Instagram:'IG',Facebook:'FB',LinkedIn:'LI',TikTok:'TT',X:'X',Threads:'TH'};
+const TM={
+Instagram:{wd:'19:00',we:'10:30',days:'Wed, Fri, Sat',prime:'7:00 to 9:00 PM on weekdays',alt:'Saturday 10:00 AM to 12:00 PM',why:'Evening scrolling after work and study; weekend mornings suit Reels and carousels.'},
+Facebook:{wd:'20:00',we:'09:30',days:'Wed, Thu, Sun',prime:'8:00 to 9:30 PM',alt:'Sunday 9:00 to 11:00 AM',why:'Older, family-heavy audience browses late evening and on slow Sunday mornings.'},
+LinkedIn:{wd:'08:30',we:'09:00',days:'Tue, Wed, Thu',prime:'8:00 to 10:00 AM',alt:'12:00 to 1:00 PM',why:'Professionals check in before work and at lunch; weekends are quiet.'},
+TikTok:{wd:'20:30',we:'21:00',days:'Thu, Fri, Sat',prime:'8:00 to 10:00 PM',alt:'Saturday 12:00 to 2:00 PM',why:'Peak discovery happens late evening, when people settle in to watch.'},
+X:{wd:'09:00',we:'11:00',days:'Mon to Fri',prime:'8:00 to 10:00 AM',alt:'1:00 to 2:00 PM',why:'News and commentary move fastest in the morning and around lunch.'},
+Threads:{wd:'12:30',we:'20:00',days:'Mon, Wed, Fri',prime:'12:00 to 2:00 PM',alt:'8:00 to 9:00 PM',why:'Conversational posts do well in lunch breaks and relaxed evenings.'}
+};
+const CTA={Awareness:['Share this with someone who needs it','Follow for more','Tag a friend who would love this'],Trust:['Read the full story, link in bio','Save this for later','Tell us your experience in the comments'],Sales:['Send us a DM to book','Tap the link in bio','Message us “START” today']};
+const PAT={2:[2,4],3:[1,3,5],4:[1,2,4,6],5:[1,2,3,4,5],6:[1,2,3,4,5,6],7:[0,1,2,3,4,5,6]};
+const STAT=['Idea','Drafted','Scheduled','Posted'];
+const KEY='cc-planner-v1';
+let S={brand:'Your Brand',month:'',day:1,perWeek:3,goal:'Awareness',themes:['edu','bts','proof','story'],plats:['Instagram','LinkedIn','Facebook'],posts:[],sel:null,fmt:'csv'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const th=id=>T.find(t=>t.id===id)||T[0];
+const pad=n=>String(n).padStart(2,'0');
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.posts)S=Object.assign(S,o)}}catch(e){}}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hide'),2200)}
+function timeFor(plat,date){const d=new Date(date+'T00:00').getDay();const t=TM[plat]||TM.Instagram;return (d===0||d===6)?t.we:t.wd}
+function t12(t){const[h,m]=t.split(':').map(Number);return (h%12||12)+':'+pad(m)+' '+(h<12?'AM':'PM')}
+function fmtFor(plat,theme,k){if(plat==='X'||plat==='Threads')return k%2?'Thread':'Text post';if(plat==='LinkedIn')return k%2?'Text post':'Carousel';if(plat==='TikTok')return 'Short video';return theme.f[k%theme.f.length]}
+function idea(theme,k){const [a,b]=theme.i[k%theme.i.length].split('|');return{title:a.replace(/\{b\}/g,S.brand||'us'),hook:b.replace(/\{b\}/g,S.brand||'us')}}
+function build(){
+ const [y,m]=S.month.split('-').map(Number);const dim=new Date(y,m,0).getDate();const pat=PAT[S.perWeek];
+ const themes=S.themes.length?S.themes:['edu'];const plats=S.plats.length?S.plats:['Instagram'];
+ const cnt={};let i=0;const posts=[];
+ for(let d=Math.min(S.day||1,dim);d<=dim;d++){
+  const date=y+'-'+pad(m)+'-'+pad(d);if(!pat.includes(new Date(date+'T00:00').getDay()))continue;
+  const tid=themes[i%themes.length];const theme=th(tid);const plat=plats[(i+Math.floor(i/plats.length))%plats.length];
+  const k=cnt[tid]=(cnt[tid]??-1)+1;const id=idea(theme,k);const cs=CTA[S.goal];
+  posts.push({id:'p'+Date.now()+i,date,time:timeFor(plat,date),plat,theme:tid,fmt:fmtFor(plat,theme,k),title:id.title,hook:id.hook,cta:cs[i%cs.length],status:'Idea'});i++;
+ }
+ S.posts=posts;S.sel=null;save();render();
+}
+function sorted(){return S.posts.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))}
+function renderChips(){
+ $('themeChips').innerHTML=T.map(t=>`<button class="chip" aria-pressed="${S.themes.includes(t.id)}" data-th="${t.id}"><i style="background:${t.c}"></i>${t.n}</button>`).join('');
+ $('platChips').innerHTML=P.map(p=>`<button class="chip" aria-pressed="${S.plats.includes(p)}" data-pl="${p}">${p}</button>`).join('');
+}
+function renderBalance(){
+ const c={};S.posts.forEach(p=>c[p.theme]=(c[p.theme]||0)+1);const tot=S.posts.length;
+ const ids=Object.keys(c);
+ $('balance').innerHTML=tot?ids.map(id=>{const t=th(id);const pc=Math.round(c[id]/tot*100);return `<div style="flex:${c[id]};background:${t.c}" title="${t.n}: ${c[id]} posts">${pc}%</div>`}).join(''):'<div style="flex:1;background:var(--line);color:var(--mut)">No posts yet</div>';
+ $('legend').innerHTML=ids.map(id=>`<span><span class="dot" style="background:${th(id).c}"></span>${th(id).n} (${c[id]})`+'</span>').join('');
+ const done=S.posts.filter(p=>p.status==='Posted').length,sch=S.posts.filter(p=>p.status==='Scheduled').length;
+ const pl=new Set(S.posts.map(p=>p.plat)).size;
+ $('stats').innerHTML=`<div><b>${tot}</b>posts planned</div><div><b>${ids.length}</b>themes</div><div><b>${pl}</b>platforms</div><div><b>${sch}</b>scheduled</div><div><b>${done}</b>posted</div>`;
+}
+function renderCal(){
+ const [y,m]=S.month.split('-').map(Number);const dim=new Date(y,m,0).getDate();const off=(new Date(y,m-1,1).getDay()+6)%7;
+ let h=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="dow">${d}</div>`).join('');
+ for(let i=0;i<off;i++)h+='<div class="day empty"></div>';
+ for(let d=1;d<=dim;d++){
+  const date=y+'-'+pad(m)+'-'+pad(d);
+  const ps=S.posts.filter(p=>p.date===date).map(p=>`<button class="post${S.sel===p.id?' sel':''}" data-id="${p.id}" style="border-color:${th(p.theme).c}"><b>${AB[p.plat]||p.plat} ${t12(p.time)}</b><span>${esc(p.title)}</span></button>`).join('');
+  h+=`<div class="day" data-date="${date}"><div class="n">${d}</div>${ps}</div>`;
+ }
+ $('grid').innerHTML=h;
+}
+function renderList(){
+ const rows=sorted().map(p=>{const dt=new Date(p.date+'T00:00');return `<tr class="click" data-id="${p.id}"><td>${dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}<br><span class="note" style="margin:0">${t12(p.time)}</span></td><td>${p.plat}<br><span class="note" style="margin:0">${esc(p.fmt)}</span></td><td><span class="dot" style="background:${th(p.theme).c}"></span>${th(p.theme).n}</td><td><b>${esc(p.title)}</b><br>${esc(p.hook)}</td><td><span class="badge">${p.status}</span></td></tr>`}).join('');
+ $('listTbl').innerHTML=`<tr><th>Date</th><th>Platform</th><th>Theme</th><th>Idea and hook</th><th>Status</th></tr>`+(rows||'<tr><td colspan="5">Build your month to see posts here.</td></tr>');
+}
+function renderTimes(){
+ const pl=S.plats.length?S.plats:P;
+ $('timeTbl').innerHTML='<tr><th>Platform</th><th>Best days</th><th>Prime window</th><th>Backup window</th><th>Why it works</th></tr>'+pl.map(p=>{const t=TM[p];return `<tr><td><b>${p}</b></td><td>${t.days}</td><td>${t.prime}</td><td>${t.alt}</td><td>${t.why}</td></tr>`}).join('');
+}
+function exportText(){
+ const rows=sorted();
+ if(S.fmt==='csv'){
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  return ['Date,Day,Time,Platform,Theme,Format,Idea,Hook,Call to action,Status'].concat(rows.map(p=>[p.date,new Date(p.date+'T00:00').toLocaleDateString('en-GB',{weekday:'short'}),t12(p.time),p.plat,th(p.theme).n,p.fmt,p.title,p.hook,p.cta,p.status].map(q).join(','))).join('\n');
+ }
+ const [y,m]=S.month.split('-').map(Number);
+ let o=`${S.brand}: content plan for ${new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'})}\nGoal: ${S.goal}. ${rows.length} posts.\n`;
+ let last='';
+ rows.forEach(p=>{const d=new Date(p.date+'T00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  o+=`\n${d}, ${t12(p.time)} on ${p.plat}\n  Theme: ${th(p.theme).n} (${p.fmt})\n  Idea: ${p.title}\n  Hook: ${p.hook}\n  Call to action: ${p.cta}\n  Status: ${p.status}\n`});
+ return o;
+}
+function renderEditor(){
+ const ed=$('editor');const p=S.posts.find(x=>x.id===S.sel);
+ if(!p){ed.classList.add('hide');return}
+ ed.classList.remove('hide');
+ const op=(arr,v,f=x=>x)=>arr.map(x=>`<option value="${esc(f(x)[0])}"${f(x)[0]===v?' selected':''}>${esc(f(x)[1])}</option>`).join('');
+ ed.innerHTML=`<h3>Edit post</h3>
+ <div class="row"><div><label for="e-date">Date</label><input id="e-date" type="date" value="${p.date}"></div><div><label for="e-time">Time</label><input id="e-time" type="time" value="${p.time}"></div></div>
+ <div class="row"><div><label for="e-plat">Platform</label><select id="e-plat">${op(P,p.plat,x=>[x,x])}</select></div><div><label for="e-theme">Theme</label><select id="e-theme">${op(T,p.theme,x=>[x.id,x.n])}</select></div></div>
+ <div class="row"><div><label for="e-fmt">Format</label><select id="e-fmt">${op(['Carousel','Reel','Photo','Story','Short video','Text post','Thread'],p.fmt,x=>[x,x])}</select></div><div><label for="e-status">Status</label><select id="e-status">${op(STAT,p.status,x=>[x,x])}</select></div></div>
+ <label for="e-title">Idea</label><input id="e-title" value="${esc(p.title)}">
+ <label for="e-hook">Hook</label><input id="e-hook" value="${esc(p.hook)}">
+ <label for="e-cta">Call to action</label><input id="e-cta" value="${esc(p.cta)}">
+ <div class="acts"><button class="btn" id="e-shuf">New idea for this theme</button><button class="btn" id="e-best">Use best time</button><button class="btn" id="e-del">Delete post</button><button class="btn pri" id="e-close">Done</button></div>`;
+}
+function fillDate(){const [y,m]=S.month.split('-').map(Number);const cy=new Date().getFullYear();const ys=[];for(let v=cy-1;v<=cy+3;v++)ys.push(v);if(!ys.includes(y))ys.push(y);ys.sort();
+ $('year').innerHTML=ys.map(v=>`<option${v===y?' selected':''}>${v}</option>`).join('');
+ $('mon').innerHTML=['January','February','March','April','May','June','July','August','September','October','November','December'].map((n,i)=>`<option value="${i+1}"${i+1===m?' selected':''}>${n}</option>`).join('');
+ const dim=new Date(y,m,0).getDate();if(!S.day)S.day=1;if(S.day>dim)S.day=dim;
+ $('startDay').innerHTML=Array.from({length:dim},(_,i)=>`<option${i+1===S.day?' selected':''}>${i+1}</option>`).join('')}
+function render(){$('brand').value=S.brand;fillDate();$('perWeek').value=S.perWeek;$('goal').value=S.goal;renderChips();renderBalance();renderCal();renderList();renderTimes();$('out').value=exportText();renderEditor()}
+function tab(t){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('hide',p.id!=='p-'+t));if(t==='exp')$('out').value=exportText()}
+function openPost(id){S.sel=id;save();renderCal();renderEditor();$('editor').scrollIntoView({behavior:'smooth',block:'nearest'})}
+
+document.addEventListener('click',e=>{
+ const c=e.target.closest('[data-th]');if(c){const id=c.dataset.th;S.themes=S.themes.includes(id)?S.themes.filter(x=>x!==id):S.themes.concat(id);save();renderChips();return}
+ const pl=e.target.closest('[data-pl]');if(pl){const id=pl.dataset.pl;S.plats=S.plats.includes(id)?S.plats.filter(x=>x!==id):S.plats.concat(id);save();renderChips();renderTimes();return}
+ const tb=e.target.closest('.tab');if(tb){tab(tb.dataset.t);return}
+ const ps=e.target.closest('.post');if(ps){openPost(ps.dataset.id);return}
+ const tr=e.target.closest('tr.click');if(tr){tab('cal');openPost(tr.dataset.id);return}
+ const dy=e.target.closest('.day[data-date]');if(dy){const date=dy.dataset.date;const plat=S.plats[0]||'Instagram';const t=th(S.themes[0]||'edu');const id=idea(t,0);
+  const p={id:'p'+Date.now(),date,time:timeFor(plat,date),plat,theme:t.id,fmt:fmtFor(plat,t,0),title:id.title,hook:id.hook,cta:CTA[S.goal][0],status:'Idea'};S.posts.push(p);openPost(p.id);renderBalance();renderList();return}
+ const f=e.target.closest('[data-f]');if(f){S.fmt=f.dataset.f;$('out').value=exportText();return}
+ const p=S.posts.find(x=>x.id===S.sel);
+ switch(e.target.id){
+  case 'gen':build();toast('Month built');break;
+  case 'fresh':{const b=$('fresh');if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Click again to clear everything';clearTimeout(b.h);b.h=setTimeout(()=>{delete b.dataset.arm;b.textContent='New beginning'},3500);break}
+   clearTimeout(b.h);delete b.dataset.arm;b.textContent='New beginning';const n=new Date();const nx=new Date(n.getFullYear(),n.getMonth()+1,1);
+   S={brand:'Your Brand',month:nx.getFullYear()+'-'+pad(nx.getMonth()+1),day:1,perWeek:3,goal:'Awareness',themes:['edu','bts','proof','story'],plats:['Instagram','LinkedIn','Facebook'],posts:[],sel:null,fmt:'csv'};save();render();toast('Fresh start. Pick your themes, then build your month');break}
+  case 'copy':{const o=$('out');o.value=exportText();o.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}try{navigator.clipboard&&navigator.clipboard.writeText(o.value);ok=true}catch(x){}toast(ok?'Copied':'Selected. Press Ctrl+C or Cmd+C to copy');break}
+  case 'print':tab('list');window.print();break;
+  case 'e-close':S.sel=null;save();renderCal();renderEditor();break;
+  case 'e-del':if(p){S.posts=S.posts.filter(x=>x.id!==p.id);S.sel=null;save();render()}break;
+  case 'e-best':if(p){p.time=timeFor(p.plat,p.date);save();renderEditor();renderCal();renderList()}break;
+  case 'e-shuf':if(p){const t=th(p.theme);let k;do{k=Math.floor(Math.random()*t.i.length)}while(t.i.length>1&&idea(t,k).title===p.title);const id=idea(t,k);p.title=id.title;p.hook=id.hook;save();renderEditor();renderCal();renderList()}break;
+ }
+});
+document.addEventListener('input',e=>{
+ const id=e.target.id;
+ if(id==='brand'){S.brand=e.target.value;save();return}
+ if(id==='year'||id==='mon'||id==='startDay'){const [y,m]=S.month.split('-').map(Number);let ny=y,nm=m;if(id==='year')ny=+e.target.value;if(id==='mon')nm=+e.target.value;if(id==='startDay')S.day=+e.target.value;S.month=ny+'-'+pad(nm);fillDate();save();return}
+ if(id==='perWeek'||id==='goal'){S[id]=id==='perWeek'?+e.target.value:e.target.value;save();return}
+ if(id&&id.startsWith('e-')){const p=S.posts.find(x=>x.id===S.sel);if(!p)return;
+  const map={'e-date':'date','e-time':'time','e-plat':'plat','e-theme':'theme','e-fmt':'fmt','e-status':'status','e-title':'title','e-hook':'hook','e-cta':'cta'};
+  if(map[id]){p[map[id]]=e.target.value;save();renderBalance();renderCal();renderList();$('out').value=exportText()}}
+});
+(function init(){
+ load();
+ if(!S.month){const n=new Date();const nx=new Date(n.getFullYear(),n.getMonth()+1,1);S.month=nx.getFullYear()+'-'+pad(nx.getMonth()+1)}
+ if(!S.posts.length)build();else render();
+})();
+</script>
+</body>
+</html>

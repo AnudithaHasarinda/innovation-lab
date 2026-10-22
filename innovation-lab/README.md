@@ -22,15 +22,18 @@ HTML), and links back to it. See *Integrating with your existing website* below.
 
 ### The projects (all labelled by status)
 
-Built into the lab as a React component:
+Standalone single-file apps:
 
-- **Digital Identity** builds a standards-based vCard 3.0, a live QR code and a downloadable `.vcf`.
+- **Digital Identity** is the earlier Tapcard prototype (v5): a single HTML file with privacy levels, QR sharing, print kit, contacts and a roadmap tab (`public/projects/digital-identity/`).
 
 Standalone single-file apps, each kept as-is in `public/projects/<slug>/index.html` (or `prototype.html`) and shown in a frame by
 `components/demos/FrameDemo.tsx` (or its own small wrapper). To replace one with a newer version, overwrite its HTML file:
 
 - **AI Business Assistant** (`public/projects/ai-business-assistant/`): a *rule-based* planner (lean canvas, SWOT, break-even maths, 30-60-90 plan). **No AI model is connected.** It loads React from a public CDN.
 - **Brand Studio** (`public/projects/brand-studio/`): palettes from colour theory with WCAG contrast checks, font pairing, monogram, colour psychology brief, logo recolouring and CSS/JSON export.
+- **Content Calendar & Post Planner** (`public/projects/content-calendar/`): builds a month of posts from themes and platforms; ideas are built-in templates, not AI; times are starting points.
+- **Folio** (`public/projects/folio/`): quote, proposal and invoice maker in LKR with print or save as PDF. Not tax or legal advice.
+- **Production Budget & Shot Planner** (`public/projects/production-planner/`): starter budgets, shot list with day check, call sheet, saved sheets. Starter rates are examples.
 - **Ledgerline** (`public/projects/ledgerline/`): a personal money manager (accounts, budgets, cards, multi-currency, backup). Data stays in the browser; sign-up is only a local profile.
 - **Tapcard** (`public/projects/tapcard/`): a digital business card with QR, a test Nearby radar, print kit and contacts.
 - **Shadow Run** (`public/projects/shadow-run/`): an offline 3D runner game.
