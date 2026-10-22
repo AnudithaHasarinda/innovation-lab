@@ -1,0 +1,1432 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>AI Business Assistant</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/*
+  Layout concept: a planner's workbench. The brief sits in a sticky rail on the
+  left, the plan sheet fills the right, and the break-even figure is the one
+  loud element. Everything else stays quiet: hairlines, small caps labels, mono numbers.
+*/
+:root {
+  --font-display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --bg: #e9edf2;
+  --surface: #fbfcfd;
+  --surface-2: #f1f4f8;
+  --ink: #0e1a2b;
+  --ink-2: #4b5a6d;
+  --ink-3: #738195;
+  --line: #d2d9e2;
+  --line-2: #e3e8ef;
+  --accent: #0a6b5c;
+  --accent-strong: #07564a;
+  --on-accent: #ffffff;
+  --accent-soft: #d6ede7;
+  --watch: #8f5f00;
+  --watch-soft: #f5e8cb;
+  --risk: #b3362d;
+  --risk-soft: #f7dcd8;
+  --shadow: 0 1px 2px rgba(14, 26, 43, 0.05), 0 10px 30px rgba(14, 26, 43, 0.07);
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #090f19;
+    --surface: #101926;
+    --surface-2: #152131;
+    --ink: #e8edf4;
+    --ink-2: #9aa8bb;
+    --ink-3: #7b8a9f;
+    --line: #243247;
+    --line-2: #1b283a;
+    --accent: #4fd1b2;
+    --accent-strong: #7be2c9;
+    --on-accent: #04211b;
+    --accent-soft: #11382f;
+    --watch: #e3b04b;
+    --watch-soft: #3a2f13;
+    --risk: #f2857b;
+    --risk-soft: #3d1e1c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #090f19;
+  --surface: #101926;
+  --surface-2: #152131;
+  --ink: #e8edf4;
+  --ink-2: #9aa8bb;
+  --ink-3: #7b8a9f;
+  --line: #243247;
+  --line-2: #1b283a;
+  --accent: #4fd1b2;
+  --accent-strong: #7be2c9;
+  --on-accent: #04211b;
+  --accent-soft: #11382f;
+  --watch: #e3b04b;
+  --watch-soft: #3a2f13;
+  --risk: #f2857b;
+  --risk-soft: #3d1e1c;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+dl,
+dd,
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+/* Single-column grids must be allowed to shrink below their content, or wide children push the page sideways. */
+.brief,
+.sheet,
+.breakeven,
+.roadmap,
+.field,
+fieldset,
+.signals,
+.phase,
+.formula,
+.explorer,
+.fallback {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+ul {
+  list-style: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* ---------- shell ---------- */
+
+.shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 48px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.logo-frame {
+  fill: var(--surface);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.logo-grid {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.2;
+}
+.logo-mark {
+  fill: var(--accent);
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.engine {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+  background: var(--surface);
+}
+
+.engine-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--ink-2);
+  cursor: default;
+}
+.engine-opt[aria-pressed='true'] {
+  background: var(--surface-2);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.engine-opt:disabled {
+  opacity: 0.85;
+}
+.engine-soon {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+}
+.dot-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+}
+.icon-btn:hover {
+  border-color: var(--ink-3);
+}
+.theme-ring {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+.theme-half {
+  fill: var(--ink);
+}
+
+.intro {
+  padding-block: 28px 22px;
+  max-width: 760px;
+}
+.intro h1 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(28px, 4.4vw, 42px);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.intro p {
+  margin-top: 10px;
+  color: var(--ink-2);
+  max-width: 62ch;
+  font-size: 16px;
+}
+
+/* ---------- workspace ---------- */
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 372px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.brief-panel {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+@media (min-width: 981px) {
+  .brief-panel {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- brief ---------- */
+
+.brief {
+  padding: 20px;
+  display: grid;
+  gap: 18px;
+}
+
+.brief-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.brief-head h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.presets-label {
+  width: 100%;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.chip-btn {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.chip-btn:hover {
+  border-color: var(--ink-3);
+}
+.chip-btn[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+fieldset {
+  border: 0;
+  border-top: 1px solid var(--line-2);
+  padding-top: 14px;
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+legend {
+  padding: 0 8px 0 0;
+  margin-left: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  float: left;
+  width: 100%;
+  margin-bottom: 12px;
+}
+legend + * {
+  clear: both;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.field label,
+.field .label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.field input[type='text'],
+.field input[type='number'],
+.field select,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 11px;
+  line-height: 1.35;
+}
+.field textarea {
+  resize: vertical;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--ink-3);
+}
+.field input[aria-invalid='true'] {
+  border-color: var(--risk);
+}
+.field-note {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+.field-note.error {
+  color: var(--risk);
+}
+.field-note.hint {
+  color: var(--watch);
+}
+
+.money {
+  position: relative;
+}
+.money-sym {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-3);
+  pointer-events: none;
+  min-width: 14px;
+}
+.money input {
+  padding-left: 40px !important;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.segmented button[aria-checked='true'] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(14, 26, 43, 0.08);
+}
+
+.privacy,
+.example-note {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.example-note {
+  color: var(--accent-strong);
+}
+
+/* ---------- sheet ---------- */
+
+.sheet {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  display: grid;
+  gap: 22px;
+}
+
+.plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px 32px;
+  flex-wrap: wrap;
+}
+.plan-title {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.plan-title h2 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.headline {
+  margin-top: 10px;
+  color: var(--ink-2);
+  max-width: 60ch;
+  font-size: 15.5px;
+  text-wrap: pretty;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.be-figure {
+  display: grid;
+  justify-items: end;
+  text-align: right;
+  gap: 0;
+  padding-left: 28px;
+  border-left: 1px solid var(--line);
+  min-width: 150px;
+}
+.be-number {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(56px, 8vw, 84px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.be-undefined .be-number {
+  color: var(--risk);
+}
+.be-unit {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .be-figure {
+    border-left: 0;
+    padding-left: 0;
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  border-block: 1px solid var(--line);
+}
+.stats > div {
+  padding: 14px 18px 14px 0;
+  min-width: 0;
+}
+.stats > div + div {
+  padding-left: 18px;
+  border-left: 1px solid var(--line-2);
+}
+.stats dt {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.stats dd {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.stat-sub {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+.pos {
+  color: var(--accent);
+}
+.neg {
+  color: var(--risk);
+}
+
+@media (max-width: 560px) {
+  .stats > div + div {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--line-2);
+  }
+}
+
+/* ---------- tabs ---------- */
+
+.tabbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.tabs button {
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tabs button:hover {
+  color: var(--ink);
+}
+.tabs button[aria-selected='true'] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(14, 26, 43, 0.08);
+}
+
+.export {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn.ghost:hover {
+  border-color: var(--ink-3);
+  background: var(--surface-2);
+}
+
+.fallback {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 13.5px;
+}
+.fallback textarea {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+.fallback .link-btn {
+  justify-self: start;
+}
+
+.panel {
+  min-width: 0;
+}
+.panel:focus-visible {
+  outline-offset: 6px;
+  border-radius: 8px;
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-weight: 650;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- lean canvas ---------- */
+
+.canvas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.block {
+  background: var(--surface);
+  padding: 16px 16px 18px;
+  min-width: 0;
+}
+.block h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+.block-order {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0;
+}
+.block ul {
+  display: grid;
+  gap: 8px;
+}
+.block li {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.block li:first-child {
+  font-weight: 550;
+}
+.block li:not(:first-child) {
+  color: var(--ink-2);
+}
+.block-uvp li:first-child {
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 860px) {
+  .canvas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .block-advantage {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 520px) {
+  .canvas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- SWOT ---------- */
+
+.swot {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.quad {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  min-width: 0;
+}
+.quad header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-2);
+}
+.quad h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.quad h3::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.quad-weaknesses h3::before,
+.quad-threats h3::before {
+  background: var(--watch);
+}
+.quad-sub {
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.quad ul {
+  display: grid;
+  gap: 10px;
+}
+.quad li {
+  font-size: 14px;
+  color: var(--ink);
+  padding-left: 14px;
+  position: relative;
+  text-wrap: pretty;
+}
+.quad li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 1.5px;
+  background: var(--ink-3);
+}
+
+@media (max-width: 700px) {
+  .swot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- break-even ---------- */
+
+.breakeven {
+  display: grid;
+  gap: 28px;
+}
+
+.formula {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: grid;
+  gap: 4px;
+  overflow-x: auto;
+}
+.formula-line {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.formula-line.working {
+  color: var(--ink);
+}
+.formula-result {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-top: 4px;
+}
+.formula-result.undefined {
+  color: var(--risk);
+  font-size: 14.5px;
+  white-space: normal;
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+.formula .eyebrow {
+  margin-bottom: 4px;
+}
+
+.chart-head {
+  margin-bottom: 8px;
+}
+.chart-sub {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.chart .grid {
+  stroke: var(--line-2);
+  stroke-width: 1;
+}
+.chart .tick {
+  fill: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.chart .axis-title {
+  fill: var(--ink-2);
+  font-size: 12px;
+  font-family: var(--font-body);
+}
+.chart .rev-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.75;
+  stroke-linecap: round;
+}
+.chart .cost-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+}
+.chart .fixed-line {
+  stroke: var(--ink-3);
+  stroke-width: 1.25;
+  stroke-dasharray: 4 5;
+}
+.chart .profit {
+  fill: var(--accent);
+  fill-opacity: 0.14;
+}
+.chart .loss {
+  fill: var(--risk);
+  fill-opacity: 0.11;
+}
+.chart .line-label,
+.chart .be-label {
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.chart .line-label {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+.chart .rev-label {
+  fill: var(--accent);
+}
+.chart .cost-label {
+  fill: var(--ink);
+}
+.chart .fixed-label {
+  fill: var(--ink-3);
+  font-weight: 500;
+}
+.chart .target-line {
+  stroke: var(--watch);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 4;
+}
+.chart .target-label {
+  fill: var(--watch);
+}
+.chart .be-dot {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.chart .be-label {
+  fill: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: var(--font-body);
+}
+.chart .explore-line {
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+.chart .explore-dot {
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+.chart .explore-dot.rev {
+  fill: var(--accent);
+}
+.chart .explore-dot.cost {
+  fill: var(--ink);
+}
+
+.explorer {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.explorer label {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.explorer strong {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.explorer input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.readout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.readout.wide {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-top: 10px;
+}
+.readout > div {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 0;
+}
+.readout dt {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.readout dd {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .readout:not(.wide) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.scenarios h3,
+.signals-wrap h3,
+.target-summary h3 {
+  margin-bottom: 10px;
+}
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th,
+td {
+  padding: 10px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+thead th {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+tbody th {
+  font-weight: 550;
+}
+tbody tr + tr > * {
+  border-top: 1px solid var(--line-2);
+}
+tbody tr.current > * {
+  background: var(--accent-soft);
+  font-weight: 650;
+}
+.num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+thead .num {
+  font-family: var(--font-body);
+}
+
+.signals {
+  display: grid;
+  gap: 8px;
+}
+.signal {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.signal-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: 999px;
+  padding: 3px 0;
+  margin-top: 1px;
+}
+.signal-good .signal-tag {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.signal-watch .signal-tag {
+  background: var(--watch-soft);
+  color: var(--watch);
+}
+.signal-risk .signal-tag {
+  background: var(--risk-soft);
+  color: var(--risk);
+}
+.signal-title {
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.signal-detail {
+  color: var(--ink-2);
+  font-size: 13.5px;
+  margin-top: 2px;
+}
+
+@media (max-width: 480px) {
+  .signal {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .signal-tag {
+    justify-self: start;
+    padding-inline: 12px;
+  }
+}
+
+/* ---------- roadmap ---------- */
+
+.roadmap {
+  display: grid;
+  gap: 22px;
+}
+.ramp-track {
+  display: grid;
+  gap: 6px;
+}
+.ramp-step {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  min-width: min(100%, 130px);
+}
+.ramp-num {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.ramp-day {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.ramp-note {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-top: 8px;
+}
+
+.phases {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.phase {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+}
+.phase-range {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.phase-objective {
+  font-size: 14px;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.phase-metric {
+  display: grid;
+  padding-block: 10px;
+  border-block: 1px solid var(--line-2);
+}
+.phase-metric-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.phase-metric-label {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.checklist {
+  display: grid;
+  gap: 10px;
+}
+.checklist li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.checklist input {
+  margin: 3px 0 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+.checklist label {
+  font-size: 14px;
+  line-height: 1.45;
+  cursor: pointer;
+  text-wrap: pretty;
+}
+.checklist input:checked + label {
+  color: var(--ink-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--line);
+}
+.progress-note {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 1180px) {
+  .phases {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- footer, toast ---------- */
+
+.foot {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 13px;
+  max-width: 78ch;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 550;
+  box-shadow: var(--shadow);
+  z-index: 20;
+}
+
+@media (max-width: 560px) {
+  .sheet {
+    padding: 16px;
+  }
+  .brief {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tabs button,
+  .segmented button,
+  .chip-btn,
+  .btn {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+}
+
+/* Break-even tab before a price exists */
+.chart-empty {
+  display: grid;
+  gap: 6px;
+  padding: 20px 22px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.chart-empty h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.chart-empty p {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+</style>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+(()=>{var Ce=Object.create;var{getPrototypeOf:$e,defineProperty:Z,getOwnPropertyNames:Me}=Object;var Q=Object.prototype.hasOwnProperty;function Pe(t){return this[t]}var Se,Te,H=(t,e,a)=>{var n=t!=null&&typeof t==="object";if(n){var i=e?Se??=new WeakMap:Te??=new WeakMap,u=i.get(t);if(u)return u}a=t!=null?Ce($e(t)):{};let c=e||!t||!t.__esModule||!Q.call(t,"default")?Z(a,"default",{value:t,enumerable:!0}):a;if(t&&typeof t==="object"||typeof t==="function"){for(let l of Me(t))if(!Q.call(c,l))Z(c,l,{get:Pe.bind(t,l),enumerable:!0})}if(n)i.set(t,c);return c};var X=(t,e)=>()=>(e||t((e={exports:{}}).exports,e),e.exports);var te=X(function(Re,ee){ee.exports=window.ReactDOM});var Y=X(function(Ae,se){se.exports=window.React});var ke=H(te(),1);var x=H(Y(),1);function y(t){if(!Number.isFinite(t))return"—";return new Intl.NumberFormat("en-US",{maximumFractionDigits:1}).format(t)}function S(t){if(!Number.isFinite(t))return"—";return`${Math.round(t*100)}%`}function E(t,e="USD",a={}){if(!Number.isFinite(t))return"—";let n=Math.abs(t),i=!Number.isInteger(t)&&n<100;try{return new Intl.NumberFormat("en-US",{style:"currency",currency:e,...a.compact?{notation:"compact",minimumFractionDigits:0,maximumFractionDigits:1}:{minimumFractionDigits:i?2:0,maximumFractionDigits:i?2:0}}).format(t)}catch{return`${e} ${t.toFixed(i?2:0)}`}}function ae(t){try{return new Intl.NumberFormat("en-US",{style:"currency",currency:t,currencyDisplay:"narrowSymbol"}).formatToParts(0).find((a)=>a.type==="currency")?.value??t}catch{return t}}var F={subscription:{label:"Subscription",blurb:"Customers pay every month while they stay.",priceLabel:"Monthly price per subscriber",costLabel:"Monthly cost to serve one subscriber",noun:"subscriber",nouns:"subscribers",period:"per subscriber per month",perMonth:!1},"one-time":{label:"One-time sale",blurb:"Customers pay once for each product or job.",priceLabel:"Price per sale",costLabel:"Cost per sale (materials, fees, delivery)",noun:"sale",nouns:"sales",period:"per sale",perMonth:!0},services:{label:"Services and retainers",blurb:"Clients pay monthly for ongoing work.",priceLabel:"Fee per client per month",costLabel:"Monthly cost to serve one client",noun:"client",nouns:"clients",period:"per client per month",perMonth:!1},marketplace:{label:"Marketplace commission",blurb:"You earn a cut of each transaction between two sides.",priceLabel:"Your revenue per transaction",costLabel:"Cost per transaction (payments, support)",noun:"transaction",nouns:"transactions",period:"per transaction",perMonth:!0},usage:{label:"Usage-based",blurb:"Customers pay according to how much they use.",priceLabel:"Average monthly spend per customer",costLabel:"Monthly cost to serve one customer",noun:"customer",nouns:"customers",period:"per customer per month",perMonth:!1}},L={idea:{label:"Idea",hint:"Nothing built or sold yet."},validating:{label:"Validating",hint:"Talking to customers, testing demand."},launched:{label:"Launched",hint:"First paying customers."},scaling:{label:"Scaling",hint:"Repeatable sales, growing the base."}};function ne(t,e,a){let n=U(e-a,9);if(!Number.isFinite(n)||!(n>0))return null;if(!Number.isFinite(t)||t<=0)return 0;return Math.ceil(U(t/n,9))}var Fe=["idea","validating","launched","scaling"],Be=["subscription","one-time","services","marketplace","usage"];function U(t,e){let a=10**e;return Math.round(t*a)/a}function V(t){let e=typeof t==="number"?t:Number(t);return Number.isFinite(e)?e:0}var G=(t)=>Math.max(0,V(t));function I(t){return typeof t==="string"?t.replace(/\s+/g," ").trim():""}function Ee(t){let e=V(t.targetCustomers);return{businessName:I(t.businessName)||"Untitled venture",idea:I(t.idea),problem:I(t.problem),audience:I(t.audience)||"your target customers",customerType:t.customerType==="consumers"?"consumers":"businesses",stage:Fe.includes(t.stage)?t.stage:"idea",revenueModel:Be.includes(t.revenueModel)?t.revenueModel:"subscription",currency:I(t.currency).toUpperCase()||"USD",price:G(t.price),variableCostPerCustomer:G(t.variableCostPerCustomer),monthlyFixedCosts:G(t.monthlyFixedCosts),targetCustomers:e>0?Math.round(e):null}}function re(t){let e=[],a=V(t.price),n=V(t.variableCostPerCustomer);if(!I(t.idea))e.push({field:"idea",level:"hint",message:"Describe the idea in a sentence so the canvas can use your words."});if(!I(t.audience))e.push({field:"audience",level:"hint",message:"Name who this is for. The plan is written around them."});if(a<=0)e.push({field:"price",level:"hint",message:"Enter a price above zero to see break-even."});else if(a<=n)e.push({field:"variableCostPerCustomer",level:"error",message:"Price must be higher than the cost per customer, or break-even does not exist."});return e}function Ie(t){if(!t)return"";let e=t.match(/^.*?[.!?](\s|$)/),a=(e?e[0]:t).trim();if(a.length>160)a=`${a.slice(0,157).trimEnd()}…`;return a}function Le(t){let{price:e,variableCostPerCustomer:a,monthlyFixedCosts:n,targetCustomers:i}=t,u=U(e-a,9),c=ne(n,e,a),l=c!==null,r=l&&u>0?n/u:null,m=[0.8,0.9,1,1.1,1.2].map((v)=>{let M=U(e*v,2),b=U(M-a,9),f=ne(n,M,a);return{label:v===1?"Your price":`${v>1?"+":"−"}${Math.round(Math.abs(v-1)*100)}%`,price:M,unitMargin:b,customers:f,revenue:f===null?null:f*M}}),h=i?{customers:i,revenue:i*e,costs:n+i*a,profit:i*e-(n+i*a),marginOfSafety:c===null?null:(i-c)/i}:null,d=Math.max(c??0,i??0);return{feasible:l,unitMargin:u,marginPercent:e>0?u/e:null,customers:c,revenue:c===null?null:c*e,exactCustomers:r,sixMonthFixedCosts:n*6,target:h,scenarios:m,chartMax:Math.max(10,Math.ceil(d*1.6))}}function De(t,e){let a=F[t.revenueModel],n=(h)=>E(h,t.currency),i=(h)=>`${y(h)} ${h===1?a.noun:a.nouns}`,u=(h)=>a.perMonth?`${i(h)} per month`:`${y(h)} active ${h===1?a.noun:a.nouns}`,c=e.customers&&e.customers>0?e.customers:t.targetCustomers??10,l=Math.max(1,Math.round(c*0.2)),r=Math.max(l,Math.round(c*0.5)),m=Math.max(r,c);return{inp:t,meta:a,be:e,aud:Oe(t.audience),money:n,count:i,units:u,d30:l,d60:r,d90:m}}function Oe(t){return/^[A-Z][a-z]/.test(t)?t.charAt(0).toLowerCase()+t.slice(1):t}function We(t){let{inp:e,meta:a,be:n,aud:i,money:u,count:c}=t,l=(D,j,p,N)=>({id:D,order:j,title:p,items:N}),r=e.customerType==="businesses",m=Ie(e.idea),h=[e.problem||"Not written yet. Describe the problem the way a customer would say it out loud.",r?"Today they patch it together with spreadsheets, email and general-purpose software.":"Today they rely on word of mouth, crowded marketplaces, or go without.",...e.stage==="idea"||e.stage==="validating"?["Open question: how often does this hurt, and what do they already pay to ease it?"]:[]],d=[e.audience,`Early adopters: the ${r?"buyers":"people"} in that group who feel the problem weekly and already pay for a workaround.`,r?"Check who signs off and who uses it. They are often different people.":"Check who decides and who pays. In households and teams, they can differ."],v=m?[m,`Made for ${i}, priced at ${u(e.price)} ${a.period}.`]:["Write one sentence: what you do, for whom, and why it beats the alternative.",`Made for ${i}, priced at ${u(e.price)} ${a.period}.`],M={subscription:"Ongoing access delivered as a monthly subscription.","one-time":"A single purchase that delivers the full result.",services:"A productised service with fixed scope, price and delivery time.",marketplace:"A platform that matches both sides and takes a cut of each transaction.",usage:"Pay-for-what-you-use access, so cost grows with the value received."},b={idea:"Start with the smallest version that proves the core promise: a landing page, a prototype or a manual service.",validating:"Deliver the promise by hand or with no-code tools before building anything permanent.",launched:"Tighten the one workflow customers pay for and remove features they do not use.",scaling:"Systemise delivery so each new customer costs less to serve than the last."},f={idea:"Start with one-to-one conversations before any paid channel.",validating:"Double down on the one channel that produced your first committed customers.",launched:"Rank channels by cost per customer and cut the weakest.",scaling:"Add one channel at a time and prove payback before raising spend."},T=r?[`Direct outreach to ${i} by email and LinkedIn`,"Referrals from early customers and advisors","Content that answers the exact problem people search for"]:[`Short posts and video where ${i} already spend time`,"Word of mouth with a simple referral reward","Search and local listings"],g={subscription:"Annual plan at a discount to reduce churn.","one-time":"Add-ons and bundles to lift order value.",services:"Retainer upgrade once the first project lands.",marketplace:"Featured listings for the supply side.",usage:"Volume tiers and a minimum monthly commitment."},R=[`${u(e.price)} ${a.period}`,g[e.revenueModel],e.targetCustomers?`At ${c(e.targetCustomers)}: ${u(e.targetCustomers*e.price)} revenue per month.`:n.revenue!==null?`Break-even revenue: ${u(n.revenue)} per month.`:"Price is at or below cost, so revenue does not yet cover delivery."],w={subscription:"Typical drivers: hosting, support and payment fees.","one-time":"Typical drivers: materials, fulfilment and returns.",services:"Typical drivers: delivery time, tools and subcontractors.",marketplace:"Typical drivers: payment fees, trust and safety, support.",usage:"Typical drivers: compute or materials that rise with usage."},k=[`Fixed: ${u(e.monthlyFixedCosts)} per month.`,`Variable: ${u(e.variableCostPerCustomer)} per ${a.noun}.`,w[e.revenueModel],n.customers!==null?`Covered at ${t.units(n.customers)}.`:"Not covered at the current price."],A=[...{subscription:["Active subscribers","Monthly churn","Trial to paid conversion"],"one-time":["Sales per month","Visit to purchase conversion","Refund and repeat-purchase rate"],services:["Active clients","Capacity used","Lead to client conversion"],marketplace:["Transactions per month","Supply to demand ratio","Share of transactions that repeat"],usage:["Active accounts","Average monthly spend","Usage growth per account"]}[e.revenueModel],n.customers!==null&&n.customers>0?`Progress to break-even: ${y(n.customers)}.`:"Margin per unit after delivery."],O=[r?"Candidates: domain expertise, a trusted network, proprietary data.":"Candidates: community, brand, supplier access, speed of delivery.","Test it: could a funded competitor copy this in a month? If yes, name what they could not."];return[l("problem",1,"Problem",h),l("segments",2,"Customer segments",d),l("uvp",3,"Unique value proposition",v),l("solution",4,"Solution",[M[e.revenueModel],b[e.stage]]),l("channels",5,"Channels",[f[e.stage],...T]),l("revenue",6,"Revenue streams",R),l("costs",7,"Cost structure",k),l("metrics",8,"Key metrics",A),l("advantage",9,"Unfair advantage",O)]}function je(t){let{inp:e,be:a,meta:n,money:i,units:u,aud:c}=t,l=[],r=e.customerType==="businesses";if(!a.feasible){let h=e.variableCostPerCustomer-e.price;return l.push({id:"price-below-cost",level:"risk",title:"Price does not cover the cost of serving a customer",detail:h>0?`Each ${n.noun} loses ${i(h)}. More volume makes the loss larger. Raise the price or cut the cost before selling.`:`Each ${n.noun} earns nothing after delivery, so fixed costs can never be recovered. Price must be above ${i(e.variableCostPerCustomer)}.`}),l}let m=a.marginPercent??0;if(m>=0.6)l.push({id:"margin",level:"good",title:`Healthy unit margin of ${S(m)}`,detail:`Each ${n.noun} contributes ${i(a.unitMargin)}, which leaves room to pay for acquiring customers.`});else if(m>=0.3)l.push({id:"margin",level:"watch",title:`Moderate unit margin of ${S(m)}`,detail:`Each ${n.noun} contributes ${i(a.unitMargin)}. Keep acquisition cost well below that figure.`});else l.push({id:"margin",level:"risk",title:`Thin unit margin of ${S(m)}`,detail:`Each ${n.noun} contributes only ${i(a.unitMargin)}. Small cost increases or discounts could erase it.`});if(e.monthlyFixedCosts<=0)l.push({id:"fixed",level:"good",title:"No fixed costs",detail:"Every sale contributes from the first one, so there is no break-even hurdle to clear."});else if(a.customers!==null){let h=r?150:1000;if(a.customers>h)l.push({id:"scale",level:"watch",title:`Break-even needs ${u(a.customers)}`,detail:`That is a large base for ${c}. Cut fixed costs or raise the price to bring it down.`});else if(a.customers<=(r?25:100))l.push({id:"scale",level:"good",title:`Break-even needs only ${u(a.customers)}`,detail:"This is reachable through direct outreach and word of mouth, without outside capital."})}if(a.target){let h=a.target.marginOfSafety;if(h!==null&&h<0)l.push({id:"target",level:"risk",title:"Target sits below break-even",detail:`At ${y(a.target.customers)} ${n.nouns} the plan loses ${i(Math.abs(a.target.profit))} each month. Raise the target, the price, or cut fixed costs.`});else if(h!==null&&h<0.4)l.push({id:"target",level:"watch",title:`Margin of safety is ${S(h)}`,detail:"Your target is only slightly above break-even. A weak month of sales could push you into a loss."});else if(h!==null)l.push({id:"target",level:"good",title:`Margin of safety is ${S(h)}`,detail:`At your target the plan earns ${i(a.target.profit)} per month after all costs.`})}if(e.revenueModel==="subscription")l.push({id:"churn",level:"watch",title:"Churn raises the number of sign-ups you need",detail:"Break-even counts active subscribers. Every cancellation has to be replaced before the count grows."});else if(e.revenueModel==="marketplace")l.push({id:"two-sided",level:"watch",title:"Both sides must show up",detail:"Transactions need supply and demand together. Start in one niche or area until both are active."});else if(e.revenueModel==="one-time")l.push({id:"reset",level:"watch",title:"Sales reset every month",detail:"Without repeat purchases you must find new buyers each month to stay above break-even."});return l}function Ue(t){let{inp:e,be:a,meta:n,money:i,units:u}=t,c=e.customerType==="businesses",l=a.marginPercent??0,r=[];if(a.feasible&&l>=0.6)r.push(`Strong unit margin of ${S(l)} leaves room for acquisition cost.`);if(a.feasible&&e.monthlyFixedCosts<=0)r.push("No fixed costs: every sale contributes from day one.");else if(a.customers!==null&&a.customers<=(c?25:100))r.push(`Low break-even of ${u(a.customers)} is reachable without outside capital.`);let m={subscription:"Recurring revenue makes cash flow easier to forecast.","one-time":"A simple offer with no commitment lowers the barrier to buy.",services:"Service revenue arrives early, before a full product exists.",marketplace:"Network effects can compound once both sides are active.",usage:"Revenue grows with customer value and the barrier to start is low."},h={idea:"Low sunk cost: you can change direction freely.",validating:"You can learn from real customers before committing money.",launched:"Real customers give you evidence that competitors lack.",scaling:"Proven demand and a repeatable base to build on."};if(r.push(m[e.revenueModel],h[e.stage]),I(e.audience).length>3&&e.audience!=="your target customers")r.push(`A defined audience: ${e.audience}.`);let d=[];if(!a.feasible)d.push(`Price of ${i(e.price)} does not cover the ${i(e.variableCostPerCustomer)} cost per ${n.noun}.`);else if(l<0.3)d.push(`Thin unit margin of ${S(l)} leaves little room for error.`);if(a.customers!==null&&a.customers>(c?150:1000))d.push(`Break-even needs ${u(a.customers)}, a large base to build.`);if(!e.problem)d.push("The customer problem is not yet written down.");let v={idea:"Demand, price and willingness to pay are all untested.",validating:"Evidence so far comes from a small sample of conversations.",launched:"Retention data is still thin, so lifetime value is a guess.",scaling:"Processes may strain as volume grows."},M={subscription:"Churn erodes the base and forces constant acquisition.","one-time":"Revenue resets each month and depends on finding new buyers.",services:"Revenue is capped by the hours your team can deliver.",marketplace:"Value appears only when both sides are present, which is hard to start.",usage:"Revenue varies month to month and is harder to forecast."};d.push(v[e.stage],M[e.revenueModel]);let b=[];b.push(c?"Businesses pay for time saved. Anchor the price to hours or revenue protected.":"Consumer niches respond well to community-led growth and referrals.");let f={subscription:"Annual plans and add-ons raise lifetime value.","one-time":"Bundles and accessories lift the value of each order.",services:"Package the repeatable parts of the work into a fixed-price offer.",marketplace:"Win one narrow niche or city to reach density before expanding.",usage:"Tiered pricing can capture heavier users."},T={idea:"Customer interviews can shape the offer before any build cost.",validating:"Pilot customers can become case studies and referrals.",launched:"Testimonials from first customers can cut acquisition cost.",scaling:"New segments and channels can use the same core product."};b.push(f[e.revenueModel],T[e.stage],"Low-cost AI and no-code tools make early delivery cheaper than it was a few years ago.");let g=[];if(e.monthlyFixedCosts>0)g.push(`Cash need: about ${i(a.sixMonthFixedCosts)} to cover six months of fixed costs before break-even.`);let R={subscription:"Price-sensitive customers may cancel when budgets tighten.","one-time":"Rivals may discount and compress your price.",services:"Clients may bring the work in-house.",marketplace:"Participants may transact off-platform to avoid your fee.",usage:"Customers may cap usage to control spend."};return g.push(R[e.revenueModel]),g.push(c?"Long sales cycles can delay the first revenue.":"Rising ad costs make paid acquisition expensive."),g.push("Incumbents with larger budgets can copy visible features."),{strengths:r.slice(0,4),weaknesses:d.slice(0,4),opportunities:b.slice(0,4),threats:g.slice(0,4)}}function Ve(t){let{inp:e,meta:a,be:n,aud:i,money:u,count:c,d30:l,d60:r,d90:m}=t,h=e.customerType==="businesses",{noun:d,nouns:v}=a,M={idea:{title:"Prove the problem is real",objective:`Confirm that ${i} feel the problem strongly enough to pay ${u(e.price)} ${a.period}.`,actions:[`Hold 15 problem interviews with ${i}. Ask how they handle this today and what it costs them.`,"Write the problem and promise in one sentence and test it on the next five people you speak to.",`Ask for a deposit or pre-order from ${c(l)}.`,`Replace the ${u(e.variableCostPerCustomer)} cost guess per ${d} with a real quote or a manual test.`]},validating:{title:"Turn interest into paid commitments",objective:`Convert warm leads into ${c(l)} paying at ${u(e.price)} ${a.period}.`,actions:[`Offer paid pilots to ${i} who have already shown interest.`,"Log every objection and price reaction in one shared sheet.","Deliver the promise by hand or with no-code tools before building anything permanent.",`Compare real delivery cost with your ${u(e.variableCostPerCustomer)} assumption.`]},launched:{title:"Find out why customers stay",objective:`Reach ${c(l)} and learn what keeps them.`,actions:["Interview your five happiest customers and anyone who left.",`Track activation: how many new ${v} reach their first result within a week.`,"Shorten the path from first contact to first payment.","Hide or remove features nobody uses."]},scaling:{title:"Stabilise the base before adding spend",objective:`Hold at least ${c(l)} while you find the leakiest step in the funnel.`,actions:["Map the funnel by channel and find the step that loses the most people.",`Document delivery so a new hire could serve a ${d} in their first week.`,`Review the ${u(e.monthlyFixedCosts)} of monthly fixed costs line by line.`,"Pick one new channel to test with a small, capped budget."]}},T=[h?`Send 30 personal outreach messages a week to ${i}. Track replies and calls booked.`:`Post three times a week where ${i} already spend time. Track which post brings sign-ups.`,"Turn the first happy customers into one case study and two referrals.",{subscription:"Offer an annual plan with a discount to cut early churn.","one-time":"Test a bundle or add-on to raise the value of each order.",services:"Package the work into one fixed-scope offer with a set delivery time.",marketplace:"Focus on a single niche or area until both sides are active.",usage:"Test a minimum monthly commitment or simple usage tiers."}[e.revenueModel],n.feasible?`Record what it costs to win one ${d}. Keep it well below the ${u(n.unitMargin)} margin per ${d}.`:`Fix the price first: it must exceed ${u(e.variableCostPerCustomer)} before you spend on acquisition.`],g=n.scenarios.find((A)=>A.label==="+10%"),R=[n.feasible&&g&&g.customers!==null?`Test a price 10% higher with new prospects. At ${u(g.price)}, break-even falls to ${y(g.customers)}.`:"Test two price points with new prospects and keep the one that leaves a positive margin.","Spend only on the channel that worked in days 31 to 60.",n.feasible?`At day 90, compare actual ${v} with ${y(m)}, margin per ${d} and cash left.`:"At day 90, check that every sale now contributes a positive margin.","Decide whether to continue, change the offer or stop. Write down the evidence for the choice."],w=`Price (${u(e.price)}) is at or below the cost per ${d} (${u(e.variableCostPerCustomer)}). Fix that before selling.`,k=M[e.stage];return[{id:"d30",range:"Days 1 to 30",title:k.title,objective:k.objective,metric:n.feasible?{label:`${a.nouns} by day 30`,value:y(l)}:{label:"Margin per unit",value:"Above zero"},actions:n.feasible?k.actions:[w,...k.actions.slice(0,3)]},{id:"d60",range:"Days 31 to 60",title:"Make acquisition repeatable",objective:n.feasible?`Find one channel that brings in ${i} at an affordable cost and reach ${c(r)}.`:`Find one channel that works, then reprice so each ${d} is profitable.`,metric:n.feasible?{label:`${a.nouns} by day 60`,value:y(r)}:{label:"Price above cost",value:u(e.variableCostPerCustomer)},actions:T},{id:"d90",range:"Days 61 to 90",title:n.feasible?"Reach break-even and decide":"Reprice and decide",objective:n.feasible&&n.revenue!==null?`Reach ${c(m)} so ${u(n.revenue)} of revenue covers ${u(e.monthlyFixedCosts)} of fixed costs.`:`Reprice or cut cost so each ${d} contributes a positive margin.`,metric:n.feasible?{label:`${a.nouns} by day 90`,value:y(m)}:{label:"Break-even",value:"Not defined yet"},actions:R}]}function _e(t){let{inp:e,be:a,meta:n,money:i,units:u}=t;if(!a.feasible||a.customers===null){let l=e.variableCostPerCustomer-e.price;return l>0?`At ${i(e.price)} against a cost of ${i(e.variableCostPerCustomer)} per ${n.noun}, each ${n.noun} loses ${i(l)}. Break-even is undefined until price exceeds cost.`:`Break-even is undefined until the price is above the ${i(e.variableCostPerCustomer)} cost per ${n.noun}.`}let c=`Break-even needs ${u(a.customers)} at ${i(e.price)} ${n.period}.`;if(a.target&&a.target.customers>0){if(a.customers<=a.target.customers)return`${c} That is ${S(a.customers/a.target.customers)} of your target of ${y(a.target.customers)}.`;return`${c} Your target of ${y(a.target.customers)} sits below it, so the plan loses money at that scale.`}return c}function oe(t){let e=Ee(t),a=Le(e),n=De(e,a);return{engine:{id:"rule-based",label:"Rule-based engine"},input:e,headline:_e(n),canvas:We(n),swot:Ue(n),breakEven:a,signals:je(n),roadmap:Ve(n)}}function ie(t){let{input:e,breakEven:a}=t,n=F[e.revenueModel],i=(l)=>E(l,e.currency),u=(l)=>l.map((r)=>`- ${r}`).join(`
+`),c=[];if(c.push(`# ${e.businessName}`),e.idea)c.push(e.idea);c.push(`**Stage:** ${L[e.stage].label} · **Model:** ${n.label} · **Customers:** ${e.customerType}`),c.push(`> ${t.headline}`),c.push("## Lean canvas");for(let l of[...t.canvas].sort((r,m)=>r.order-m.order))c.push(`### ${l.order}. ${l.title}
+${u(l.items)}`);if(c.push("## SWOT"),c.push(`### Strengths
+${u(t.swot.strengths)}`),c.push(`### Weaknesses
+${u(t.swot.weaknesses)}`),c.push(`### Opportunities
+${u(t.swot.opportunities)}`),c.push(`### Threats
+${u(t.swot.threats)}`),c.push("## Break-even"),c.push([`- Price: ${i(e.price)} ${n.period}`,`- Variable cost: ${i(e.variableCostPerCustomer)} per ${n.noun}`,`- Fixed costs: ${i(e.monthlyFixedCosts)} per month`,`- Unit margin: ${i(a.unitMargin)}${a.marginPercent!==null?` (${S(a.marginPercent)})`:""}`,a.customers!==null?`- Break-even: ${y(a.customers)} ${a.customers===1?n.noun:n.nouns}${n.perMonth?" per month":" active"}, ${i(a.revenue??0)} revenue per month`:"- Break-even: undefined, because price is not above variable cost"].join(`
+`)),c.push("Formula: break-even = ceil(monthly fixed costs / (price − variable cost per customer))."),t.signals.length)c.push(`### Signals
+${u(t.signals.map((l)=>`${l.title}. ${l.detail}`))}`);c.push("## 30-60-90 day plan");for(let l of t.roadmap)c.push(`### ${l.range}: ${l.title}
+${l.objective}
+
+**${l.metric.label}:** ${l.metric.value}
+
+${u(l.actions)}`);return c.push("_Generated in the browser by the rule-based engine. Nothing was sent anywhere._"),c.join(`
+
+`)}function le(t){return JSON.stringify(t,null,2)}function ce(t){let e=(a)=>{let n=Number(a);return Number.isFinite(n)?n:0};return{businessName:t.businessName,idea:t.idea,problem:t.problem,audience:t.audience,customerType:t.customerType,stage:t.stage,revenueModel:t.revenueModel,currency:t.currency,price:e(t.price),variableCostPerCustomer:e(t.variableCost),monthlyFixedCosts:e(t.fixedCosts),targetCustomers:t.target.trim()===""?null:e(t.target)}}var W=[{id:"invoices",label:"Invoice reminders",form:{businessName:"Nudge",idea:"Automatic, polite payment reminders for unpaid invoices, sent from the freelancer’s own email address.",problem:"Freelancers wait 30 days or more to be paid and feel awkward chasing clients, so cash flow suffers.",audience:"Freelance designers and developers",customerType:"businesses",stage:"validating",revenueModel:"subscription",currency:"USD",price:"12",variableCost:"2.4",fixedCosts:"600",target:"150"}},{id:"bikes",label:"Mobile bike repair",form:{businessName:"Spoke & Ride",idea:"A van that comes to your home or office and repairs your bike the same day.",problem:"Bike shops have week-long queues, and commuters cannot be without their bike that long.",audience:"Urban commuters who ride every day",customerType:"consumers",stage:"idea",revenueModel:"one-time",currency:"USD",price:"38",variableCost:"14",fixedCosts:"1800",target:"120"}},{id:"coffee",label:"Coffee subscription",form:{businessName:"Roast Parcel",idea:"A monthly box of freshly roasted single-origin coffee from small roasters.",problem:"Specialty coffee is hard to discover, and supermarket beans are often stale by the time they are opened.",audience:"Home brewers who care about coffee",customerType:"consumers",stage:"launched",revenueModel:"subscription",currency:"USD",price:"24",variableCost:"14.5",fixedCosts:"1200",target:"300"}}],J={businessName:"",idea:"",problem:"",audience:"",customerType:"businesses",stage:"idea",revenueModel:"subscription",currency:"USD",price:"",variableCost:"",fixedCosts:"",target:""},ue=["USD","EUR","GBP","LKR","INR","AUD","CAD","SGD","AED"];var _=window.React,de=_.Fragment;function s(t,e,a){let{children:n,...i}=e;if(a!==void 0)i.key=a;if(n===void 0)return _.createElement(t,i);return Array.isArray(n)?_.createElement(t,i,...n):_.createElement(t,i,n)}var o=s;function B(t){let{id:e,label:a,hint:n,issue:i,children:u}=t;return o("div",{className:"field",children:[s("label",{htmlFor:e,children:a}),u,i?s("p",{className:`field-note ${i.level}`,id:`${e}-note`,children:i.message}):n?s("p",{className:"field-note",id:`${e}-note`,children:n}):null]})}function K(t){return o("div",{className:"money",children:[s("span",{className:"money-sym","aria-hidden":"true",children:ae(t.currency)}),s("input",{id:t.id,type:"number",inputMode:"decimal",min:"0",step:"any",value:t.value,placeholder:t.placeholder,"aria-invalid":t.invalid||void 0,"aria-describedby":`${t.id}-note`,onChange:(e)=>t.onChange(e.target.value)})]})}function me({form:t,issues:e,exampleId:a,onChange:n,onPreset:i,onBlank:u}){let c=(r)=>e.find((m)=>m.field===r),l=F[t.revenueModel];return o("form",{className:"brief",onSubmit:(r)=>r.preventDefault(),"aria-label":"Business brief",children:[o("div",{className:"brief-head",children:[s("h2",{children:"Your brief"}),s("button",{type:"button",className:"link-btn",onClick:u,children:"Start blank"})]}),o("div",{className:"presets",role:"group","aria-label":"Example briefs",children:[s("span",{className:"presets-label",children:"Try an example"}),W.map((r)=>s("button",{type:"button",className:"chip-btn","aria-pressed":a===r.id,onClick:()=>i(r.id),children:r.label},r.id))]}),o("fieldset",{children:[s("legend",{children:"The idea"}),s(B,{id:"businessName",label:"Business name",children:s("input",{id:"businessName",type:"text",value:t.businessName,placeholder:"e.g. Nudge",onChange:(r)=>n({businessName:r.target.value})})}),s(B,{id:"idea",label:"What does it do?",issue:c("idea"),hint:"One or two sentences. The first sentence becomes your value proposition.",children:s("textarea",{id:"idea",rows:3,value:t.idea,"aria-describedby":"idea-note",placeholder:"Describe what you offer and the result customers get.",onChange:(r)=>n({idea:r.target.value})})}),s(B,{id:"problem",label:"What problem does it solve?",hint:"Optional, but it sharpens the canvas.",children:s("textarea",{id:"problem",rows:2,value:t.problem,"aria-describedby":"problem-note",placeholder:"The problem, as a customer would say it.",onChange:(r)=>n({problem:r.target.value})})})]}),o("fieldset",{children:[s("legend",{children:"The audience"}),s(B,{id:"audience",label:"Who is it for?",issue:c("audience"),children:s("input",{id:"audience",type:"text",value:t.audience,"aria-describedby":"audience-note",placeholder:"e.g. Freelance designers",onChange:(r)=>n({audience:r.target.value})})}),o("div",{className:"field",children:[s("span",{className:"label",id:"ctype-label",children:"They are"}),s("div",{className:"segmented",role:"radiogroup","aria-labelledby":"ctype-label",children:["businesses","consumers"].map((r)=>s("button",{type:"button",role:"radio","aria-checked":t.customerType===r,onClick:()=>n({customerType:r}),children:r==="businesses"?"Businesses":"Consumers"},r))})]})]}),o("fieldset",{children:[s("legend",{children:"The model"}),s(B,{id:"stage",label:"Stage",hint:L[t.stage].hint,children:s("select",{id:"stage",value:t.stage,"aria-describedby":"stage-note",onChange:(r)=>n({stage:r.target.value}),children:Object.keys(L).map((r)=>s("option",{value:r,children:L[r].label},r))})}),s(B,{id:"revenueModel",label:"Revenue model",hint:l.blurb,children:s("select",{id:"revenueModel",value:t.revenueModel,"aria-describedby":"revenueModel-note",onChange:(r)=>n({revenueModel:r.target.value}),children:Object.keys(F).map((r)=>s("option",{value:r,children:F[r].label},r))})})]}),o("fieldset",{children:[s("legend",{children:"The numbers"}),s(B,{id:"currency",label:"Currency",children:s("select",{id:"currency",value:t.currency,onChange:(r)=>n({currency:r.target.value}),children:ue.map((r)=>s("option",{value:r,children:r},r))})}),s(B,{id:"price",label:l.priceLabel,issue:c("price"),children:s(K,{id:"price",value:t.price,currency:t.currency,placeholder:"0",onChange:(r)=>n({price:r})})}),s(B,{id:"variableCost",label:l.costLabel,issue:c("variableCostPerCustomer"),children:s(K,{id:"variableCost",value:t.variableCost,currency:t.currency,placeholder:"0",invalid:c("variableCostPerCustomer")?.level==="error",onChange:(r)=>n({variableCost:r})})}),s(B,{id:"fixedCosts",label:"Fixed costs per month",hint:"Rent, tools, salaries, ads: anything that does not change with volume.",children:s(K,{id:"fixedCosts",value:t.fixedCosts,currency:t.currency,placeholder:"0",onChange:(r)=>n({fixedCosts:r})})}),s(B,{id:"target",label:`Target ${l.nouns} per month`,hint:"Optional. Adds profit and margin of safety at your target.",children:s("input",{id:"target",type:"number",inputMode:"numeric",min:"0",step:"1",value:t.target,"aria-describedby":"target-note",placeholder:"e.g. 100",onChange:(r)=>n({target:r.target.value})})})]}),s("p",{className:"privacy",children:"Everything runs in this page. Nothing you type is sent anywhere."}),a&&s("p",{className:"example-note",children:"Showing an example brief. Edit any field to make it yours."})]})}var fe=H(Y(),1);function pe({plan:t}){return s("div",{className:"canvas","aria-label":"Lean canvas",children:t.canvas.map((e)=>o("section",{className:`block block-${e.id}`,children:[o("h3",{children:[s("span",{className:"block-order","aria-hidden":"true",children:e.order}),e.title]}),s("ul",{children:e.items.map((a)=>s("li",{children:a},a))})]},e.id))})}function he({plan:t}){let e=[{key:"strengths",title:"Strengths",sub:"Internal, helpful",items:t.swot.strengths},{key:"weaknesses",title:"Weaknesses",sub:"Internal, harmful",items:t.swot.weaknesses},{key:"opportunities",title:"Opportunities",sub:"External, helpful",items:t.swot.opportunities},{key:"threats",title:"Threats",sub:"External, harmful",items:t.swot.threats}];return s("div",{className:"swot","aria-label":"SWOT analysis",children:e.map((a)=>o("section",{className:`quad quad-${a.key}`,children:[o("header",{children:[s("h3",{children:a.title}),s("span",{className:"quad-sub",children:a.sub})]}),s("ul",{children:a.items.map((n)=>s("li",{children:n},n))})]},a.key))})}var qe={good:"Strength",watch:"Watch",risk:"Risk"};function be({signals:t}){return s("ul",{className:"signals",children:t.map((e)=>o("li",{className:`signal signal-${e.level}`,children:[s("span",{className:"signal-tag",children:qe[e.level]}),o("div",{children:[s("p",{className:"signal-title",children:e.title}),s("p",{className:"signal-detail",children:e.detail})]})]},e.id))})}function ge({plan:t,checked:e,onToggle:a}){let n=t.roadmap.reduce((r,m)=>r+m.actions.length,0),i=t.roadmap.reduce((r,m)=>r+m.actions.filter((h)=>e[h]).length,0),u=t.breakEven.feasible,c=t.roadmap.map((r)=>Number(r.metric.value.replace(/,/g,""))),l=Math.max(1,...c.filter((r)=>Number.isFinite(r)));return o("div",{className:"roadmap",children:[u&&o("div",{className:"ramp",role:"img","aria-label":`Customers needed: ${c.map((r,m)=>`${y(r)} by day ${(m+1)*30}`).join(", ")}`,children:[s("div",{className:"ramp-track",children:c.map((r,m)=>o("div",{className:"ramp-step",style:{width:`${Math.max(8,r/l*100)}%`},children:[s("span",{className:"ramp-num",children:y(r)}),o("span",{className:"ramp-day",children:["Day ",(m+1)*30]})]},m))}),o("p",{className:"ramp-note",children:[t.input.revenueModel==="one-time"||t.input.revenueModel==="marketplace"?"Monthly volume":"Active customers"," needed at each checkpoint. Day 90 equals break-even."]})]}),s("div",{className:"phases",children:t.roadmap.map((r)=>o("section",{className:"phase",children:[s("p",{className:"phase-range",children:r.range}),s("h3",{children:r.title}),s("p",{className:"phase-objective",children:r.objective}),o("div",{className:"phase-metric",children:[s("span",{className:"phase-metric-value",children:r.metric.value}),s("span",{className:"phase-metric-label",children:r.metric.label})]}),s("ul",{className:"checklist",children:r.actions.map((m,h)=>{let d=`${r.id}-${h}`;return o("li",{children:[s("input",{id:d,type:"checkbox",checked:!!e[m],onChange:()=>a(m)}),s("label",{htmlFor:d,children:m})]},m)})})]},r.id))}),o("p",{className:"progress-note","aria-live":"polite",children:[i," of ",n," actions done"]})]})}function ve(t,e){let a=t>0?t:1,n=a/e,i=10**Math.floor(Math.log10(n)),u=n/i,c=(u<=1?1:u<=2?2:u<=5?5:10)*i,l=Math.ceil(a/c-0.000000001)*c,r=[];for(let m=0;m<=l+c/1000;m+=c)r.push(Math.round(m*1e6)/1e6);return{ticks:r,top:l}}function He({plan:t,explore:e}){let{input:a,breakEven:n}=t,i=F[a.revenueModel],{price:u,variableCostPerCustomer:c,monthlyFixedCosts:l,currency:r}=a,m=720,h=340,d={l:64,r:22,t:22,b:46},v=720-d.l-d.r,M=340-d.t-d.b,b=n.chartMax,f=(C)=>C*u,T=(C)=>l+C*c,g=ve(Math.max(f(b),T(b),1),5),R=ve(b,6),w=(C)=>d.l+C/b*v,k=(C)=>d.t+M-C/g.top*M,P=(C,Ne)=>`${w(C).toFixed(1)},${k(Ne).toFixed(1)}`,A=n.exactCustomers,O=u>=c,D=n.feasible&&A!==null?[P(A,f(A)),P(b,f(b)),P(b,T(b))].join(" "):null,j=n.feasible&&A!==null?[P(0,0),P(0,l),P(A,f(A))].join(" "):[P(0,0),P(0,l),P(b,T(b)),P(b,f(b))].join(" "),p=n.customers,N=n.target?.customers??null,q=N!==null&&N<=b,z=w(e)>446.4;return o("svg",{className:"chart",viewBox:"0 0 720 340",role:"img","aria-label":`Revenue and total cost against ${i.nouns}. ${n.feasible&&p!==null?`They cross at ${y(p)} ${i.nouns}.`:"Revenue never catches total cost at the current price."}`,children:[g.ticks.map((C)=>o("g",{children:[s("line",{className:"grid",x1:d.l,x2:720-d.r,y1:k(C),y2:k(C)}),s("text",{className:"tick",x:d.l-8,y:k(C)+4,textAnchor:"end",children:E(C,r,{compact:!0})})]},`y${C}`)),R.ticks.filter((C)=>C<=b).map((C)=>s("text",{className:"tick",x:w(C),y:340-d.b+18,textAnchor:"middle",children:y(C)},`x${C}`)),o("text",{className:"axis-title",x:d.l+v/2,y:334,textAnchor:"middle",children:[i.nouns,i.perMonth?" per month":" (active)"]}),s("polygon",{className:"loss",points:j}),D&&s("polygon",{className:"profit",points:D}),l>0&&s("line",{className:"fixed-line",x1:d.l,x2:720-d.r,y1:k(l),y2:k(l)}),s("polyline",{className:"cost-line",points:`${P(0,l)} ${P(b,T(b))}`}),s("polyline",{className:"rev-line",points:`${P(0,0)} ${P(b,f(b))}`}),s("text",{className:"line-label rev-label",x:720-d.r-4,y:k(f(b))+(O?-8:16),textAnchor:"end",children:"Revenue"}),s("text",{className:"line-label cost-label",x:720-d.r-4,y:k(T(b))+(O?16:-8),textAnchor:"end",children:"Total cost"}),l>0&&T(b)-l>g.top*0.12&&s("text",{className:"line-label fixed-label",x:720-d.r-4,y:k(l)-6,textAnchor:"end",children:"Fixed costs"}),q&&N!==null&&o("g",{children:[s("line",{className:"target-line",x1:w(N),x2:w(N),y1:d.t,y2:d.t+M}),o("text",{className:"line-label target-label",x:w(N)+6,y:d.t+12,children:["Target ",y(N)]})]}),n.feasible&&p!==null&&p<=b&&o("g",{children:[s("circle",{className:"be-dot",cx:w(p),cy:k(f(p)),r:"6"}),o("text",{className:"be-label",x:w(p)+(w(p)>503.99999999999994?-12:12),y:k(f(p))+(w(p)>503.99999999999994?24:-14),textAnchor:w(p)>503.99999999999994?"end":"start",children:["Break-even ",y(p)]})]}),o("g",{children:[s("line",{className:"explore-line",x1:w(e),x2:w(e),y1:d.t,y2:d.t+M}),s("circle",{className:"explore-dot rev",cx:w(e),cy:k(f(e)),r:"4"}),s("circle",{className:"explore-dot cost",cx:w(e),cy:k(T(e)),r:"4"}),s("text",{className:"tick explore-text",x:w(e)+(z?-6:6),y:d.t+M-6,textAnchor:z?"end":"start",children:y(e)})]})]})}function ye({plan:t}){let{input:e,breakEven:a}=t,n=F[e.revenueModel],i=(v)=>E(v,e.currency),[u,c]=fe.useState(null),l=a.target?.customers??a.customers??Math.round(a.chartMax/2),r=Math.min(u??l,a.chartMax),m=r*e.price,h=e.monthlyFixedCosts+r*e.variableCostPerCustomer,d=m-h;return o("div",{className:"breakeven",children:[o("section",{className:"formula","aria-label":"Break-even working",children:[s("p",{className:"eyebrow",children:"Formula"}),o("p",{className:"formula-line",children:["break-even ",n.nouns," = ceil( fixed costs ÷ ( price − variable cost ) )"]}),a.feasible&&a.customers!==null?o(de,{children:[o("p",{className:"formula-line working",children:["= ceil( ",i(e.monthlyFixedCosts)," ÷ ( ",i(e.price)," − ",i(e.variableCostPerCustomer)," ) )"]}),o("p",{className:"formula-line working",children:["= ceil( ",i(e.monthlyFixedCosts)," ÷ ",i(a.unitMargin)," )",a.exactCustomers!==null&&!Number.isInteger(a.exactCustomers)?` = ceil( ${a.exactCustomers.toFixed(2)} )`:""]}),o("p",{className:"formula-result",children:["= ",y(a.customers)," ",a.customers===1?n.noun:n.nouns]})]}):o("p",{className:"formula-result undefined",children:["Undefined. Price (",i(e.price),") must be greater than variable cost (",i(e.variableCostPerCustomer),")."]})]}),e.price<=0&&o("section",{className:"chart-empty","aria-live":"polite",children:[s("h3",{children:"Add a price to draw the chart"}),s("p",{children:"Enter a price above zero in your brief. The chart, the volume slider and the price table appear as soon as there is a price to work with."})]}),e.price>0&&o("section",{className:"chart-wrap",children:[o("div",{className:"chart-head",children:[s("h3",{children:"Revenue against cost"}),s("p",{className:"chart-sub",children:"Drag the slider to read any volume. Shaded green is profit, shaded red is loss."})]}),s(He,{plan:t,explore:r}),o("div",{className:"explorer",children:[o("label",{htmlFor:"explore",children:["At ",s("strong",{children:y(r)})," ",n.nouns,n.perMonth?" per month":""]}),s("input",{id:"explore",type:"range",min:0,max:a.chartMax,step:1,value:r,onChange:(v)=>c(Number(v.target.value))}),o("dl",{className:"readout",children:[o("div",{children:[s("dt",{children:"Revenue"}),s("dd",{children:i(m)})]}),o("div",{children:[s("dt",{children:"Total cost"}),s("dd",{children:i(h)})]}),o("div",{className:d>=0?"pos":"neg",children:[s("dt",{children:d>=0?"Profit":"Loss"}),s("dd",{children:i(Math.abs(d))})]})]})]})]}),e.price>0&&o("section",{className:"scenarios",children:[s("h3",{children:"What a different price does"}),s("div",{className:"table-scroll",children:o("table",{children:[s("thead",{children:o("tr",{children:[s("th",{scope:"col",children:"Price change"}),s("th",{scope:"col",className:"num",children:"Price"}),s("th",{scope:"col",className:"num",children:"Margin"}),s("th",{scope:"col",className:"num",children:"Break-even"}),s("th",{scope:"col",className:"num",children:"Revenue needed"})]})}),s("tbody",{children:a.scenarios.map((v)=>o("tr",{className:v.label==="Your price"?"current":void 0,children:[s("th",{scope:"row",children:v.label}),s("td",{className:"num",children:i(v.price)}),s("td",{className:"num",children:v.price>0?S(v.unitMargin/v.price):"—"}),s("td",{className:"num",children:v.customers===null?"Undefined":y(v.customers)}),s("td",{className:"num",children:v.revenue===null?"—":i(v.revenue)})]},v.label))})]})})]}),a.target&&o("section",{className:"target-summary",children:[o("h3",{children:["At your target of ",y(a.target.customers)]}),o("dl",{className:"readout wide",children:[o("div",{children:[s("dt",{children:"Revenue"}),s("dd",{children:i(a.target.revenue)})]}),o("div",{children:[s("dt",{children:"Costs"}),s("dd",{children:i(a.target.costs)})]}),o("div",{className:a.target.profit>=0?"pos":"neg",children:[s("dt",{children:a.target.profit>=0?"Profit per month":"Loss per month"}),s("dd",{children:i(Math.abs(a.target.profit))})]}),o("div",{children:[s("dt",{children:"Margin of safety"}),s("dd",{children:a.target.marginOfSafety===null?"—":S(a.target.marginOfSafety)})]})]})]}),o("section",{className:"signals-wrap",children:[s("h3",{children:"Signals"}),s(be,{signals:t.signals})]})]})}var Ye=[{id:"canvas",label:"Lean canvas"},{id:"swot",label:"SWOT"},{id:"breakeven",label:"Break-even"},{id:"roadmap",label:"30-60-90 plan"}],we="aba:form:v1";function Ge(){try{let t=localStorage.getItem(we);if(t){let e=JSON.parse(t);if(e&&typeof e==="object"&&typeof e.idea==="string")return{form:{...J,...e},exampleId:null}}}catch{}return{form:W[0].form,exampleId:W[0].id}}function Je(){let t=document.documentElement.getAttribute("data-theme");if(t==="dark"||t==="light")return t;return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}function Ke(){return o("svg",{className:"logo",viewBox:"0 0 28 28",width:"28",height:"28","aria-hidden":"true",children:[s("rect",{x:"1.5",y:"1.5",width:"25",height:"25",rx:"6",className:"logo-frame"}),s("path",{className:"logo-grid",d:"M10 3v22M18 3v22M3 12h22"}),s("rect",{x:"11",y:"13",width:"6",height:"11",rx:"1",className:"logo-mark"})]})}function xe(){let t=x.useMemo(Ge,[]),[e,a]=x.useState(t.form),[n,i]=x.useState(t.exampleId),[u,c]=x.useState("canvas"),[l,r]=x.useState({}),[m,h]=x.useState(null),[d,v]=x.useState(null),M=x.useRef(null),b=x.useMemo(()=>ce(e),[e]),f=x.useMemo(()=>oe(b),[b]),T=x.useMemo(()=>re(b),[b]),g=f.breakEven,R=F[f.input.revenueModel],w=(p)=>E(p,f.input.currency);x.useEffect(()=>{if(n)return;try{localStorage.setItem(we,JSON.stringify(e))}catch{}},[e,n]),x.useEffect(()=>{if(!m)return;let p=window.setTimeout(()=>h(null),2200);return()=>window.clearTimeout(p)},[m]),x.useEffect(()=>{if(d)M.current?.select()},[d]);let k=x.useCallback((p)=>{a((N)=>({...N,...p})),i(null)},[]),P=x.useCallback((p)=>{let N=W.find((q)=>q.id===p);if(!N)return;a(N.form),i(N.id)},[]),A=x.useCallback(()=>{a(J),i(null)},[]),O=()=>{let p=Je()==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",p);try{localStorage.setItem("aba:theme",p)}catch{}};x.useEffect(()=>{try{let p=localStorage.getItem("aba:theme");if(p==="dark"||p==="light")document.documentElement.setAttribute("data-theme",p)}catch{}},[]);let D=async(p,N)=>{try{await navigator.clipboard.writeText(N),v(null),h(`${p} copied`)}catch{v({label:p,text:N})}},j=(p)=>r((N)=>({...N,[p]:!N[p]}));return o("div",{className:"shell",children:[o("header",{className:"topbar",children:[o("div",{className:"brand",children:[s(Ke,{}),s("span",{className:"brand-name",children:"AI Business Assistant"})]}),o("div",{className:"topbar-tools",children:[o("div",{className:"engine",role:"group","aria-label":"Planning engine",children:[o("button",{type:"button",className:"engine-opt","aria-pressed":"true",children:[s("span",{className:"dot dot-on","aria-hidden":"true"}),"Rule-based"]}),o("button",{type:"button",className:"engine-opt","aria-pressed":"false",disabled:!0,title:"No AI model is connected yet. Add a PlannerProvider in lib/planner.ts.",children:[s("span",{className:"dot","aria-hidden":"true"}),"AI model",s("span",{className:"engine-soon",children:"not connected"})]})]}),s("button",{type:"button",className:"icon-btn",onClick:O,"aria-label":"Switch between light and dark theme",children:o("svg",{viewBox:"0 0 20 20",width:"18",height:"18","aria-hidden":"true",children:[s("circle",{cx:"10",cy:"10",r:"6.5",className:"theme-ring"}),s("path",{d:"M10 3.5a6.5 6.5 0 0 1 0 13z",className:"theme-half"})]})})]})]}),o("section",{className:"intro",children:[s("h1",{children:"Turn a rough idea into a structured business plan."}),s("p",{children:"Describe the idea, the audience and the price. You get a lean canvas, a SWOT, real break-even maths and a 30-60-90 day plan, rebuilt as you type."})]}),o("div",{className:"workspace",children:[s("aside",{className:"brief-panel",children:s(me,{form:e,issues:T,exampleId:n,onChange:k,onPreset:P,onBlank:A})}),o("main",{className:"sheet","aria-live":"polite",children:[o("div",{className:"plan-head",children:[o("div",{className:"plan-title",children:[o("div",{className:"chips",children:[s("span",{className:"chip",children:L[f.input.stage].label}),s("span",{className:"chip",children:R.label}),s("span",{className:"chip",children:f.input.customerType==="businesses"?"B2B":"B2C"})]}),s("h2",{children:f.input.businessName}),s("p",{className:"headline",children:f.headline})]}),o("div",{className:`be-figure ${g.feasible?"":"be-undefined"}`,children:[s("span",{className:"eyebrow",children:"Break-even"}),s("span",{className:"be-number",children:g.customers!==null?y(g.customers):"—"}),s("span",{className:"be-unit",children:g.customers!==null?`${g.customers===1?R.noun:R.nouns}${R.perMonth?" per month":" active"}`:"undefined"})]})]}),o("dl",{className:"stats",children:[o("div",{children:[o("dt",{children:["Margin per ",R.noun]}),o("dd",{children:[w(g.unitMargin),g.marginPercent!==null&&o("span",{className:"stat-sub",children:[" ",S(g.marginPercent)]})]})]}),o("div",{children:[s("dt",{children:"Break-even revenue"}),o("dd",{children:[g.revenue!==null?`${w(g.revenue)}`:"—",s("span",{className:"stat-sub",children:" /month"})]})]}),o("div",{children:[s("dt",{children:g.target?"Profit at target":"Six months of fixed costs"}),o("dd",{className:g.target?g.target.profit>=0?"pos":"neg":void 0,children:[g.target?`${g.target.profit<0?"−":""}${w(Math.abs(g.target.profit))}`:w(g.sixMonthFixedCosts),g.target&&s("span",{className:"stat-sub",children:" /month"})]})]})]}),o("div",{className:"tabbar",children:[s("div",{className:"tabs",role:"tablist","aria-label":"Plan sections",children:Ye.map((p)=>s("button",{type:"button",role:"tab",id:`tab-${p.id}`,"aria-selected":u===p.id,"aria-controls":`panel-${p.id}`,onClick:()=>c(p.id),children:p.label},p.id))}),o("div",{className:"export",children:[s("button",{type:"button",className:"btn",onClick:()=>D("Markdown",ie(f)),children:"Copy Markdown"}),s("button",{type:"button",className:"btn ghost",onClick:()=>D("JSON",le(f)),children:"Copy JSON"})]})]}),d&&o("div",{className:"fallback",role:"group","aria-label":`${d.label} text`,children:[o("p",{children:["Your browser blocked automatic copying. Select all and copy the ",d.label," below."]}),s("textarea",{ref:M,readOnly:!0,rows:6,value:d.text,onFocus:(p)=>p.currentTarget.select()}),s("button",{type:"button",className:"link-btn",onClick:()=>v(null),children:"Close"})]}),o("div",{role:"tabpanel",id:`panel-${u}`,"aria-labelledby":`tab-${u}`,className:"panel",tabIndex:0,children:[u==="canvas"&&s(pe,{plan:f}),u==="swot"&&s(he,{plan:f}),u==="breakeven"&&s(ye,{plan:f}),u==="roadmap"&&s(ge,{plan:f,checked:l,onToggle:j})]})]})]}),s("footer",{className:"foot",children:o("p",{children:["The engine is a pure function, ",s("code",{children:"generateBusinessPlan(input)"})," in ",s("code",{children:"lib/planner.ts"}),". A future AI provider can return the same ",s("code",{children:"BusinessPlan"})," shape without touching this interface."]})}),m&&s("div",{className:"toast",role:"status",children:m})]})}ke.createRoot(document.getElementById("root")).render(s(xe,{}));})();
+
+</script>
+
+</body></html>

@@ -20,13 +20,24 @@ HTML), and links back to it. See *Integrating with your existing website* below.
 | Terminal-style interactive element | `components/Terminal.tsx` |
 | Page transitions, loading states, 404 | `app/template.tsx`, `app/loading.tsx`, `app/not-found.tsx` |
 
-### The four built-in prototypes (all labelled as prototypes)
+### The projects (all labelled by status)
 
-- **AI Business Assistant** is a *rule-based* planner (lean canvas, SWOT, real break-even maths, 30-60-90 plan).
-  **No AI model is connected.** The engine is isolated in `lib/planner.ts` so a model can be plugged in later.
+Built into the lab as a React component:
+
 - **Digital Identity** builds a standards-based vCard 3.0, a live QR code and a downloadable `.vcf`.
-- **Brand Studio** generates palettes from colour theory with WCAG contrast checks, fonts, monogram, CSS/JSON export.
-- **Finance Dashboard** shows hand-built accessible SVG charts and a sortable table over **fictional sample data**.
+
+Standalone single-file apps, each kept as-is in `public/projects/<slug>/index.html` (or `prototype.html`) and shown in a frame by
+`components/demos/FrameDemo.tsx` (or its own small wrapper). To replace one with a newer version, overwrite its HTML file:
+
+- **AI Business Assistant** (`public/projects/ai-business-assistant/`): a *rule-based* planner (lean canvas, SWOT, break-even maths, 30-60-90 plan). **No AI model is connected.** It loads React from a public CDN.
+- **Brand Studio** (`public/projects/brand-studio/`): palettes from colour theory with WCAG contrast checks, font pairing, monogram, colour psychology brief, logo recolouring and CSS/JSON export.
+- **Ledgerline** (`public/projects/ledgerline/`): a personal money manager (accounts, budgets, cards, multi-currency, backup). Data stays in the browser; sign-up is only a local profile.
+- **Tapcard** (`public/projects/tapcard/`): a digital business card with QR, a test Nearby radar, print kit and contacts.
+- **Shadow Run** (`public/projects/shadow-run/`): an offline 3D runner game.
+
+The earlier React versions of the AI Business Assistant, Brand Studio and Finance Dashboard (`components/demos/BusinessAssistantDemo.tsx`,
+`components/demos/BrandStudioDemo.tsx`, `components/demos/FinanceDashboardDemo.tsx`, `lib/planner.ts`, `lib/palette.ts`, `lib/finance.ts`) are no longer shown on the site. They are kept so the
+logic tests still run; delete them together with their tests if you do not want them.
 
 ## Honesty rules (built in)
 

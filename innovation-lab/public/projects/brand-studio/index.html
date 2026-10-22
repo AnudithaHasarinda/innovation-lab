@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brand Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700&family=Newsreader:ital,wght@0,400;0,600;1,400&family=Manrope:wght@400;600&family=Playfair+Display:wght@500;700&family=Jost:wght@300;400;500&family=Syne:wght@600;800&family=Work+Sans:wght@400;500&family=Bricolage+Grotesque:wght@500;800&family=Nunito:wght@400;700&family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap">
+<style>
+:root{--bg:#eceff3;--panel:#fff;--text:#14171c;--muted:#5b6370;--line:#d9dde4;--brand:#3b5bdb;--brand-ink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1217;--panel:#171b22;--text:#eef0f4;--muted:#9aa3b2;--line:#2a303b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1217;--panel:#171b22;--text:#eef0f4;--muted:#9aa3b2;--line:#2a303b;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.55 "Hanken Grotesk",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:320px minmax(0,1fr);gap:28px;max-width:1280px;margin:0 auto;padding:28px 20px 64px}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+h1{font:700 26px/1.1 "Hanken Grotesk";margin:0 0 6px;letter-spacing:-.02em}
+h2{font:700 17px/1.2 "Hanken Grotesk";margin:0 0 4px}
+p{margin:0}.muted{color:var(--muted)}
+aside{align-self:start;position:sticky;top:calc(16px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:20px}
+@media(max-width:900px){aside{position:static}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+label.f{display:block;font-weight:700;font-size:13px;margin:0 0 6px}
+input[type=text]{width:100%;font:inherit;color:var(--text);background:transparent;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.seed{display:flex;gap:10px;align-items:center}
+input[type=color]{width:46px;height:42px;border:1px solid var(--line);border-radius:10px;background:none;padding:3px;cursor:pointer;flex:none}
+button{font:inherit;cursor:pointer;color:var(--text)}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.btn{border:1px solid var(--line);background:transparent;border-radius:10px;padding:9px 14px;font-weight:500}
+.btn:hover{border-color:var(--brand)}
+.btn.solid{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.moods{display:flex;flex-direction:column;gap:8px}
+.mood{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:transparent;border-radius:12px;padding:10px 12px}
+.mood[aria-pressed=true]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand) inset}
+.mood b{display:block;font-size:14px}.mood small{color:var(--muted)}
+.dots{display:flex;flex:none}.dots i{width:14px;height:34px;display:block}
+.dots i:first-child{border-radius:7px 0 0 7px}.dots i:last-child{border-radius:0 7px 7px 0}
+main{display:flex;flex-direction:column;gap:22px;min-width:0}
+.board{border-radius:22px;overflow:hidden;border:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+@media(max-width:700px){.board{grid-template-columns:1fr}}
+.board .l{padding:44px 36px;display:flex;flex-direction:column;gap:18px;justify-content:center}
+.board .r{display:grid;place-items:center;padding:28px}
+.board .r svg{width:min(100%,260px);height:auto}
+.name{font-size:clamp(38px,6vw,64px);line-height:1;letter-spacing:-.015em;margin:0;overflow-wrap:anywhere}
+.tag{font-size:17px;max-width:34ch}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.pill{border:0;border-radius:999px;padding:11px 20px;font-weight:600;font-size:15px}
+.sw{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media(max-width:800px){.sw{grid-template-columns:1fr}}
+.s{border-radius:14px;padding:16px;min-height:190px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line)}
+@media(max-width:800px){.s{min-height:0;gap:22px}}
+.s b{font-size:16px}.s .hex{font:500 15px/1.2 ui-monospace,Menlo,monospace}
+.badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;background:rgba(255,255,255,.88);color:#111;margin-top:6px}
+.badge.f{background:#ffd9d9;color:#7a0b0b}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:800px){.two{grid-template-columns:1fr}}
+.spec .d{font-size:44px;line-height:1.05;margin:10px 0 2px}.spec .b{font-size:17px}
+.tabs{display:flex;gap:8px;margin:12px 0}
+.tabs button[aria-selected=true]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+pre{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,monospace;max-height:340px;color:var(--text)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg);padding:1px 6px;border-radius:5px}
+.doc ol{padding-left:20px;margin:10px 0}.doc li{margin:4px 0}
+.calc{margin-top:12px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.calc span:nth-child(odd){color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+[hidden]{display:none!important}
+select{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 12px;font-size:14px}
+button.chip:hover{border-color:var(--brand)}
+.chip[aria-pressed=true]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.meter{height:10px;border-radius:6px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;background:var(--brand)}
+.big{font:800 52px/1 "Hanken Grotesk";letter-spacing:-.03em;margin-top:14px}
+.fam{display:flex;gap:12px;align-items:flex-start;margin:10px 0}.fam i{width:36px;height:36px;border-radius:10px;flex:none;border:1px solid var(--line)}
+.pg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:28px;margin-top:8px}
+@media(max-width:800px){.pg{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--brand);padding:2px 0 2px 12px;color:var(--muted);font-size:14px;margin-top:16px}
+ul.br{padding-left:18px;margin:8px 0}.br li{margin:6px 0}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:12px}
+.chk{display:flex;gap:8px;align-items:center;margin:8px 0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.tile{margin:0;border-radius:14px;border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.tile img{max-width:100%;max-height:110px;object-fit:contain}
+.tile figcaption{font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+ <div><h1>Brand Studio</h1><p class="muted">Pick a seed colour and a mood. Get a palette, type pairing and monogram, with every contrast ratio checked.</p></div>
+ <div class="card">
+  <label class="f" for="nm">Brand name</label>
+  <input type="text" id="nm" value="Aurelia Atelier" maxlength="28" autocomplete="off">
+  <label class="f" for="hx" style="margin-top:16px">Seed colour</label>
+  <div class="seed"><input type="color" id="cp" aria-label="Pick seed colour"><input type="text" id="hx" maxlength="7" spellcheck="false"><button class="btn" id="sh" title="Random seed">Shuffle</button></div>
+ </div>
+ <div class="card"><h2>Mood</h2><p class="muted" style="margin-bottom:12px">Each mood uses a different colour harmony.</p><div class="moods" id="moods"></div></div>
+ <div class="card"><h2>Brand goal</h2><p class="muted" style="margin-bottom:12px">What should customers feel when they meet your product?</p><div class="chips" id="goals"></div><button class="btn solid" id="mg" style="margin-top:14px;width:100%">Match my goal</button></div>
+</aside>
+<main>
+ <section class="board" id="board" aria-label="Brand board"></section>
+ <section class="card"><h2>Palette</h2><p class="muted" style="margin-bottom:14px">Text colour on each swatch is chosen automatically. Ratios follow WCAG 2.1.</p><div class="sw" id="sw"></div></section>
+ <section class="card" id="psy"></section>
+ <section class="card" id="logo"><h2>Your logo</h2><p class="muted">Upload a logo and recolour it with your palette. The file stays in your browser and is never uploaded.</p>
+  <div class="row" style="margin:14px 0"><button class="btn solid" id="lu">Upload logo</button><input type="file" id="lf" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden><button class="btn" id="lx" hidden>Remove logo</button></div>
+  <div id="lc" hidden>
+   <div class="ctl">
+    <div><label class="f" for="lm">Recolour</label><select id="lm"><option value="orig">Original colours</option><option value="harm">Match primary hue</option><option value="tint">Single colour</option><option value="duo">Duotone</option></select></div>
+    <div id="c1w" hidden><label class="f" for="c1" id="c1l">Colour</label><select id="c1"><option value="0">Primary</option><option value="1">Secondary</option><option value="2">Accent</option><option value="3">Surface</option><option value="4">Ink</option></select></div>
+    <div id="c2w" hidden><label class="f" for="c2">Light tones</label><select id="c2"><option value="0">Primary</option><option value="1">Secondary</option><option value="2" selected>Accent</option><option value="3">Surface</option><option value="4">Ink</option></select></div>
+   </div>
+   <label class="chk"><input type="checkbox" id="rb"> Remove white background</label>
+   <label class="chk"><input type="checkbox" id="ub"> Show on brand board</label>
+   <div class="tiles" id="tiles"></div>
+   <p class="muted" style="margin-top:12px;font-size:14px">Single colour and duotone work best on logos with a transparent background. For a JPG, tick Remove white background. To save the result, press and hold or right-click a preview.</p>
+  </div></section>
+ <div class="two">
+  <section class="card spec" id="type"></section>
+  <section class="card"><h2>Monogram</h2><p class="muted">Initials set in the display face, inside a mark shaped by the mood.</p><div id="mono" style="display:grid;place-items:center;padding:14px"></div><div class="row" style="justify-content:center"><button class="btn" id="cs">Copy SVG</button></div></section>
+ </div>
+ <section class="card"><h2>Export</h2><p class="muted">Drop these tokens straight into a project.</p>
+  <div class="tabs" role="tablist"><button class="btn" role="tab" id="t-css" aria-selected="true">CSS variables</button><button class="btn" role="tab" id="t-json" aria-selected="false">JSON</button><button class="btn solid" id="cc" style="margin-left:auto">Copy</button></div>
+  <pre id="out" tabindex="0"></pre></section>
+ <section class="card doc"><h2>How contrast is calculated</h2>
+  <p class="muted">The interface is a thin layer over pure functions: <code>hexToHsl</code>, <code>hslToHex</code>, <code>harmonies</code>, <code>luminance</code> and <code>contrast</code>.</p>
+  <ol><li>Each sRGB channel <code>c</code> (0–1) is linearised: <code>c ≤ 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4</code></li>
+  <li>Relative luminance: <code>L = 0.2126·R + 0.7152·G + 0.0722·B</code></li>
+  <li>Ratio: <code>(L<sub>lighter</sub> + 0.05) / (L<sub>darker</sub> + 0.05)</code>, from 1:1 to 21:1</li>
+  <li>Thresholds: 4.5 for AA body text, 7 for AAA, 3 for large text.</li></ol>
+  <p><b>Worked example, live for your primary colour</b></p><div class="calc" id="calc"></div></section>
+</main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+/* ---------- pure functions (mirror of lib/palette.ts) ---------- */
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const wrap=h=>((h%360)+360)%360;
+function hexToHsl(hex){const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;
+ const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0,s=0,l=(mx+mn)/2;
+ if(d){s=d/(1-Math.abs(2*l-1));h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}
+ return[wrap(h),s*100,l*100]}
+function hslToHex(h,s,l){h=wrap(h);s=clamp(s,0,100)/100;l=clamp(l,0,100)/100;
+ const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+ return"#"+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,"0")).join("")}
+const lin=c=>c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);
+function luminance(hex){const n=parseInt(hex.slice(1),16);return .2126*lin((n>>16&255)/255)+.7152*lin((n>>8&255)/255)+.0722*lin((n&255)/255)}
+function contrast(a,b){const x=luminance(a),y=luminance(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+const grade=r=>r>=7?"AAA":r>=4.5?"AA":r>=3?"AA large":"Fail";
+const MOODS=[
+ {id:"serene",name:"Serene",harmony:"Analogous",note:"Soft neighbours on the wheel",fonts:["Newsreader","Manrope","serif"],shape:"circle",
+  gen:(h,s)=>[[h,clamp(s,30,52),42],[h-30,clamp(s,28,45),58],[h+30,clamp(s,35,58),56],[h,26,95],[h,32,13]]},
+ {id:"luxe",name:"Luxe",harmony:"Complementary",note:"Deep base, one bright counterpoint",fonts:["Playfair Display","Jost","serif"],shape:"ring",
+  gen:(h,s)=>[[h,clamp(s,28,45),21],[h+12,18,42],[h+180,clamp(s,45,62),60],[h,14,94],[h,26,8]]},
+ {id:"bold",name:"Bold",harmony:"Complementary",note:"High energy, direct opposites",fonts:["Syne","Work Sans","sans-serif"],shape:"square",
+  gen:(h,s)=>[[h,clamp(s,72,92),46],[h+180,clamp(s,65,85),48],[h+28,92,57],[h,38,96],[h,48,11]]},
+ {id:"playful",name:"Playful",harmony:"Triadic",note:"Three evenly spaced hues",fonts:["Bricolage Grotesque","Nunito","sans-serif"],shape:"blob",
+  gen:(h,s)=>[[h,clamp(s,65,85),52],[h+120,clamp(s,55,75),46],[h+240,clamp(s,60,80),58],[h,70,96],[h,38,15]]},
+ {id:"earth",name:"Heritage",harmony:"Analogous",note:"Warm, grounded and timeless",fonts:["DM Serif Display","DM Sans","serif"],shape:"arch",
+  gen:(h,s)=>[[h,clamp(s,38,55),34],[h-24,clamp(s,32,48),50],[h+24,clamp(s,50,66),58],[h,24,93],[h,30,12]]}
+];
+const ROLES=["Primary","Secondary","Accent","Surface","Ink"];
+/* ---------- state ---------- */
+const st={name:"Aurelia Atelier",seed:"#3b5bdb",mood:"luxe",tab:"css",goal:"trust",useLogo:false};
+const $=id=>document.getElementById(id);
+function build(){const m=MOODS.find(x=>x.id===st.mood);const[h,s]=hexToHsl(st.seed);
+ const cols=m.gen(h,s).map(c=>hslToHex(...c));
+ const ink=cols[4],light=cols[3];
+ const items=cols.map((hex,i)=>{const w=contrast(hex,"#ffffff"),k=contrast(hex,ink);const useW=i===4?true:w>=k;
+  const text=i===4?"#ffffff":useW?"#ffffff":ink;return{role:ROLES[i],hex,hsl:hexToHsl(hex).map(Math.round),text,ratio:contrast(hex,text),w,k}});
+ return{m,items,ink,light}}
+function monoSVG(P){const{m,items}=P;const p=items[0],a=items[2],t=p.text;
+ const ini=(st.name.trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("")||"B").toUpperCase();
+ const shapes={circle:`<circle cx="100" cy="100" r="92" fill="${p.hex}"/>`,
+  ring:`<circle cx="100" cy="100" r="92" fill="${p.hex}"/><circle cx="100" cy="100" r="80" fill="none" stroke="${a.hex}" stroke-width="2"/>`,
+  square:`<rect x="12" y="12" width="176" height="176" fill="${p.hex}"/><rect x="12" y="150" width="176" height="38" fill="${a.hex}"/>`,
+  blob:`<path d="M100 8c48 0 92 34 92 88s-40 96-94 96S8 150 8 98 52 8 100 8z" fill="${p.hex}"/>`,
+  arch:`<path d="M24 188V96a76 76 0 0 1 152 0v92z" fill="${p.hex}"/><path d="M24 188h152" stroke="${a.hex}" stroke-width="6"/>`};
+ const fam=`'${m.fonts[0]}',${m.fonts[2]}`;const dy=m.shape==="square"?-6:m.shape==="arch"?14:0;
+ return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Monogram ${ini}">${shapes[m.shape]}<text x="100" y="${118+dy}" text-anchor="middle" font-family="${fam}" font-size="${ini.length>1?72:92}" fill="${t}" letter-spacing="2">${ini}</text></svg>`}
+function render(){const P=build(),{m,items}=P;const[pr,se,ac,su,ink]=items;
+ const r=document.documentElement.style;r.setProperty("--brand",pr.hex);r.setProperty("--brand-ink",pr.text);
+ $("moods").innerHTML=MOODS.map(x=>{const c=x.gen(...hexToHsl(st.seed)).map(c=>hslToHex(...c));
+  return`<button class="mood" data-m="${x.id}" aria-pressed="${x.id===st.mood}"><span class="dots">${c.slice(0,3).map(k=>`<i style="background:${k}"></i>`).join("")}</span><span><b>${x.name}</b><small>${x.harmony}. ${x.note}</small></span></button>`}).join("");
+ processLogo(P);const df=`'${m.fonts[0]}',${m.fonts[2]}`,bf=`'${m.fonts[1]}',sans-serif`;
+ $("board").style.background=su.hex;$("board").style.color=ink.hex;
+ $("board").innerHTML=`<div class="l" style="font-family:${bf}"><p class="name" style="font-family:${df};color:${pr.hex===ink.hex?ink.hex:pr.hex}">${esc(st.name)||"Your brand"}</p><p class="tag">A ${m.name.toLowerCase()} identity built on ${m.harmony.toLowerCase()} colour.</p><div class="row"><button class="pill" style="background:${pr.hex};color:${pr.text}">Primary action</button><button class="pill" style="background:${ac.hex};color:${ac.text}">Accent action</button><button class="pill" style="background:transparent;color:${ink.hex};box-shadow:0 0 0 2px ${se.hex} inset">Secondary</button></div></div><div class="r" style="background:${se.hex}22">${st.useLogo&&LG.out?`<img src="${LG.out}" alt="${esc(st.name)} logo" style="width:min(100%,240px);max-height:240px;object-fit:contain">`:monoSVG(P)}</div>`;
+ $("sw").innerHTML=items.map(i=>`<div class="s" style="background:${i.hex};color:${i.text}"><div><b>${i.role}</b><div class="hex">${i.hex.toUpperCase()}</div><small>hsl ${i.hsl[0]}, ${i.hsl[1]}%, ${i.hsl[2]}%</small></div><div><div style="font-size:26px;font-family:${df}">Aa</div><span class="badge ${grade(i.ratio)==="Fail"?"f":""}">${i.ratio.toFixed(2)}:1 · ${grade(i.ratio)}</span><div style="font-size:12px;margin-top:6px;opacity:.9">White ${i.w.toFixed(1)} · Ink ${i.k.toFixed(1)}</div></div></div>`).join("");
+ $("type").innerHTML=`<h2>Type pairing</h2><p class="muted">${m.fonts[0]} for display, ${m.fonts[1]} for text.</p><div class="d" style="font-family:${df}">Design with intent</div><p class="b" style="font-family:${bf}">Colour is subjective, but harmony and legibility can be measured. This pairing keeps the voice of the ${m.name.toLowerCase()} mood readable at every size.</p>`;
+ $("mono").innerHTML=monoSVG(P).replace("<svg",'<svg style="width:min(100%,200px);height:auto"');
+ const css=`:root {\n${items.map(i=>`  --brand-${i.role.toLowerCase()}: ${i.hex};`).join("\n")}\n  --font-display: ${df};\n  --font-body: ${bf};\n}`;
+ const json=JSON.stringify({name:st.name,seed:st.seed,mood:m.id,goal:st.goal,goalMatch:scoreOf(st.seed,m,st.goal),harmony:m.harmony.toLowerCase(),palette:Object.fromEntries(items.map(i=>[i.role.toLowerCase(),{hex:i.hex,hsl:i.hsl,text:i.text,contrast:+i.ratio.toFixed(2),grade:grade(i.ratio)}])),fonts:{display:m.fonts[0],body:m.fonts[1]}},null,2);
+ P.css=css;P.json=json;$("out").textContent=st.tab==="css"?css:json;window._P=P;
+ $("t-css").setAttribute("aria-selected",st.tab==="css");$("t-json").setAttribute("aria-selected",st.tab==="json");
+ const ch=hex=>{const n=parseInt(hex.slice(1),16);return[n>>16&255,n>>8&255,n&255]};const rgb=ch(pr.hex);
+ $("calc").innerHTML=`<span>Colour</span><span>${pr.hex.toUpperCase()} → rgb(${rgb.join(", ")})</span><span>Linear RGB</span><span>${rgb.map(v=>lin(v/255).toFixed(3)).join(", ")}</span><span>Luminance</span><span>${luminance(pr.hex).toFixed(4)}</span><span>Text</span><span>${pr.text.toUpperCase()} (L ${luminance(pr.text).toFixed(4)})</span><span>Ratio</span><span><b>${pr.ratio.toFixed(2)}:1</b>, ${grade(pr.ratio)}</span>`;
+ if($("hx")!==document.activeElement)$("hx").value=st.seed;$("cp").value=st.seed;renderPsy(P);renderLogoUI(P)}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1600)}
+function copy(txt,msg){const done=()=>toast(msg);
+ const fb=()=>{const a=document.createElement("textarea");a.value=txt;document.body.appendChild(a);a.select();try{document.execCommand("copy");done()}catch(e){toast("Select the text and copy it manually")}a.remove()};
+ try{navigator.clipboard.writeText(txt).then(done,fb)}catch(e){fb()}}
+$("nm").addEventListener("input",e=>{st.name=e.target.value;render()});
+$("cp").addEventListener("input",e=>{st.seed=e.target.value;render()});
+$("hx").addEventListener("input",e=>{let v=e.target.value.trim();if(v[0]!=="#")v="#"+v;if(/^#[0-9a-f]{6}$/i.test(v)){st.seed=v.toLowerCase();render()}});
+$("sh").onclick=()=>{st.seed=hslToHex(Math.random()*360,50+Math.random()*35,42+Math.random()*12);render()};
+$("moods").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(b){st.mood=b.dataset.m;render()}});
+$("t-css").onclick=()=>{st.tab="css";render()};$("t-json").onclick=()=>{st.tab="json";render()};
+$("cc").onclick=()=>copy(st.tab==="css"?_P.css:_P.json,st.tab==="css"?"CSS copied":"JSON copied");
+$("cs").onclick=()=>copy(monoSVG(_P),"SVG copied");
+/* ---------- colour psychology ---------- */
+const cd=(a,b)=>{const d=Math.abs(wrap(a)-wrap(b));return Math.min(d,360-d)};
+const aff=(h,c,w)=>Math.max(0,1-cd(h,c)/w);
+const TRAITS={
+ trust:(h,s,l)=>aff(h,220,60)*(s>20?1:.5)*(l<62?1:.7),
+ energy:(h,s,l)=>Math.max(aff(h,5,35),aff(h,35,30))*clamp(s/70,0,1)*(l>28&&l<68?1:.7),
+ calm:(h,s,l)=>Math.max(aff(h,195,55),aff(h,150,40))*(1-clamp((s-45)/55,0,.6))*(l>42?1:.8),
+ luxury:(h,s,l)=>clamp((58-l)/40,0,1)*.6+aff(h,285,55)*.3+(s<45?.1:0),
+ nature:(h,s,l)=>aff(h,125,55)*clamp(s/40,0,1)*(l<66?1:.7),
+ creative:(h,s,l)=>Math.max(aff(h,290,50),aff(h,330,35),aff(h,50,25)*.8)*clamp(s/50,0,1),
+ warmth:(h,s,l)=>Math.max(aff(h,30,45),aff(h,5,25)*.9,aff(h,345,25)*.7)*clamp(s/40,0,1)*(l>30?1:.7)};
+const GOALS=[
+ {id:"trust",name:"Trust and reliability",feel:"safe, in good hands and sure the product will deliver",use:"finance, health, software and professional services",seed:"#2f5bd3",mood:"serene"},
+ {id:"energy",name:"Energy and excitement",feel:"motivated, alert and ready to act",use:"fitness, food, sport, launches and offers",seed:"#e5483b",mood:"bold"},
+ {id:"calm",name:"Calm and wellbeing",feel:"relaxed, clear-headed and cared for",use:"wellness, spa, mindfulness and education",seed:"#3aa6a0",mood:"serene"},
+ {id:"luxury",name:"Luxury and prestige",feel:"special, refined and happy to pay more",use:"fashion, jewellery, hospitality and premium goods",seed:"#4a2c6d",mood:"luxe"},
+ {id:"nature",name:"Growth and nature",feel:"fresh, natural and responsible",use:"organic goods, sustainability, farming and health food",seed:"#3f8f4e",mood:"earth"},
+ {id:"creative",name:"Creativity and fun",feel:"inspired, playful and curious",use:"media, design, kids, entertainment and apps",seed:"#8b4fd8",mood:"playful"},
+ {id:"warmth",name:"Warmth and friendliness",feel:"welcome, approachable and looked after by real people",use:"cafés, community, hospitality and customer service",seed:"#e0793a",mood:"earth"}];
+const FAM={red:["energy","urgency","passion"],orange:["friendliness","enthusiasm","good value"],yellow:["optimism","attention","clarity"],green:["growth","health","balance"],teal:["freshness","clarity","calm"],blue:["trust","stability","competence"],purple:["creativity","imagination","luxury"],pink:["care","playfulness","warmth"],neutral:["simplicity","restraint","sophistication"]};
+const fam=(h,s)=>s<12?"neutral":h>=345||h<15?"red":h<45?"orange":h<70?"yellow":h<170?"green":h<200?"teal":h<250?"blue":h<320?"purple":"pink";
+const tone=(h,s,l)=>l<28?"deep":l>72?"soft":s>75?"vivid":"balanced";
+function scoreOf(seed,m,gid){const[h,s]=hexToHsl(seed),c=m.gen(h,s),f=TRAITS[gid];
+ const v=.5*f(...c[0].map((x,i)=>i?x:wrap(x)))+.2*f(...c[1])+.3*f(...c[2]);return Math.round(clamp(v*125,0,100))}
+function renderPsy(P){
+ const g=GOALS.find(x=>x.id===st.goal),sc=scoreOf(st.seed,P.m,g.id);
+ $("goals").innerHTML=GOALS.map(x=>`<button class="chip" data-g="${x.id}" aria-pressed="${x.id===st.goal}">${x.name}</button>`).join("");
+ const all=GOALS.map(x=>({x,s:scoreOf(st.seed,P.m,x.id)})).sort((a,b)=>b.s-a.s);
+ const best=MOODS.map(m=>({m,s:scoreOf(st.seed,m,g.id)})).sort((a,b)=>b.s-a.s)[0];
+ const verdict=sc>=75?"Strong match":sc>=55?"Partial match":"Weak match";
+ const pass=P.items.filter(i=>i.ratio>=4.5).length;
+ const rows=P.items.slice(0,3).map(i=>{const f=fam(i.hsl[0],i.hsl[1]);return`<div class="fam"><i style="background:${i.hex}"></i><div><b>${i.role}: ${tone(...i.hsl)} ${f}</b><br><span class="muted">Often read as ${FAM[f].join(", ")}.</span></div></div>`}).join("");
+ const tip=sc>=75?`Keep this direction. Use the primary colour on main buttons so the feeling shows up where customers decide.`:best.m.id!==P.m.id&&best.s>sc+8?`Try the ${best.m.name} mood to reach about ${best.s}%, or press Match my goal to start from a hue that fits.`:`Press Match my goal to start from a hue that suits ${g.name.toLowerCase()}.`;
+ $("psy").innerHTML=`<h2>Colour psychology brief</h2><p class="muted">Your goal: ${g.name}.</p><div class="pg"><div><div class="big">${sc}%</div><p style="margin:6px 0 10px"><b>${verdict}</b> for ${g.name.toLowerCase()}</p><div class="meter" role="img" aria-label="Goal match ${sc} percent"><i style="width:${sc}%"></i></div><p class="muted" style="margin-top:10px;font-size:14px">${tip}</p><b style="font-size:13px;display:block;margin-top:14px">Other goals this palette suits</b><div class="chips" style="margin-top:8px">${all.filter(a=>a.x.id!==g.id).slice(0,3).map(a=>`<span class="chip">${a.x.name} ${a.s}%</span>`).join("")}</div></div><div>${rows}<ul class="br"><li><b>Customers should feel</b> ${g.feel}.</li><li><b>Strong fit for</b> ${g.use}.</li><li><b>Where to use it</b> Primary on main buttons and the logo, accent once per screen, surface and ink for space and text.</li><li><b>Readability</b> ${pass} of 5 swatches reach AA with their text colour.</li></ul></div></div><p class="note">The score estimates how closely your primary (50%), accent (30%) and secondary (20%) hues, with their saturation and lightness, fit the goal. Colour meanings are tendencies, not rules: culture, product category and competitors change how people read a colour. Treat this as a starting point and test it with a few real customers.</p>`}
+/* ---------- logo recolour ---------- */
+const LG={data:null,out:null},cv=document.createElement("canvas");
+const rgbOf=hex=>{const n=parseInt(hex.slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+function toHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,l=(mx+mn)/2;let h=0,s=0;if(d){s=d/(1-Math.abs(2*l-1));h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h=wrap(h*60)}return[h,s,l]}
+function fromHsl(h,s,l){h=wrap(h);const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return[f(0)*255,f(8)*255,f(4)*255]}
+function loadLogo(file){if(!file)return;if(file.size>8e6){toast("Choose an image under 8 MB");return}
+ const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{
+  const w=im.naturalWidth||512,h=im.naturalHeight||512,svg=file.type==="image/svg+xml",k=svg?512/Math.max(w,h):Math.min(1,512/Math.max(w,h));
+  cv.width=Math.max(1,Math.round(w*k));cv.height=Math.max(1,Math.round(h*k));const x=cv.getContext("2d");x.clearRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);
+  LG.data=x.getImageData(0,0,cv.width,cv.height);render()};
+  im.onerror=()=>toast("That file couldn’t be read. Try PNG, JPG, WebP or SVG.");im.src=fr.result};fr.readAsDataURL(file)}
+function processLogo(P){if(!LG.data){LG.out=null;return}
+ const mode=$("lm").value,t1=rgbOf(P.items[+$("c1").value].hex),t2=rgbOf(P.items[+$("c2").value].hex),src=LG.data,d=new Uint8ClampedArray(src.data),rb=$("rb").checked;
+ let sx=0,sy=0,n=0;
+ if(mode==="harm")for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;const[h,s]=toHsl(d[i],d[i+1],d[i+2]);if(s>.15){sx+=Math.cos(h*Math.PI/180)*s;sy+=Math.sin(h*Math.PI/180)*s;n++}}
+ const shift=n?hexToHsl(P.items[0].hex)[0]-wrap(Math.atan2(sy,sx)*180/Math.PI):0;
+ for(let i=0;i<d.length;i+=4){let r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+  if(rb){const mn=Math.min(r,g,b);if(mn>235)a=0;else if(mn>205)a=Math.round(a*(235-mn)/30)}
+  if(mode==="tint"){r=t1[0];g=t1[1];b=t1[2]}
+  else if(mode==="duo"){const L=(.2126*r+.7152*g+.0722*b)/255;r=t1[0]+(t2[0]-t1[0])*L;g=t1[1]+(t2[1]-t1[1])*L;b=t1[2]+(t2[2]-t1[2])*L}
+  else if(mode==="harm"&&n){const[h,s,l]=toHsl(r,g,b);if(s>.1)[r,g,b]=fromHsl(h+shift,s,l)}
+  d[i]=r;d[i+1]=g;d[i+2]=b;d[i+3]=a}
+ cv.width=src.width;cv.height=src.height;cv.getContext("2d").putImageData(new ImageData(d,src.width,src.height),0,0);LG.out=cv.toDataURL("image/png")}
+function renderLogoUI(P){const has=!!LG.data;$("lc").hidden=!has;$("lx").hidden=!has;$("lu").textContent=has?"Replace logo":"Upload logo";if(!has)return;
+ const mode=$("lm").value;$("c1w").hidden=mode==="orig"||mode==="harm";$("c2w").hidden=mode!=="duo";$("c1l").textContent=mode==="duo"?"Dark tones":"Colour";
+ const tl=[["Surface",P.items[3].hex],["Primary",P.items[0].hex],["Ink",P.items[4].hex],["White","#ffffff"]];
+ $("tiles").innerHTML=tl.map(([n,c])=>`<figure class="tile" style="background:${c};color:${contrast(c,"#ffffff")>=contrast(c,"#111111")?"#fff":"#111"}"><img src="${LG.out}" alt="Logo on ${n.toLowerCase()}"><figcaption>${n}</figcaption></figure>`).join("")}
+$("lu").onclick=()=>$("lf").click();
+$("lf").addEventListener("change",e=>loadLogo(e.target.files[0]));
+$("lx").onclick=()=>{LG.data=null;LG.out=null;$("lf").value="";$("ub").checked=false;st.useLogo=false;render()};
+$("lm").addEventListener("change",()=>{const m=$("lm").value;if(m==="duo"){$("c1").value="4";$("c2").value="2"}else if(m==="tint")$("c1").value="0";render()});
+["c1","c2","rb"].forEach(id=>$(id).addEventListener("change",render));
+$("ub").addEventListener("change",e=>{st.useLogo=e.target.checked;render()});
+$("goals").addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b){st.goal=b.dataset.g;render()}});
+$("mg").onclick=()=>{const g=GOALS.find(x=>x.id===st.goal);st.seed=g.seed;st.mood=g.mood;render();toast("Palette matched to "+g.name.toLowerCase())};
+render();
+</script>
+</body>
+</html>

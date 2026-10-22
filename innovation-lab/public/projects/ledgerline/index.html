@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ledgerline – Money Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eef3f1;--surface:#fff;--ink:#10231f;--muted:#5a6b66;--line:#d6e0dc;--inc:#0f766e;--exp:#b42318;--acc:#0f766e;--c1:#0f766e;--c2:#6d4ccf;--c3:#d08a12;--c4:#2f6fb0;--c5:#c2417a;--c6:#7a8a85;--c7:#3f8f3a;--c8:#a35a2a;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1614;--surface:#13211e;--ink:#e6f1ee;--muted:#93a8a2;--line:#243732;--inc:#3dd6c0;--exp:#ff8a7a;--acc:#3dd6c0;--c1:#3dd6c0;--c2:#a99bff;--c3:#f0b445;--c4:#6fb1ff;--c5:#f27bb0;--c6:#8ea39d;--c7:#8fd37f;--c8:#e0976a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c1614;--surface:#13211e;--ink:#e6f1ee;--muted:#93a8a2;--line:#243732;--inc:#3dd6c0;--exp:#ff8a7a;--acc:#3dd6c0;--c1:#3dd6c0;--c2:#a99bff;--c3:#f0b445;--c4:#6fb1ff;--c5:#f27bb0;--c6:#8ea39d;--c7:#8fd37f;--c8:#e0976a;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "Instrument Sans",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:16px 16px 110px}
+h1,h2,.big{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0}
+h1{font-size:24px}h2{font-size:17px;margin-bottom:8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;color:var(--muted);font:500 14px "Instrument Sans",sans-serif;padding:10px 12px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.row3 .card{margin:0;padding:12px}
+.l{color:var(--muted);font-size:13px}.big{font-size:20px;font-variant-numeric:tabular-nums;word-break:break-word}
+.inc{color:var(--inc)}.exp{color:var(--exp)}
+.month{display:flex;align-items:center;gap:6px}
+.ic{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;min-width:38px;height:38px;cursor:pointer;font-size:15px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:9px 14px;font:500 14px "Instrument Sans",sans-serif;cursor:pointer;min-height:38px}
+.btn.p{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.d{color:var(--exp)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:5;border-radius:999px;padding:14px 22px;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;color:inherit;text-align:left;font:inherit;cursor:pointer}
+.item:last-child{border-bottom:0}
+.item small{display:block;color:var(--muted)}
+.amt{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.day{color:var(--muted);font-size:13px;margin:12px 0 0}
+.empty{text-align:center;padding:28px 12px;color:var(--muted)}
+.empty .btn{margin:6px 4px 0}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--bg)}
+.seg button{flex:1;border:0;background:none;color:var(--muted);font:500 14px "Instrument Sans",sans-serif;padding:8px;border-radius:7px;cursor:pointer}
+.seg button[aria-checked="true"]{background:var(--ink);color:var(--bg)}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);padding:18px;width:min(440px,calc(100% - 24px));max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.err{color:var(--exp);font-size:13px;min-height:18px;margin-top:8px}
+.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--acc)}.bar i.over{background:var(--exp)}
+.split{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+svg{display:block;width:100%;height:auto}svg text{fill:var(--muted);font:11px "Instrument Sans",sans-serif}
+.lock{max-width:320px;margin:20vh auto;text-align:center}
+.bud{display:grid;grid-template-columns:1fr 110px;gap:8px 12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.bud .bar{grid-column:1/-1;margin:0}
+.fine{font-size:12px;color:var(--muted)}
+.alert{background:var(--surface);border:1px solid var(--c3);border-left-width:4px;border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:14px}.alert.over{border-color:var(--exp)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--bg)}.chip button{border:0;background:none;color:var(--ink);font:500 14px "Instrument Sans",sans-serif;padding:9px 12px;cursor:pointer}.chip button+button{color:var(--muted);padding-left:8px;border-left:1px solid var(--line)}
+.settle{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 0 10px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}#toast.on{opacity:1}
+/* ===== premium skin ===== */
+:root{--hero1:#0a3a32;--hero2:#14624f;--pill:#0b3d35;--gold:#d9b36a;--sh:0 1px 2px rgba(16,35,31,.05),0 14px 30px -18px rgba(16,35,31,.28);--line:#dde5e1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hero1:#0d2f29;--hero2:#17584a;--pill:#1c5446;--sh:0 0 0 rgba(0,0,0,0);--line:#223530}}
+:root[data-theme="dark"]{--hero1:#0d2f29;--hero2:#17584a;--pill:#1c5446;--sh:0 0 0 rgba(0,0,0,0);--line:#223530}
+body{background:radial-gradient(900px 360px at 50% -120px,rgba(20,98,79,.16),transparent 70%),var(--bg);letter-spacing:.005em}
+.wrap{max-width:960px;padding-top:22px}
+.brand{display:flex;align-items:center;font-size:25px;letter-spacing:-.01em}
+.mk{display:inline-block;width:24px;height:24px;border-radius:8px;margin-right:10px;position:relative;background:linear-gradient(135deg,var(--hero2),var(--hero1));box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.mk::after{content:"";position:absolute;left:6px;right:6px;top:11px;height:2px;border-radius:2px;background:var(--gold)}
+.card{border-radius:20px;padding:20px;box-shadow:var(--sh)}
+h2{font-size:18px;letter-spacing:-.005em;margin-bottom:10px}
+.tabs{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px;gap:2px;margin-bottom:18px;box-shadow:var(--sh)}
+.tabs button{border-radius:12px;border-bottom:0;padding:9px 14px;transition:background .15s,color .15s}
+.tabs button[aria-selected="true"]{background:var(--pill);color:#fff}
+.tabs button[data-a="logout"],.tabs button[data-a="showauth"]{border:1px solid var(--line);color:var(--ink);margin-left:auto}
+.hero{position:relative;overflow:hidden;color:#fff;border-radius:24px;padding:26px 24px 22px;margin-bottom:14px;background:linear-gradient(135deg,var(--hero1),var(--hero2));box-shadow:0 18px 40px -22px rgba(10,58,50,.7)}
+.hero::before{content:"";position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(217,179,106,.45);box-shadow:0 0 0 28px rgba(217,179,106,.07),0 0 0 56px rgba(255,255,255,.035)}
+.hero>*{position:relative}
+.hl{font-size:13px;color:rgba(255,255,255,.72)}
+.hv{font:600 clamp(32px,7vw,46px)/1.1 Fraunces,Georgia,serif;letter-spacing:-.02em;margin:4px 0 20px;font-variant-numeric:tabular-nums;word-break:break-word}
+.hm{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;border-top:1px solid rgba(255,255,255,.16);padding-top:14px}
+.hm span{display:block;font-size:12px;color:rgba(255,255,255,.65)}
+.hm b{font:600 clamp(14px,3.6vw,18px) Fraunces,Georgia,serif;font-variant-numeric:tabular-nums;word-break:break-word}
+.row3 .card{padding:14px}
+.btn{border-radius:12px;transition:transform .12s,border-color .15s}
+.btn:hover{border-color:var(--acc)}
+.btn.p{background:linear-gradient(135deg,var(--hero2),var(--hero1));border-color:transparent;color:#fff}
+.fab{background:linear-gradient(135deg,var(--hero2),var(--hero1));color:#fff;border:1px solid var(--gold);padding:14px 24px;box-shadow:0 14px 30px -10px rgba(10,58,50,.6)}
+input,select,textarea{border-radius:12px;background:var(--surface);border-color:var(--line)}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+.item{padding:13px 4px;border-radius:10px}.item:hover{background:rgba(20,98,79,.06)}
+.amt{font-family:Fraunces,Georgia,serif;font-weight:600}
+.seg{border-radius:13px}.seg button[aria-checked="true"]{background:var(--pill);color:#fff}
+dialog{border-radius:22px;padding:22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+.bar{height:10px;border-radius:6px}.bar i{border-radius:6px;background:linear-gradient(90deg,var(--hero2),var(--acc))}.bar i.over{background:var(--exp)}
+.alert{border-radius:14px;box-shadow:var(--sh)}
+.chip{background:var(--surface);box-shadow:var(--sh)}
+.lock.card{box-shadow:0 30px 70px -30px rgba(10,58,50,.55);padding:28px 22px}.lock .brand{justify-content:center;margin-bottom:6px}
+#toast{background:var(--pill);color:#fff;border:1px solid var(--gold)}
+@media(max-width:520px){.wrap{padding:16px 12px 110px}.hero{padding:22px 18px 18px;border-radius:22px}.tabs button{padding:9px 11px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status"></div>
+<script>
+/* ===== storage ===== */
+let KEY=null;const USERS='ledgerline.users',SESS='ledgerline.session';
+const DEF={cur:'USD',pass:null,accounts:[],tx:[],budgets:{},theme:null,tpl:[],rates:{}};
+const CATS={exp:['Food','Transport','Housing','Bills','Health','Shopping','Fun','Other'],inc:['Salary','Business','Gift','Other']};
+const TYPES={Cash:0,Bank:0,Savings:0,Card:1,Loan:1};
+const SUBS={Food:['Groceries','Restaurants','Coffee'],Transport:['Fuel','Public transit','Taxi'],Housing:['Rent','Utilities','Repairs'],Bills:['Phone','Internet','Insurance'],Health:['Doctor','Pharmacy'],Shopping:['Clothes','Electronics','Gifts'],Fun:['Movies','Games','Travel']};
+const P={USD:1,EUR:1.08,GBP:1.27,LKR:0.0031,INR:0.012,JPY:0.0064,AUD:0.65,CAD:0.73};
+const val=c=>(S.rates[c]||P[c]||1);
+const R=c=>val(c)/val(S.cur);
+const accCur=a=>(a&&a.cur)||S.cur;
+let S=JSON.parse(JSON.stringify(DEF));
+function loadUser(){try{S=Object.assign(JSON.parse(JSON.stringify(DEF)),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}}
+const save=()=>{if(!KEY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const p2=n=>String(n).padStart(2,'0');
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())};
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const fmt=(n,c=S.cur)=>new Intl.NumberFormat('en-US',{style:'currency',currency:c,maximumFractionDigits:['JPY','LKR'].includes(c)?0:2}).format(n);
+const hash=s=>{let h=5381;for(const c of s)h=(h*33^c.charCodeAt(0))>>>0;return String(h)};
+
+/* ===== double-entry core ===== */
+// income: to=account | expense: from=account | transfer: from + to
+const acc=id=>S.accounts.find(a=>a.id===id);
+const bal=a=>S.tx.reduce((b,t)=>b+(t.to===a.id?(t.amtTo??t.amt):0)-(t.from===a.id?t.amt:0),+a.open||0);
+const type=t=>t.from&&t.to?'xfer':t.to?'inc':'exp';
+const cv=t=>t.amt*R(accCur(acc(t.from)||acc(t.to)));
+let ym={y:new Date().getFullYear(),m:new Date().getMonth()};
+const key=()=>ym.y+'-'+p2(ym.m+1);
+const monthTx=()=>S.tx.filter(t=>t.date.startsWith(key()));
+const sumBy=(arr,f)=>arr.reduce((s,t)=>s+f(t),0);
+
+/* ===== charts (hand-built SVG) ===== */
+function donut(items){
+  const tot=sumBy(items,i=>i.v);if(!tot)return'';const r=60,C=2*Math.PI*r;let off=0,a='';
+  items.forEach((it,i)=>{const len=it.v/tot*C;a+=`<circle r="${r}" cx="80" cy="80" fill="none" stroke="var(--c${i%8+1})" stroke-width="24" stroke-dasharray="${Math.max(0,len-2)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 80 80)"><title>${esc(it.n)}: ${fmt(it.v)}</title></circle>`;off+=len});
+  return`<div class="split"><svg style="width:160px" viewBox="0 0 160 160" role="img" aria-label="Spending by category">${a}<text x="80" y="84" text-anchor="middle" style="font:600 13px Fraunces,Georgia,serif;fill:var(--ink)">${fmt(tot)}</text></svg>
+  <div style="flex:1;min-width:160px">${items.map((it,i)=>`<div class="item" style="cursor:default"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;background:var(--c${i%8+1})"></i>${esc(it.n)}</span><span class="amt">${fmt(it.v)} <small style="display:inline">${Math.round(it.v/tot*100)}%</small></span></div>`).join('')}</div></div>`;
+}
+function dayBars(){
+  const n=new Date(ym.y,ym.m+1,0).getDate(),v=Array(n).fill(0);
+  monthTx().filter(t=>type(t)==='exp').forEach(t=>v[+t.date.slice(8)-1]+=cv(t));
+  const max=Math.max(...v,1),W=600,H=120,bw=W/n;
+  return`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="Daily spending this month">${v.map((x,i)=>`<rect x="${i*bw+1.5}" y="${H-x/max*H}" width="${bw-3}" height="${Math.max(x?2:0,x/max*H)}" rx="2" fill="var(--exp)"><title>${MN[ym.m].slice(0,3)} ${i+1}: ${fmt(x)}</title></rect>`).join('')}<text x="0" y="${H+13}">1</text><text x="${W}" y="${H+13}" text-anchor="end">${n}</text></svg>`;
+}
+
+/* ===== quick-add, card settlement, toast ===== */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)}
+function lastDue(d){const n=new Date();let y=n.getFullYear(),m=n.getMonth();if(n.getDate()<d){m--;if(m<0){m=11;y--}}return y+'-'+p2(m+1)+'-'+p2(d)}
+function nextDue(d){const n=new Date();let y=n.getFullYear(),m=n.getMonth();if(n.getDate()>d){m++;if(m>11){m=0;y++}}return new Date(y,m,d).toLocaleDateString('en-US',{month:'short',day:'numeric'})}
+function settleTx(a,o,date){const cf=accCur(acc(a.pay)),ct=accCur(a),t={id:uid(),date,from:a.pay,to:a.id,amt:o,cat:'',note:'Card settlement'};if(cf!==ct){t.amt=+(o*val(ct)/val(cf)).toFixed(2);t.amtTo=o}return t}
+function runSettle(){let n=0;S.accounts.forEach(a=>{if(!TYPES[a.type]||!a.auto||!a.due||!acc(a.pay))return;const ld=lastDue(a.due);if((a.settled||'')>=ld)return;
+  const ow=-S.tx.reduce((b,t)=>t.date<=ld?b+(t.to===a.id?(t.amtTo??t.amt):0)-(t.from===a.id?t.amt:0):b,+a.open||0);
+  if(ow>0){S.tx.push(settleTx(a,+ow.toFixed(2),ld));n++}a.settled=ld});
+  if(n){save();setTimeout(()=>toast('Auto-settled '+n+' card'+(n>1?'s':'')),300)}}
+function dueLine(x){const a=x.a;if(!TYPES[a.type]||!a.due)return'';return`<div class="settle"><span class="l">Due ${nextDue(a.due)} · ${fmt(Math.max(0,-x.b),accCur(a))} pending${a.auto?' · auto-settles':''}</span>${x.b<0&&acc(a.pay)?`<button class="btn" data-a="settle" data-id="${a.id}">Settle now</button>`:''}</div>`}
+function quick(){return S.tpl.length?`<div class="card"><h2>Quick add</h2><div class="chips">${S.tpl.map(t=>`<span class="chip"><button data-a="qa" data-id="${t.id}">${esc(t.name)} · ${fmt(t.amt,accCur(acc(t.from)||acc(t.to)))}</button><button data-a="qdel" data-id="${t.id}" aria-label="Remove ${esc(t.name)}">×</button></span>`).join('')}</div></div>`:''}
+
+/* ===== login, sign up, log out (local accounts) ===== */
+let user=null,authMode='login',authErr='',showAuth=false;
+async function H(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return hash(s)}}
+function authHtml(){const su=authMode==='signup';return`<div class="lock card" style="margin-top:10vh"><h1 class="brand"><i class="mk"></i>Ledgerline</h1><p class="l">${su?'Create your account. Your ledger starts empty.':'Log in to your ledger.'}</p>
+<div style="text-align:left">${su?'<label for="au-n">Name</label><input id="au-n" autocomplete="name">':''}<label for="au-e">Email</label><input id="au-e" type="email" autocomplete="email"><label for="au-p">Password</label><input id="au-p" type="password" autocomplete="${su?'new-password':'current-password'}" placeholder="At least 6 characters"></div>
+<div class="err" id="au-err" role="alert">${esc(authErr)}</div><div class="acts" style="justify-content:space-between"><button class="btn" data-a="authmode">${su?'I have an account':'Create account'}</button><button class="btn p" data-a="auth">${su?'Sign up':'Log in'}</button></div><p class="fine">Login is optional. Accounts and data are stored on this device only.</p><button class="btn" data-a="skipauth" style="width:100%">Continue without an account</button></div>`}
+async function doAuth(){
+  const e=$('au-e').value.trim().toLowerCase(),p=$('au-p').value,su=authMode==='signup',err=m=>{authErr=m;$('au-err').textContent=m};
+  if(!/^\S+@\S+\.\S+$/.test(e))return err('Enter a valid email address.');
+  if(p.length<6)return err('Use a password of at least 6 characters.');
+  let U={};try{U=JSON.parse(localStorage.getItem(USERS)||'{}')}catch(x){}
+  if(su){if(U[e])return err('An account with this email already exists. Log in instead.');
+    const salt=uid()+uid();U[e]={id:uid()+uid(),salt,hash:await H(salt+p),name:($('au-n').value||'').trim()};
+    try{localStorage.setItem(USERS,JSON.stringify(U))}catch(x){return err('This browser blocked saving. Allow site storage and try again.')}}
+  else{const u=U[e];if(!u||u.hash!==await H(u.salt+p))return err('Email or password is incorrect.')}
+  try{localStorage.setItem(SESS,e)}catch(x){}
+  authErr='';startSession(e,U[e]);
+}
+function startSession(e,u){showAuth=false;user=e;KEY='ledgerline.data.'+u.id;S=JSON.parse(JSON.stringify(DEF));loadUser();locked=!!S.pass;view='home';q='';runSettle();render()}
+function startGuest(){showAuth=false;user=null;KEY='ledgerline.data.guest';S=JSON.parse(JSON.stringify(DEF));loadUser();locked=!!S.pass;view='home';q='';runSettle();render()}
+function logout(){try{localStorage.removeItem(SESS)}catch(x){}closeDlg();authErr='';authMode='login';startGuest()}
+function boot(){try{const U=JSON.parse(localStorage.getItem(USERS)||'{}'),e=localStorage.getItem(SESS);if(e&&U[e])return startSession(e,U[e])}catch(x){}startGuest()}
+
+/* ===== views ===== */
+let view='home',locked=!!S.pass,q='',confirmReset=false;
+const VIEWS=[['home','Overview'],['tx','Transactions'],['acc','Accounts'],['bud','Budget'],['set','Settings']];
+
+function txRow(t){
+  const k=type(t),a=acc(t.from)||{},b=acc(t.to)||{};
+  const sub=k==='xfer'?`${esc(a.name)} → ${esc(b.name)}`:esc((k==='inc'?b:a).name||'');
+  return`<button class="item" data-a="edit" data-id="${t.id}"><span>${esc(t.note||t.cat)}<small>${k==='xfer'?'Transfer':esc(t.cat)+(t.sub?' › '+esc(t.sub):'')} · ${sub}</small></span><span class="amt ${k==='inc'?'inc':k==='exp'?'exp':''}">${k==='exp'?'−':k==='inc'?'+':''}${fmt(t.amt,accCur(k==='inc'?b:a))}</span></button>`;
+}
+function vHome(){
+  const m=monthTx(),inc=sumBy(m,t=>type(t)==='inc'?cv(t):0),ex=sumBy(m,t=>type(t)==='exp'?cv(t):0);
+  const by={};m.filter(t=>type(t)==='exp').forEach(t=>by[t.cat]=(by[t.cat]||0)+cv(t));
+  const items=Object.entries(by).map(([n,v])=>({n,v})).sort((a,b)=>b.v-a.v);
+  const budT=sumBy(CATS.exp,c=>+S.budgets[c]||0);
+  const nw=sumBy(S.accounts,a=>bal(a)*R(accCur(a)));let h=`<section class="hero" aria-label="Summary"><div class="hl">Net worth</div><div class="hv">${fmt(nw)}</div><div class="hm"><div><span>Income</span><b>${fmt(inc)}</b></div><div><span>Spent</span><b>${fmt(ex)}</b></div><div><span>Saved</span><b>${fmt(inc-ex)}</b></div></div></section>`;
+  if(!S.accounts.length)return h+`<div class="card empty"><h2>Start your ledger</h2><p>Add your first account, such as cash or a bank account, then record income and spending. Everything stays on this device.</p><button class="btn p" data-a="add">Add a transaction</button><button class="btn" data-a="newacc">Add an account</button><button class="btn" data-a="sample">Try sample data</button></div>`;
+  h+=quick()+CATS.exp.filter(c=>S.budgets[c]&&(by[c]||0)>=S.budgets[c]*.8).map(c=>{const p=(by[c]||0)/S.budgets[c];return`<div class="alert ${p>=1?'over':''}" role="alert">${c}: ${p>=1?'over budget by '+fmt(by[c]-S.budgets[c]):Math.round(p*100)+'% of budget used'}</div>`}).join('');
+  if(budT)h+=`<div class="card"><h2>Budget</h2><div class="l">${fmt(ex)} of ${fmt(budT)} spent</div><div class="bar"><i class="${ex>budT?'over':''}" style="width:${Math.min(100,ex/budT*100)}%"></i></div></div>`;
+  h+=`<div class="card"><h2>Spending by category</h2>${items.length?donut(items):'<p class="l">No expenses this month.</p>'}</div>`;
+  if(items.length)h+=`<div class="card"><h2>Daily spending</h2>${dayBars()}</div>`;
+  const rec=m.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  return h+`<div class="card"><h2>Recent</h2>${rec.length?rec.map(txRow).join(''):'<p class="l">Nothing recorded this month. Tap Add to start.</p>'}</div>`;
+}
+function vTx(){
+  const s=q.toLowerCase();
+  const rows=monthTx().filter(t=>!s||(t.note+' '+t.cat).toLowerCase().includes(s)).sort((a,b)=>b.date.localeCompare(a.date));
+  let h=`<input id="q" type="search" placeholder="Search notes and categories" value="${esc(q)}" aria-label="Search transactions">`;
+  if(!rows.length)return h+`<div class="card empty" style="margin-top:12px">No transactions found for ${MN[ym.m]} ${ym.y}.</div>`;
+  let last='';h+='<div class="card" style="margin-top:12px">';
+  rows.forEach(t=>{if(t.date!==last){last=t.date;h+=`<div class="day">${new Date(t.date+'T00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>`}h+=txRow(t)});
+  return h+'</div>';
+}
+function vAcc(){
+  const bs=S.accounts.map(a=>({a,b:bal(a)})),as=sumBy(bs,x=>TYPES[x.a.type]?0:x.b*R(accCur(x.a))),li=sumBy(bs,x=>TYPES[x.a.type]?x.b*R(accCur(x.a)):0);
+  let h=`<div class="row3"><div class="card"><div class="l">Assets</div><div class="big">${fmt(as)}</div></div><div class="card"><div class="l">Liabilities</div><div class="big exp">${fmt(li)}</div></div><div class="card"><div class="l">Net worth</div><div class="big">${fmt(as+li)}</div></div></div>`;
+  h+=`<div class="card"><div class="top"><h2>Accounts</h2><button class="btn" data-a="newacc">Add account</button></div>`;
+  h+=bs.length?bs.map(x=>`<button class="item" data-a="editacc" data-id="${x.a.id}"><span>${esc(x.a.name)}<small>${x.a.type}${TYPES[x.a.type]?' · negative means you owe':''}</small></span><span class="amt ${x.b<0?'exp':''}">${fmt(x.b,accCur(x.a))}</span></button>${dueLine(x)}`).join(''):'<p class="l">No accounts yet.</p>';
+  return h+'</div><p class="fine">Paying a card? Record a transfer from your bank to the card.</p>';
+}
+function vBud(){
+  const by={};monthTx().filter(t=>type(t)==='exp').forEach(t=>by[t.cat]=(by[t.cat]||0)+cv(t));
+  return`<div class="card"><h2>Monthly budget</h2><p class="l">Set a limit per category. Leave blank for none.</p>${CATS.exp.map(c=>{const b=+S.budgets[c]||0,sp=by[c]||0;
+  return`<div class="bud"><div>${c}<small class="l" style="display:block">${fmt(sp)} spent${b?` · ${fmt(b-sp)} ${sp>b?'over':'left'}`:''}</small></div><input type="number" min="0" step="any" inputmode="decimal" data-cat="${c}" value="${b||''}" aria-label="${c} budget"><div class="bar"><i class="${sp>b&&b?'over':''}" style="width:${b?Math.min(100,sp/b*100):0}%"></i></div></div>`}).join('')}</div>`;
+}
+function vSet(){
+  return`<div class="card"><h2>Account</h2>${user?`<p class="l">Signed in as ${esc(user)}. Erasing data below only affects this account.</p>`:'<p class="l">You’re using Ledgerline without an account. Your data stays in this browser. Log in or sign up if you want a separate, named ledger.</p>'}<div class="acts" style="justify-content:flex-start">${user?'<button class="btn" data-a="logout">Log out</button>':'<button class="btn p" data-a="showauth">Log in or sign up</button>'}</div></div>
+  <div class="card"><h2>Currency</h2><select id="cur">${['USD','EUR','GBP','LKR','INR','JPY','AUD','CAD'].map(c=>`<option ${c===S.cur?'selected':''}>${c}</option>`).join('')}</select>
+  <h2 style="margin-top:16px">Appearance</h2><select id="thm"><option value="">Match device</option><option value="light" ${S.theme==='light'?'selected':''}>Light</option><option value="dark" ${S.theme==='dark'?'selected':''}>Dark</option></select></div>
+  <div class="card"><h2>Exchange rates</h2><p class="l">Set your own rates. Net worth and reports convert to ${S.cur}.</p>${Object.keys(P).filter(c=>c!==S.cur).map(c=>`<div class="bud"><label for="r-${c}" style="margin:0">1 ${c} in ${S.cur}</label><input id="r-${c}" type="number" step="any" min="0" data-rate="${c}" value="${+R(c).toPrecision(5)}"></div>`).join('')}</div>
+  <div class="card"><h2>Passcode</h2><p class="l">${S.pass?'A passcode is on. It hides the app on this device; it isn’t encryption.':'Lock the app with a passcode on this device.'}</p>
+  <input id="pc" type="password" inputmode="numeric" placeholder="${S.pass?'New passcode':'Choose a passcode'}" autocomplete="off"><div class="acts"><button class="btn" data-a="setpc">Save passcode</button>${S.pass?'<button class="btn d" data-a="rmpc">Remove</button>':''}</div></div>
+  <div class="card"><h2>Backup and restore</h2><p class="l">Your data is stored only in this browser. Copy a backup to keep it safe, or paste one to restore.</p>
+  <textarea id="bk" rows="4" aria-label="Backup text"></textarea><div class="acts"><button class="btn" data-a="backup">Copy backup</button><button class="btn" data-a="csv">Show CSV</button><button class="btn p" data-a="restore">Restore</button></div><div class="err" id="bkm" role="status"></div></div>
+  <div class="card"><h2>Data</h2><div class="acts" style="justify-content:flex-start"><button class="btn" data-a="sample">Load sample data</button><button class="btn d" data-a="reset">${confirmReset?'Tap again to erase everything':'Erase all data'}</button></div></div>`;
+}
+function render(){
+  document.documentElement.dataset.theme=S.theme||'';if(!S.theme)delete document.documentElement.dataset.theme;
+  const app=$('app');if(showAuth){app.innerHTML=authHtml();return}
+  if(locked){app.innerHTML=`<div class="lock card"><h1>Ledgerline</h1><p class="l">Enter your passcode</p><input id="unl" type="password" inputmode="numeric" autocomplete="off" aria-label="Passcode"><div class="err" id="ue"></div><div class="acts"><button class="btn p" data-a="unlock">Unlock</button></div></div>`;return}
+  const f=document.activeElement&&document.activeElement.id;
+  const showMonth=view!=='acc'&&view!=='set';
+  app.innerHTML=`<div class="top"><h1 class="brand"><i class="mk"></i>Ledgerline</h1>${showMonth?`<div class="month"><button class="ic" data-a="prev" aria-label="Previous month">‹</button><strong style="min-width:110px;text-align:center">${MN[ym.m].slice(0,3)} ${ym.y}</strong><button class="ic" data-a="next" aria-label="Next month">›</button></div>`:''}</div>
+  <div class="tabs" role="tablist">${VIEWS.map(([k,n])=>`<button role="tab" aria-selected="${k===view}" data-a="tab" data-id="${k}">${n}</button>`).join('')}<button role="none" data-a="${user?'logout':'showauth'}" style="margin-left:auto">${user?'Log out':'Log in'}</button></div>
+  ${{home:vHome,tx:vTx,acc:vAcc,bud:vBud,set:vSet}[view]()}
+  <button class="btn p fab" data-a="add">+ Add</button>`;
+  if(f==='q'){const e=$('q');e.focus();e.setSelectionRange(q.length,q.length)}
+}
+
+/* ===== dialogs ===== */
+function openDlg(h){$('dlg').innerHTML=h;if(!$('dlg').open)$('dlg').showModal()}
+const closeDlg=()=>$('dlg').close();
+let F={};
+function txForm(id){
+  const t=id&&S.tx.find(x=>x.id===id);
+  F=t?{id,k:type(t),amt:t.amt,date:t.date,a:t.from||t.to,b:t.to&&t.from?t.to:'',cat:t.cat,sub:t.sub||'',note:t.note}:{k:'exp',amt:'',date:todayStr(),a:S.accounts[0].id,b:'',cat:CATS.exp[0],sub:'',note:''};
+  drawTx();
+}
+function drawTx(){
+  const k=F.k,opts=(sel,skip)=>S.accounts.filter(a=>a.id!==skip).map(a=>`<option value="${a.id}" ${a.id===sel?'selected':''}>${esc(a.name)}</option>`).join('');
+  openDlg(`<h2>${F.id?'Edit':'New'} transaction</h2>
+  <div class="seg" role="radiogroup" aria-label="Type">${[['exp','Expense'],['inc','Income'],['xfer','Transfer']].map(([v,n])=>`<button role="radio" aria-checked="${k===v}" data-a="ftype" data-id="${v}">${n}</button>`).join('')}</div>
+  <label for="f-amt">Amount</label><input id="f-amt" type="number" min="0" step="any" inputmode="decimal" value="${F.amt}">
+  <label for="f-date">Date</label><input id="f-date" type="date" value="${F.date}">
+  <label for="f-a">${k==='inc'?'Deposit to':k==='xfer'?'From':'Paid from'}</label><select id="f-a">${opts(F.a)}</select>
+  ${k==='xfer'?`<label for="f-b">To</label><select id="f-b">${opts(F.b,F.a)}</select>`:`<label for="f-cat">Category</label><select id="f-cat">${CATS[k].map(c=>`<option ${c===F.cat?'selected':''}>${c}</option>`).join('')}</select>`}
+  ${k==='exp'&&SUBS[F.cat]?`<label for="f-sub">Sub-category</label><select id="f-sub"><option value="">None</option>${SUBS[F.cat].map(s=>`<option ${s===F.sub?'selected':''}>${s}</option>`).join('')}</select>`:''}
+  <label for="f-note">Note</label><input id="f-note" value="${esc(F.note)}" placeholder="Optional">
+  ${k==='xfer'&&F.b&&accCur(acc(F.a))!==accCur(acc(F.b))?'<p class="fine">Currencies differ. The received amount uses your saved rates.</p>':''}
+  ${F.id?'':`<label style="display:flex;gap:8px;align-items:center"><input id="f-tpl" type="checkbox" style="width:auto;min-height:0" ${F.tpl?'checked':''}>Save as a quick-add shortcut</label>`}
+  <div class="err" id="ferr" role="alert"></div>
+  <div class="acts">${F.id?'<button class="btn d" data-a="fdel">Delete</button>':''}<button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="fsave">Save</button></div>`);
+}
+function readF(){F.amt=$('f-amt').value;F.date=$('f-date').value;F.a=$('f-a').value;if($('f-b'))F.b=$('f-b').value;if($('f-cat'))F.cat=$('f-cat').value;F.note=$('f-note').value.trim();if($('f-sub'))F.sub=$('f-sub').value;F.tpl=!!($('f-tpl')&&$('f-tpl').checked)}
+function accForm(id){
+  const a=id&&acc(id)||{};
+  openDlg(`<h2>${id?'Edit':'New'} account</h2><label for="n-name">Name</label><input id="n-name" value="${esc(a.name||'')}" placeholder="e.g. Everyday bank">
+  <label for="n-type">Type</label><select id="n-type">${Object.keys(TYPES).map(t=>`<option ${t===a.type?'selected':''}>${t}</option>`).join('')}</select>
+  <label for="n-open">Opening balance (use a negative number for money you owe)</label><input id="n-open" type="number" step="any" inputmode="decimal" value="${a.open??0}">
+  <label for="n-cur">Currency</label><select id="n-cur">${Object.keys(P).map(c=>`<option ${c===accCur(a)?'selected':''}>${c}</option>`).join('')}</select>
+  <label for="n-due">Card payment due day (1–28, cards only)</label><input id="n-due" type="number" min="1" max="28" value="${a.due||''}">
+  <label for="n-pay">Pay card from</label><select id="n-pay"><option value="">None</option>${S.accounts.filter(x=>x.id!==a.id&&!TYPES[x.type]).map(x=>`<option value="${x.id}" ${x.id===a.pay?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+  <label style="display:flex;gap:8px;align-items:center"><input id="n-auto" type="checkbox" style="width:auto;min-height:0" ${a.auto?'checked':''}>Auto-settle on the due date</label>
+  <div class="err" id="ferr" role="alert"></div><div class="acts">${id?'<button class="btn d" data-a="adel" data-id="'+id+'">Delete</button>':''}<button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="asave" data-id="${id||''}">Save</button></div>`);
+}
+
+/* ===== actions ===== */
+function sample(){
+  const mk=(n,t,o)=>({id:uid(),name:n,type:t,open:o});
+  const cash=mk('Wallet','Cash',150),bank=mk('Everyday bank','Bank',2400),card=mk('Credit card','Card',0);
+  card.due=5;card.pay=bank.id;S.accounts=[cash,bank,card];S.tx=[];S.budgets={Food:450,Transport:150,Fun:120,Shopping:200};
+  S.tpl=[{id:uid(),name:'Morning coffee',from:cash.id,to:null,amt:4.5,cat:'Food',sub:'Coffee'},{id:uid(),name:'Bus fare',from:cash.id,to:null,amt:1.5,cat:'Transport',sub:'Public transit'}];
+  const now=new Date();
+  for(let m=0;m<3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1),ds=day=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(day);
+    const add=(day,from,to,amt,cat,note)=>S.tx.push({id:uid(),date:ds(day),from,to,amt,cat,note});
+    add(1,null,bank.id,3200,'Salary','Monthly pay');add(2,bank.id,null,950,'Housing','Rent');add(5,card.id,null,64.5,'Bills','Internet and phone');
+    add(6,card.id,null,86.2,'Food','Groceries');add(9,cash.id,null,12.8,'Food','Lunch');add(11,card.id,null,41,'Transport','Fuel');
+    add(14,card.id,null,58,'Fun','Cinema and dinner');add(17,bank.id,null,120.4,'Shopping','Shoes');add(20,card.id,null,92.7,'Food','Groceries');
+    add(24,bank.id,card.id,400,'','Card payment');add(26,cash.id,null,18,'Transport','Taxi');}
+  save();
+}
+const csv=()=>'date,type,amount,from,to,category,note\n'+S.tx.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[t.date,type(t),t.amt,(acc(t.from)||{}).name||'',(acc(t.to)||{}).name||'',t.cat,t.note].map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,id=b.dataset.id;
+  switch(a){
+    case'tab':view=id;confirmReset=false;render();break;
+    case'prev':case'next':ym.m+=a==='next'?1:-1;if(ym.m<0){ym.m=11;ym.y--}if(ym.m>11){ym.m=0;ym.y++}render();break;
+    case'add':if(!S.accounts.length){S.accounts.push({id:uid(),name:'Cash',type:'Cash',open:0,cur:S.cur});save()}txForm();break;
+    case'edit':txForm(id);break;
+    case'close':closeDlg();break;
+    case'ftype':readF();F.k=id;F.cat=CATS[id]?CATS[id][0]:'';if(id==='xfer'&&!F.b)F.b=(S.accounts.find(x=>x.id!==F.a)||{}).id||'';drawTx();break;
+    case'fsave':{readF();const amt=parseFloat(F.amt),err=m=>$('ferr').textContent=m;
+      if(!(amt>0))return err('Enter an amount greater than zero.');if(!F.date)return err('Choose a date.');
+      if(F.k==='xfer'&&(!F.b||F.b===F.a))return err('Choose two different accounts.');
+      const t={id:F.id||uid(),date:F.date,amt,cat:F.k==='xfer'?'':F.cat,sub:F.k==='exp'?F.sub:'',note:F.note,from:F.k==='inc'?null:F.a,to:F.k==='inc'?F.a:F.k==='xfer'?F.b:null};
+      if(t.from&&t.to){const cf=accCur(acc(t.from)),ct=accCur(acc(t.to));if(cf!==ct)t.amtTo=+(amt*val(cf)/val(ct)).toFixed(2)}
+      if(F.tpl&&!F.id)S.tpl.push({id:uid(),name:t.note||t.cat||'Transfer',from:t.from,to:t.to,amt,amtTo:t.amtTo,cat:t.cat,sub:t.sub});
+      const i=S.tx.findIndex(x=>x.id===t.id);if(i>=0)S.tx[i]=t;else S.tx.push(t);
+      ym={y:+F.date.slice(0,4),m:+F.date.slice(5,7)-1};save();closeDlg();render();break}
+    case'fdel':S.tx=S.tx.filter(x=>x.id!==F.id);save();closeDlg();render();break;
+    case'newacc':accForm();break;
+    case'editacc':accForm(id);break;
+    case'asave':{const name=$('n-name').value.trim();if(!name)return $('ferr').textContent='Give the account a name.';
+      const o={name,type:$('n-type').value,open:parseFloat($('n-open').value)||0,cur:$('n-cur').value,due:parseInt($('n-due').value)||0,pay:$('n-pay').value,auto:$('n-auto').checked};
+      if(o.auto&&o.due&&!(id&&acc(id).auto))o.settled=lastDue(o.due);
+      if(id)Object.assign(acc(id),o);else S.accounts.push(Object.assign({id:uid()},o));save();closeDlg();render();break}
+    case'adel':if(S.tx.some(t=>t.from===id||t.to===id))return $('ferr').textContent='This account has transactions. Delete or edit them first.';
+      S.accounts=S.accounts.filter(x=>x.id!==id);save();closeDlg();render();break;
+    case'auth':doAuth();break;
+    case'authmode':authMode=authMode==='login'?'signup':'login';authErr='';render();break;
+    case'logout':logout();break;
+    case'showauth':authMode='login';authErr='';showAuth=true;render();break;
+    case'skipauth':showAuth=false;render();break;
+    case'qa':{const t=S.tpl.find(x=>x.id===id);if(!t)break;S.tx.push({id:uid(),date:todayStr(),from:t.from,to:t.to,amt:t.amt,amtTo:t.amtTo,cat:t.cat,sub:t.sub,note:t.name});ym={y:new Date().getFullYear(),m:new Date().getMonth()};save();render();toast('Added '+t.name);break}
+    case'qdel':S.tpl=S.tpl.filter(x=>x.id!==id);save();render();break;
+    case'settle':{const a=acc(id),o=-bal(a);if(o>0&&acc(a.pay)){S.tx.push(settleTx(a,o,todayStr()));save();render();toast('Card settled')}break}
+    case'sample':sample();view='home';render();break;
+    case'reset':if(!confirmReset){confirmReset=true;render();break}S=JSON.parse(JSON.stringify(DEF));save();confirmReset=false;locked=false;view='home';render();break;
+    case'setpc':{const v=$('pc').value;if(v.length<4)return;S.pass=hash(v);save();render();break}
+    case'rmpc':S.pass=null;save();render();break;
+    case'unlock':if(hash($('unl').value)===S.pass){locked=false;render()}else $('ue').textContent='That passcode is incorrect.';break;
+    case'backup':{const t=JSON.stringify(S);$('bk').value=t;$('bk').select();let ok=false;try{navigator.clipboard.writeText(t).then(()=>$('bkm').textContent='Backup copied. Paste it somewhere safe.',()=>$('bkm').textContent='Select the text above and copy it.')}catch(x){$('bkm').textContent='Select the text above and copy it.'}break}
+    case'csv':$('bk').value=csv();$('bk').select();$('bkm').textContent='CSV ready. Copy it into a spreadsheet.';break;
+    case'restore':try{const d=JSON.parse($('bk').value);if(!Array.isArray(d.accounts)||!Array.isArray(d.tx))throw 0;S=Object.assign({},DEF,d);save();view='home';render()}catch(x){$('bkm').textContent='That doesn’t look like a Ledgerline backup.'}break;
+  }
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){q=e.target.value;render()}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='cur'){S.cur=t.value;save();render()}
+  if(t.id==='thm'){S.theme=t.value||null;save();render()}
+  if(t.dataset.rate){const v=parseFloat(t.value);if(v>0){S.rates[t.dataset.rate]=v*val(S.cur);save();render()}}
+  if(t.id==='f-cat'){readF();F.sub='';drawTx()}
+  if(t.dataset.cat){const v=parseFloat(t.value);if(v>0)S.budgets[t.dataset.cat]=v;else delete S.budgets[t.dataset.cat];save();render()}
+  if(t.id==='f-a'&&F.k==='xfer'){readF();if(F.b===F.a)F.b=(S.accounts.find(x=>x.id!==F.a)||{}).id;drawTx()}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(e.target.id==='unl')document.querySelector('[data-a="unlock"]').click();if(e.target.id==='au-e'||e.target.id==='au-p'||e.target.id==='au-n')doAuth()});
+boot();
+</script>
+</body>
+</html>
