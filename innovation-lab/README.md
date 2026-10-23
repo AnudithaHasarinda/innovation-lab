@@ -26,7 +26,7 @@ Standalone single-file apps:
 
 - **Digital Identity** is the earlier Tapcard prototype (v5): a single HTML file with privacy levels, QR sharing, print kit, contacts and a roadmap tab (`public/projects/digital-identity/`).
 
-Standalone single-file apps, each kept as-is in `public/projects/<slug>/index.html` (or `prototype.html`) and shown in a frame by
+Standalone single-file apps, each kept as-is in `public/projects/<slug>/app.html` (or `prototype.html`) and shown in a frame by
 `components/demos/FrameDemo.tsx` (or its own small wrapper). To replace one with a newer version, overwrite its HTML file:
 
 - **AI Business Assistant** (`public/projects/ai-business-assistant/`): a *rule-based* planner (lean canvas, SWOT, break-even maths, 30-60-90 plan). **No AI model is connected.** It loads React from a public CDN.
@@ -34,6 +34,7 @@ Standalone single-file apps, each kept as-is in `public/projects/<slug>/index.ht
 - **Content Calendar & Post Planner** (`public/projects/content-calendar/`): builds a month of posts from themes and platforms; ideas are built-in templates, not AI; times are starting points.
 - **Folio** (`public/projects/folio/`): quote, proposal and invoice maker in LKR with print or save as PDF. Not tax or legal advice.
 - **Production Budget & Shot Planner** (`public/projects/production-planner/`): starter budgets, shot list with day check, call sheet, saved sheets. Starter rates are examples.
+- **Tempo** (`public/projects/tempo/`): study planner with focus timer, spaced revision, flashcards and progress. Rule-based, saved only in the browser. The Android (Capacitor) wrapper is a separate project and is untested.
 - **Ledgerline** (`public/projects/ledgerline/`): a personal money manager (accounts, budgets, cards, multi-currency, backup). Data stays in the browser; sign-up is only a local profile.
 - **Tapcard** (`public/projects/tapcard/`): a digital business card with QR, a test Nearby radar, print kit and contacts.
 - **Shadow Run** (`public/projects/shadow-run/`): an offline 3D runner game.

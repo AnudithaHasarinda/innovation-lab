@@ -15,7 +15,7 @@ export function Hero() {
           </Reveal>
           <Reveal delay={0.05}>
             <h1 id="lab-title" className="text-5xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-7xl">
-              The Innovation <span className="text-sage">Lab</span>
+              The Innovation <span className="text-gold">Lab</span>
             </h1>
           </Reveal>
           <Reveal delay={0.12}>

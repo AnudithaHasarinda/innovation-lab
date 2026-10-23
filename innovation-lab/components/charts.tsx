@@ -49,7 +49,7 @@ export function LineChart({ labels, series, title, summary }: { labels: string[]
   );
 }
 
-export function BarChart({ labels, values, color = "#abb8a8", title, summary, negativeColor = "#e8789a" }: { labels: string[]; values: number[]; color?: string; negativeColor?: string; title: string; summary: string }) {
+export function BarChart({ labels, values, color = "#d9b873", title, summary, negativeColor = "#e8789a" }: { labels: string[]; values: number[]; color?: string; negativeColor?: string; title: string; summary: string }) {
   const { top, y } = scale(values.map((v) => Math.abs(v)));
   const bw = (W - PAD.l - PAD.r) / Math.max(1, labels.length);
   return (
@@ -65,7 +65,7 @@ export function BarChart({ labels, values, color = "#abb8a8", title, summary, ne
   );
 }
 
-const DONUT = ["#abb8a8", "#f2b35e", "#e8789a", "#9a7bff", "#6fb7c9"];
+const DONUT = ["#d9b873", "#f2b35e", "#e8789a", "#9a7bff", "#6fb7c9"];
 
 export function Donut({ data, title }: { data: { label: string; value: number }[]; title: string }) {
   const total = data.reduce((a, d) => a + d.value, 0) || 1;

@@ -15,7 +15,7 @@ export function TapcardDemo() {
         This is the real prototype, running in your browser. Anything you type stays on this device. To try <strong className="text-cream">Nearby</strong>, open the
         prototype in two windows (button below), tap Nearby in both, then tap Start Radar. It only finds windows of the same browser; Bluetooth between real phones is not built yet.
       </p>
-      <div className="card overflow-hidden">
+      <div className="demo-frame">
         <iframe
           title="Tapcard prototype"
           src={src}

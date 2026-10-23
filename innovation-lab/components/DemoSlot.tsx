@@ -10,24 +10,26 @@ export function DemoSlot({ slug }: { slug: string }) {
     case "ai-business-assistant":
       return (
         <FrameDemo
-          src="/projects/ai-business-assistant/index.html"
+          src="/projects/ai-business-assistant/app.html"
           title="AI Business Assistant"
           height={900}
           openLabel="Open the assistant in its own window"
           note="This is the real page, running in your browser. It is rule-based: no AI model is connected. What you type is saved only on this device and is never sent anywhere."
         />
       );
-    case "digital-identity": return <FrameDemo src="/projects/digital-identity/index.html" title="Digital Identity prototype" height={860} note="Sample data only. Everything you type stays in this browser and is never uploaded." openLabel="Open in its own window" />;
+    case "digital-identity": return <FrameDemo src="/projects/digital-identity/app.html" title="Digital Identity prototype" height={860} note="Sample data only. Everything you type stays in this browser and is never uploaded." openLabel="Open in its own window" />;
     case "content-calendar":
-      return <FrameDemo src="/projects/content-calendar/index.html" title="Content Calendar & Post Planner" height={900} openLabel="Open the planner in its own window" note="This is the real app, running in your browser. The ideas are built in, not AI, and your plan is saved only on this device." />;
+      return <FrameDemo src="/projects/content-calendar/app.html" title="Content Calendar & Post Planner" height={900} openLabel="Open the planner in its own window" note="This is the real app, running in your browser. The ideas are built in, not AI, and your plan is saved only on this device." />;
     case "folio":
-      return <FrameDemo src="/projects/folio/index.html" title="Folio" height={900} openLabel="Open Folio in its own window" note="This is the real app, running in your browser. The business and client shown are fictional samples. A logo you upload stays on this device." />;
+      return <FrameDemo src="/projects/folio/app.html" title="Folio" height={900} openLabel="Open Folio in its own window" note="This is the real app, running in your browser. The business and client shown are fictional samples. A logo you upload stays on this device." />;
     case "production-planner":
-      return <FrameDemo src="/projects/production-planner/index.html" title="Production Budget & Shot Planner" height={900} openLabel="Open the planner in its own window" note="This is the real app, running in your browser. Starter rates are editable examples, not real quotes. Sheets are saved only on this device." />;
+      return <FrameDemo src="/projects/production-planner/app.html" title="Production Budget & Shot Planner" height={900} openLabel="Open the planner in its own window" note="This is the real app, running in your browser. Starter rates are editable examples, not real quotes. Sheets are saved only on this device." />;
+    case "tempo":
+      return <FrameDemo src="/projects/tempo/app.html" title="Tempo study planner" height={860} openLabel="Open Tempo in its own window" note="This is the real app, running in your browser and designed for a phone. Your tasks are saved only on this device. Try the Focus tab for the timer." />;
     case "brand-studio":
       return (
         <FrameDemo
-          src="/projects/brand-studio/index.html"
+          src="/projects/brand-studio/app.html"
           title="Brand Studio"
           height={900}
           openLabel="Open Brand Studio in its own window"
@@ -37,7 +39,7 @@ export function DemoSlot({ slug }: { slug: string }) {
     case "ledgerline":
       return (
         <FrameDemo
-          src="/projects/ledgerline/index.html"
+          src="/projects/ledgerline/app.html"
           title="Ledgerline"
           height={820}
           openLabel="Open Ledgerline in its own window"

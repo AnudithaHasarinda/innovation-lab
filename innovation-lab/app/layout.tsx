@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: { default: "The Innovation Lab | Anuditha Hasarinda", template: "%s | The Innovation Lab" },
   description: "A collection of experiments, applications, and digital products exploring the possibilities of technology.",
 };
-export const viewport: Viewport = { themeColor: "#000000", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: "#050504", colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

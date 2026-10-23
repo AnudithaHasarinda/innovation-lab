@@ -1,10 +1,10 @@
 "use client";
 import { assetPath } from "@/lib/assetPath";
 
-const SRC = "/projects/shadow-run/index.html";
+const SRC = "/projects/shadow-run/app.html";
 
 /**
- * Runs the real SHADOW RUN game (public/projects/shadow-run/index.html) in a frame.
+ * Runs the real SHADOW RUN game (public/projects/shadow-run/app.html) in a frame.
  * It is a single self-contained HTML file. Progress is saved only in this browser.
  */
 export function ShadowRunDemo() {
@@ -15,7 +15,7 @@ export function ShadowRunDemo() {
         This is the real game, running in your browser. Move with the arrow keys or <strong className="text-cream">W A S D</strong> (or swipe on a touch screen). On a phone it is played in landscape, so use the
         button below to open it full screen and turn the phone sideways. Progress is saved on this device only. There are no accounts and no network requests.
       </p>
-      <div className="card overflow-hidden">
+      <div className="demo-frame">
         <iframe
           title="SHADOW RUN game"
           src={src}

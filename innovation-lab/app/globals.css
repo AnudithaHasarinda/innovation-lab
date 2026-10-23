@@ -2,28 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root { color-scheme: dark; --gold: #d9b873; --gold-hi: #f1dba3; --gold-lo: #a07f3c; }
 html { scroll-behavior: smooth; }
-body { @apply bg-ink font-display text-cream antialiased; }
-::selection { background: #abb8a8; color: #000; }
-:focus-visible { outline: 2px solid #abb8a8; outline-offset: 3px; border-radius: 6px; }
+body {
+  @apply bg-ink font-display text-cream antialiased;
+  background-image:
+    radial-gradient(900px 480px at 85% -8%, rgba(217,184,115,.13), transparent 70%),
+    radial-gradient(700px 420px at -8% 12%, rgba(217,184,115,.06), transparent 70%);
+  background-attachment: fixed;
+  letter-spacing: .005em;
+}
+::selection { background: #d9b873; color: #000; }
+:focus-visible { outline: 2px solid #d9b873; outline-offset: 3px; border-radius: 6px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2a261d; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #4a4230; }
 
 @layer components {
-  .card { @apply relative rounded-2xl border border-line bg-panel/80 backdrop-blur; }
-  .card-glow { transition: box-shadow .3s ease, border-color .3s ease, transform .3s ease; }
-  .card-glow:hover { border-color: rgba(171,184,168,.55); box-shadow: 0 24px 60px -24px rgba(171,184,168,.4); transform: translateY(-3px); }
+  .card {
+    @apply relative rounded-2xl border border-line backdrop-blur;
+    background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0) 40%), rgba(13,12,10,.85);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -30px rgba(0,0,0,.9);
+  }
+  .card-glow { transition: box-shadow .35s ease, border-color .35s ease, transform .35s ease; }
+  .card-glow:hover {
+    border-color: rgba(217,184,115,.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 30px 70px -28px rgba(217,184,115,.35);
+    transform: translateY(-4px);
+  }
   .grid-bg {
-    background-image: radial-gradient(rgba(171,184,168,.18) 1px, transparent 1px);
-    background-size: 26px 26px;
+    background-image: radial-gradient(rgba(217,184,115,.2) 1px, transparent 1px);
+    background-size: 28px 28px;
     -webkit-mask-image: radial-gradient(ellipse at 50% 25%, #000 25%, transparent 72%);
     mask-image: radial-gradient(ellipse at 50% 25%, #000 25%, transparent 72%);
   }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition; }
-  .btn-primary { @apply bg-sage text-black hover:brightness-110; }
+  .text-gold {
+    background: linear-gradient(100deg, var(--gold-lo) 0%, var(--gold-hi) 45%, var(--gold) 70%, var(--gold-lo) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition duration-300; }
+  .btn-primary {
+    @apply text-black hover:-translate-y-0.5;
+    background: linear-gradient(180deg, #ecd197, #d9b873 55%, #b8933f);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 26px -10px rgba(217,184,115,.75);
+  }
+  .btn-primary:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 16px 34px -10px rgba(217,184,115,.9); }
   .btn-ghost { @apply border border-line bg-white/5 text-cream hover:border-sage hover:text-sage; }
   .chip { @apply inline-flex items-center rounded-full border border-line bg-white/5 px-3 py-1 text-xs text-mute; }
   .input { @apply w-full rounded-xl border border-line bg-black/40 px-3 py-2.5 text-sm text-cream placeholder:text-mute/70 focus:border-sage focus:outline-none; }
   .label { @apply mb-1.5 block text-xs font-medium uppercase tracking-widest text-mute; }
+  /* browser-style frame around live demos */
+  .demo-frame { @apply overflow-hidden rounded-2xl border border-line; background: #0d0c0a; box-shadow: 0 40px 90px -40px rgba(217,184,115,.35), 0 0 0 1px rgba(217,184,115,.08); }
+  .demo-bar { @apply flex items-center gap-3 border-b border-line px-4 py-2.5; background: linear-gradient(180deg, #17150f, #100f0b); }
+  .demo-dots { @apply flex gap-1.5; }
+  .demo-dots i { @apply block h-2.5 w-2.5 rounded-full; background: #3a3426; }
+  .demo-dots i:first-child { background: #d9b873; }
 }
 
 @media (prefers-reduced-motion: reduce) {

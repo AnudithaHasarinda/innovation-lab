@@ -13,8 +13,12 @@ export function FrameDemo({ src, title, note, height = 820, openLabel = "Open in
   return (
     <div className="space-y-4">
       {note ? <p className="rounded-xl border border-line bg-panel px-4 py-3 text-sm leading-relaxed text-mute">{note}</p> : null}
-      <div className="card overflow-hidden">
-        <iframe title={title} src={url} className="block w-full bg-white" style={{ height }} loading="lazy" allow="clipboard-write" />
+      <div className="demo-frame">
+        <div className="demo-bar">
+          <span className="demo-dots" aria-hidden="true"><i /><i /><i /></span>
+          <span className="truncate font-mono text-xs text-mute">{title} · live demo</span>
+        </div>
+        <iframe title={title} src={url} className="block w-full bg-white" style={{ height }} allow="clipboard-write" />
       </div>
       <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">{openLabel} ↗</a>
     </div>

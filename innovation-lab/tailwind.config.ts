@@ -5,12 +5,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#000000",
-        panel: "#0c0d0c",
-        line: "#232623",
-        sage: "#abb8a8",
-        cream: "#f2efe9",
-        mute: "#8d9889",
+        ink: "#050504",
+        panel: "#0d0c0a",
+        line: "#2a261d",
+        sage: "#d9b873" /* champagne gold; token name kept so existing classes still work */,
+        cream: "#f5f0e6",
+        mute: "#9d978a",
       },
       fontFamily: {
         display: ["var(--font-outfit)", "Helvetica Neue", "Arial", "sans-serif"],

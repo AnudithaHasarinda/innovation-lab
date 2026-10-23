@@ -600,6 +600,62 @@ export const projects: Project[] = [
     future: ["Your own saved rate cards", "Export the call sheet as a PDF with a logo", "Share a sheet with the crew"],
     docs: [{ title: "Rates", body: "Starter rates are example figures in LKR. Replace them with your own rate card or vendor quotes before using a budget with a client." }],
   },
+  {
+    slug: "tempo",
+    name: "Tempo",
+    tagline: "A study planner with a focus timer, spaced revision and flashcards, built to work on a phone.",
+    description:
+      "Plan study tasks for the day and the week, focus with a Pomodoro timer and ambient sound, revise topics at spaced intervals, flip flashcards, and track your streak, subject time and mock exam scores.",
+    categories: ["Web Apps", "Experiments"],
+    stack: ["HTML", "CSS", "JavaScript", "Web Audio API", "Capacitor", "Google Fonts"],
+    status: "Prototype",
+    statusNote:
+      "Works today in the browser, in light and dark themes, and fits phone screens. Everything is saved only in this browser, so there are no accounts and no sync between devices (use the built-in backup text to move data). Auto-plan and the spaced-revision gaps use simple rules, not AI. An Android project that wraps this page as an APK has been prepared but has not been built or tested on a real phone, so daily reminders are only confirmed in the browser. The only outside request is Google Fonts.",
+    demo: { kind: "built-in", label: "Try Tempo" },
+    screenshots: [
+      { src: "/projects/tempo/plan.png", alt: "Tempo Plan screen with today's progress, tasks and a time-available check, using sample tasks." },
+      { src: "/projects/tempo/week.png", alt: "Tempo Week screen listing tasks by day with arrows to move them." },
+      { src: "/projects/tempo/focus.png", alt: "Tempo Focus screen with a circular 25 minute timer, ambient sound choices and a distraction log." },
+      { src: "/projects/tempo/progress.png", alt: "Tempo Progress screen with a day streak, a last 7 days bar chart and time by subject, using sample sessions." },
+      { src: "/projects/tempo/dark.png", alt: "Tempo Plan screen in the dark theme." },
+    ],
+    features: [
+      "Daily plan with a check that your tasks fit the time you have",
+      "Auto-plan and smart order using exam dates, priority and how little each subject was studied",
+      "Week view: drag tasks between days, or use the arrows on a phone",
+      "Focus timer (25/5, 50/10, 15/3) with rain, brown and white noise, a zen mode and a distraction log",
+      "Spaced revision at 1, 3, 7, 14 and 30 days, plus flashcards rated Again, Good or Easy",
+      "Progress: streak, last 7 days, time by subject, weekly goals, mock exam scores and a weekly review",
+      "Light and dark theme, and a copy-and-paste backup and restore",
+    ],
+    problem:
+      "Many students plan in several places and do not notice what they are neglecting. Tempo puts the plan, the timer, revision and progress in one small app that opens instantly on a phone.",
+    architecture: [
+      "A single self-contained HTML file with plain JavaScript and no framework.",
+      "All data is kept in the browser's local storage. There is no server and no account.",
+      "The timer works from an end time, so it stays accurate if the tab is slow. Ambient sound is generated in the page with the Web Audio API, so no audio files are needed.",
+      "Spaced revision moves a topic through fixed gaps of 1, 3, 7, 14 and 30 days, and back to 1 day if it is forgotten.",
+      "Text typed by the user is escaped before it is shown.",
+      "A separate Capacitor project can wrap the same page as an Android app with local notifications for the daily reminder.",
+    ],
+    process: [
+      "Started with the daily plan and the time-fit check.",
+      "Added the focus timer, then revision, flashcards and progress around it.",
+      "Added the week view, pace goals and backup, and prepared an Android project so it can be installed like an app.",
+    ],
+    challenges: [
+      {
+        challenge: "Browsers pause timers and notifications when the page is hidden.",
+        solution: "The timer is calculated from an end time instead of counting ticks. Reliable daily reminders need the Android app and its notification plugin, which is not yet tested on a phone.",
+      },
+      {
+        challenge: "Long task names and a crowded header pushed the page wider than a small phone.",
+        solution: "Rows now wrap and long words break, so the page no longer scrolls sideways at 320 pixels wide.",
+      },
+    ],
+    future: ["Build and test the Android app on a real phone", "Optional sync between devices", "Import a timetable"],
+    docs: [{ title: "Backup", body: "Progress > Show backup copies your data as text. Paste it into Restore backup on another device or browser to load it." }],
+  },
 ];
 
 export const getProject = (slug: string) => projects.find((p) => p.slug === slug);
